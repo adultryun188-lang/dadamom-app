@@ -366,9 +366,31 @@
         <div class="col" style="gap:5px;" id="growth-list"></div>
       </div>
 
+      <div class="card col" id="vax-card" style="gap:12px; padding:18px;">
+        <div class="row" style="align-items:center; justify-content:space-between;">
+          <h2 class="display" style="font-size:16px;">예방접종</h2>
+          <span class="helper" id="vax-progress"></span>
+        </div>
+        <div id="vax-next"></div>
+        <button type="button" data-open-vax-modal class="btn-ghost" style="height:40px; font-size:13px;">전체 목록 보기</button>
+      </div>
+
       <div class="col" style="gap:10px;">
         <h2 class="display" style="font-size:16px;">성장 타임라인</h2>
         <div class="col" style="gap:10px;" id="timeline-list"></div>
+      </div>
+
+      <div class="card col" id="monthly-album-card" style="gap:12px; padding:18px;">
+        <div class="row" style="align-items:center; justify-content:space-between;">
+          <h2 class="display" style="font-size:16px;">이달의 성장 앨범</h2>
+          <button type="button" data-open-monthly-card class="link-quiet" style="background:none; border:none; padding:2px 0;">카드 만들기</button>
+        </div>
+        <div id="monthly-album-grid" style="display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:6px;"></div>
+      </div>
+
+      <div class="card col" id="family-card" style="gap:12px; padding:18px;">
+        <h2 class="display" style="font-size:16px;">가족과 함께 기록하기</h2>
+        <div id="family-body"></div>
       </div>
 
       <div class="col" style="gap:10px;">
@@ -465,6 +487,8 @@
       careLog:[],
       growthRecords:[],
       growthMetric:'weight',
+      vaccines:{},
+      familyCode:'',
       entries:[
         {id:'e1', name:'서윤', age:'11개월', votes:128, liked:false, note:'', mine:false, createdAt: now - 2*3600*1000},
         {id:'e2', name:'민준', age:'13개월', votes:96, liked:false, note:'', mine:false, createdAt: now - 5*3600*1000},
@@ -933,7 +957,10 @@
     document.getElementById('my-stat-post').textContent = state.posts.filter(function(p){ return p.mine; }).length;
     renderCareLog();
     renderGrowth();
+    renderVax();
     renderTimeline();
+    renderMonthlyAlbum();
+    renderFamily();
   }
 
   // ---------- 오늘의 기록 (수유·수면) ----------
@@ -1134,6 +1161,289 @@
     }
   }
 
+  // ---------- 예방접종 ----------
+  var VACCINES = [
+    {id:'bcg', name:'BCG(결핵)', age:0},
+    {id:'hepb1', name:'B형간염 1차', age:0},
+    {id:'hepb2', name:'B형간염 2차', age:1},
+    {id:'dtap1', name:'DTaP 1차', age:2},
+    {id:'ipv1', name:'IPV(폴리오) 1차', age:2},
+    {id:'hib1', name:'Hib 1차', age:2},
+    {id:'pcv1', name:'폐렴구균 1차', age:2},
+    {id:'rv1', name:'로타바이러스 1차', age:2},
+    {id:'dtap2', name:'DTaP 2차', age:4},
+    {id:'ipv2', name:'IPV 2차', age:4},
+    {id:'hib2', name:'Hib 2차', age:4},
+    {id:'pcv2', name:'폐렴구균 2차', age:4},
+    {id:'rv2', name:'로타바이러스 2차', age:4},
+    {id:'dtap3', name:'DTaP 3차', age:6},
+    {id:'hepb3', name:'B형간염 3차', age:6},
+    {id:'hib3', name:'Hib 3차', age:6},
+    {id:'pcv3', name:'폐렴구균 3차', age:6},
+    {id:'ipv3', name:'IPV 3차', age:6},
+    {id:'mmr1', name:'MMR 1차', age:12},
+    {id:'var1', name:'수두', age:12},
+    {id:'hepa1', name:'A형간염 1차', age:12},
+    {id:'pcv4', name:'폐렴구균 4차', age:12},
+    {id:'hib4', name:'Hib 4차', age:12},
+    {id:'je1', name:'일본뇌염 1차', age:12},
+    {id:'dtap4', name:'DTaP 4차', age:15},
+    {id:'hepa2', name:'A형간염 2차', age:18},
+    {id:'je2', name:'일본뇌염 2차', age:24},
+    {id:'dtap5', name:'DTaP 5차', age:48},
+    {id:'ipv4', name:'IPV 4차', age:48},
+    {id:'mmr2', name:'MMR 2차', age:48}
+  ];
+
+  function renderVax(){
+    var card = document.getElementById('vax-card');
+    if(!card) return;
+    if(state.kidType !== 'parenting'){ card.hidden = true; return; }
+    card.hidden = false;
+    var done = VACCINES.filter(function(v){ return state.vaccines[v.id]; }).length;
+    document.getElementById('vax-progress').textContent = done + '/' + VACCINES.length + ' 완료';
+    var myAge = ageMonths(state.birthMonth) || 0;
+    var next = VACCINES.filter(function(v){ return !state.vaccines[v.id]; }).sort(function(a,b){ return a.age - b.age; })[0];
+    var nextEl = document.getElementById('vax-next');
+    if(!next){
+      nextEl.innerHTML = '<span class="helper">모든 접종을 완료했어요 🎉</span>';
+    } else {
+      var overdue = next.age <= myAge;
+      nextEl.innerHTML = '<div class="row" style="align-items:center; justify-content:space-between;">' +
+        '<div class="col" style="gap:2px;"><span style="font-size:13.5px; font-weight:700;">' + escapeHtml(next.name) + '</span>' +
+        '<span class="helper" style="' + (overdue ? 'color:var(--accent);' : '') + '">' + (overdue ? '접종 시기가 지났어요' : ('권장 생후 ' + next.age + '개월')) + '</span></div>' +
+        '<button type="button" data-vax-done="' + next.id + '" class="pill" style="padding:8px 14px; border:1px solid var(--border); background:var(--surface); font-size:12.5px; font-weight:700; color:var(--accent2);">완료 체크</button></div>';
+    }
+  }
+
+  function vaxModalHtml(){
+    var myAge = ageMonths(state.birthMonth) || 0;
+    var rows = VACCINES.map(function(v){
+      var done = !!state.vaccines[v.id];
+      var overdue = !done && v.age <= myAge;
+      return '<label class="check-row" style="justify-content:space-between; align-items:center;">' +
+        '<span class="row" style="align-items:center; gap:8px;"><input type="checkbox" data-vax-check="' + v.id + '" ' + (done ? 'checked' : '') + '><span style="' + (overdue ? 'color:var(--accent); font-weight:700;' : '') + '">' + escapeHtml(v.name) + '</span></span>' +
+        '<span class="helper">생후 ' + v.age + '개월</span></label>';
+    }).join('');
+    return '<div class="modal-head"><h3 class="display">예방접종 체크리스트</h3><button class="modal-close" data-close-modal aria-label="닫기">✕</button></div>' +
+      '<p class="modal-desc">질병관리청 국가예방접종 표준 일정 기준이며, 정확한 시기는 소아과 상담을 따라주세요.</p>' +
+      '<div class="col" style="gap:2px; max-height:50vh; overflow-y:auto;">' + rows + '</div>';
+  }
+
+  // ---------- 이달의 성장 앨범 ----------
+  function monthlyPhotoItems(){
+    var now = new Date();
+    var y = now.getFullYear(), m = now.getMonth();
+    return timelineItems().filter(function(it){
+      if(!it.media_url) return false;
+      var d = new Date(it.ts);
+      return d.getFullYear() === y && d.getMonth() === m;
+    });
+  }
+
+  function renderMonthlyAlbum(){
+    var card = document.getElementById('monthly-album-card');
+    if(!card) return;
+    var items = monthlyPhotoItems();
+    var grid = document.getElementById('monthly-album-grid');
+    if(!items.length){
+      grid.innerHTML = '<span class="helper" style="grid-column:1/-1;">이번 달 사진이 아직 없어요</span>';
+      return;
+    }
+    grid.innerHTML = items.slice(0,8).map(function(it){
+      return '<img src="' + escapeHtml(it.media_url) + '" alt="" style="width:100%; aspect-ratio:1; object-fit:cover; border-radius:8px;">';
+    }).join('');
+  }
+
+  function composeMonthly(imgs){
+    try{
+      var cols = imgs.length <= 2 ? imgs.length : (imgs.length <= 4 ? 2 : 3);
+      var rows = Math.ceil(imgs.length / cols);
+      var cell = 240;
+      var W = cols * cell, gridH = rows * cell, footerH = 110;
+      var H = gridH + footerH;
+      var canvas = document.createElement('canvas');
+      canvas.width = W; canvas.height = H;
+      var ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#FFFBF5'; ctx.fillRect(0, 0, W, H);
+      imgs.forEach(function(img, i){
+        if(!img) return;
+        var cx = (i % cols) * cell, cy = Math.floor(i / cols) * cell;
+        var r = img.width / img.height, sx, sy, sw, sh;
+        if(r > 1){ sh = img.height; sw = sh; sy = 0; sx = (img.width - sw) / 2; }
+        else { sw = img.width; sh = sw; sx = 0; sy = (img.height - sh) / 2; }
+        ctx.drawImage(img, sx, sy, sw, sh, cx, cy, cell, cell);
+      });
+      var now = new Date();
+      ctx.textBaseline = 'top';
+      ctx.fillStyle = '#FF7A59';
+      ctx.font = '700 28px sans-serif';
+      ctx.fillText(now.getFullYear() + '년 ' + (now.getMonth()+1) + '월의 기록', 24, gridH + 20);
+      ctx.fillStyle = '#6E5F50';
+      ctx.font = '400 16px sans-serif';
+      ctx.fillText((state.nickname || '우리 아이') + ' · ' + (ageLabel() || ''), 24, gridH + 60);
+      ctx.fillStyle = '#B0A392';
+      ctx.font = '700 14px sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText('다다맘', W - 24, gridH + 60);
+      ctx.textAlign = 'left';
+      canvas.toBlob(function(blob){
+        if(!blob){
+          var pf0 = document.getElementById('share-card-preview');
+          if(pf0) pf0.innerHTML = '<span class="helper">이미지를 만들지 못했어요</span>';
+          return;
+        }
+        var url = URL.createObjectURL(blob);
+        var prev = document.getElementById('share-card-preview');
+        if(prev) prev.innerHTML = '<img src="' + url + '" alt="이달의 성장 앨범" style="width:100%; max-width:280px; border-radius:14px; border:1px solid var(--border);">';
+        var dlBtn = document.getElementById('share-card-download');
+        if(dlBtn) dlBtn.onclick = function(){
+          var a = document.createElement('a');
+          a.href = url; a.download = 'dadamom-album-' + Date.now() + '.png';
+          document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        };
+        var shBtn = document.getElementById('share-card-share');
+        if(shBtn) shBtn.onclick = async function(){
+          try{
+            var file = new File([blob], 'dadamom-album.png', {type:'image/png'});
+            if(navigator.canShare && navigator.canShare({files:[file]})){
+              await navigator.share({files:[file], title:'이달의 성장 앨범'});
+            } else {
+              showToast('이 브라우저에서는 공유가 지원되지 않아요. 다운로드를 이용해주세요');
+            }
+          }catch(e){}
+        };
+      }, 'image/png');
+    }catch(e){
+      var pf = document.getElementById('share-card-preview');
+      if(pf) pf.innerHTML = '<span class="helper">이미지를 만들지 못했어요</span>';
+    }
+  }
+
+  function buildMonthlyCard(){
+    var items = monthlyPhotoItems().slice(0,6);
+    if(!items.length){
+      var pf = document.getElementById('share-card-preview');
+      if(pf) pf.innerHTML = '<span class="helper">이번 달 사진이 없어요</span>';
+      return;
+    }
+    var loaded = 0, imgs = new Array(items.length);
+    items.forEach(function(it, i){
+      var img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = function(){ imgs[i] = img; loaded++; if(loaded === items.length) composeMonthly(imgs); };
+      img.onerror = function(){ imgs[i] = null; loaded++; if(loaded === items.length) composeMonthly(imgs); };
+      img.src = it.media_url;
+    });
+  }
+
+  // ---------- 가족과 함께 기록하기 ----------
+  function renderFamily(){
+    var el = document.getElementById('family-body');
+    if(!el) return;
+    if(state.familyCode){
+      el.innerHTML = '<p class="helper">이 코드를 아는 사람은 같은 육아 기록을 볼 수 있어요.</p>' +
+        '<div class="row" style="align-items:center; gap:10px;">' +
+        '<span class="display" style="font-size:22px; letter-spacing:2px; flex:1;">' + escapeHtml(state.familyCode) + '</span>' +
+        '<button type="button" data-family-copy class="btn-ghost" style="height:40px; padding:0 14px; font-size:12.5px;">코드 복사</button></div>' +
+        '<div class="row" style="gap:8px;">' +
+        '<button type="button" data-family-sync class="btn-ghost" style="flex:1; height:40px; font-size:12.5px;">지금 동기화</button>' +
+        '<button type="button" data-family-leave class="btn-ghost" style="flex:1; height:40px; font-size:12.5px; color:var(--accent2);">연결 해제</button></div>';
+    } else {
+      el.innerHTML = '<p class="helper">배우자나 가족과 코드 하나로 수유·수면 기록, 성장기록을 함께 볼 수 있어요.</p>' +
+        '<button type="button" data-family-create class="btn-primary" style="height:44px; font-size:14px;">가족 코드 만들기</button>' +
+        '<div class="row" style="gap:8px; align-items:center;">' +
+        '<input type="text" id="family-join-input" placeholder="받은 코드 입력" maxlength="8" style="flex:1; border:1px solid var(--border); border-radius:12px; padding:12px 14px; background:var(--surface); color:var(--text); text-transform:uppercase;">' +
+        '<button type="button" data-family-join class="btn-ghost" style="height:44px; padding:0 16px; font-size:13px;">연결</button></div>';
+    }
+  }
+
+  function randomFamilyCode(){
+    var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    var out = '';
+    for(var i=0;i<6;i++) out += chars[Math.floor(Math.random()*chars.length)];
+    return out;
+  }
+
+  function familySnapshot(){
+    return {
+      nickname: state.nickname, kidType: state.kidType, dueDate: state.dueDate,
+      birthMonth: state.birthMonth, region: state.region,
+      careLog: state.careLog, growthRecords: state.growthRecords, vaccines: state.vaccines
+    };
+  }
+
+  function applyFamilySnapshot(data){
+    if(!data) return;
+    ['nickname','kidType','dueDate','birthMonth','region'].forEach(function(k){
+      if(data[k] != null && data[k] !== '') state[k] = data[k];
+    });
+    if(Array.isArray(data.careLog)) state.careLog = data.careLog;
+    if(Array.isArray(data.growthRecords)) state.growthRecords = data.growthRecords;
+    if(data.vaccines) state.vaccines = data.vaccines;
+  }
+
+  function pushFamilySnapshot(){
+    if(!sb || !state.familyCode) return;
+    try{
+      sb.from('families').update({ data: familySnapshot(), updated_at: new Date().toISOString() }).eq('code', state.familyCode).then(function(){});
+    }catch(e){}
+  }
+
+  async function handleFamilyCreate(){
+    var code = randomFamilyCode();
+    if(sb){
+      var res = await sb.from('families').insert({ code: code, data: familySnapshot() }).select().single();
+      if(res.error){
+        showToast('가족 코드 생성 실패: ' + (res.error.message || '다시 시도해주세요'));
+        return;
+      }
+    }
+    state.familyCode = code;
+    save(); renderFamily();
+    showToast('가족 코드가 만들어졌어요');
+  }
+
+  async function handleFamilyJoin(){
+    var input = document.getElementById('family-join-input');
+    var code = (input.value || '').trim().toUpperCase();
+    if(!code) return;
+    if(!sb){
+      showToast('온라인 상태에서만 연결할 수 있어요');
+      return;
+    }
+    var res = await sb.from('families').select('*').eq('code', code).single();
+    if(res.error || !res.data){
+      showToast('코드를 찾을 수 없어요. 다시 확인해주세요');
+      return;
+    }
+    applyFamilySnapshot(res.data.data);
+    state.familyCode = code;
+    save();
+    renderAll((location.hash || '').replace('#',''));
+    showToast('가족 기록에 연결됐어요');
+  }
+
+  async function handleFamilySync(){
+    if(!sb || !state.familyCode) return;
+    var res = await sb.from('families').select('*').eq('code', state.familyCode).single();
+    if(res.error || !res.data){
+      showToast('동기화 실패');
+      return;
+    }
+    applyFamilySnapshot(res.data.data);
+    save();
+    pushFamilySnapshot();
+    renderAll((location.hash || '').replace('#',''));
+    showToast('동기화됐어요');
+  }
+
+  function handleFamilyLeave(){
+    state.familyCode = '';
+    save(); renderFamily();
+    showToast('가족 연결을 해제했어요');
+  }
+
   function renderAll(active){
     document.querySelectorAll('[data-nav]').forEach(function(el){ el.innerHTML = buildNav(active); });
     renderOnboarding();
@@ -1332,11 +1642,12 @@
         state.careLog.push({ id:'c' + Date.now(), type: isSleeping(todayCareLog()) ? 'sleep_end' : 'sleep_start', ts:Date.now() });
       }
       save(); renderCareLog();
+      if(state.familyCode) pushFamilySnapshot();
       return;
     }
     var careUndo = e.target.closest('[data-care-undo]');
     if(careUndo){
-      if(state.careLog.length){ state.careLog.pop(); save(); renderCareLog(); }
+      if(state.careLog.length){ state.careLog.pop(); save(); renderCareLog(); if(state.familyCode) pushFamilySnapshot(); }
       return;
     }
     var peerToggle = e.target.closest('[data-peer-toggle]');
@@ -1362,6 +1673,54 @@
       var scIdx = +shareCardBtn.getAttribute('data-share-card');
       var scIt = timelineCache[scIdx];
       if(scIt) openShareCardModal(scIt);
+      return;
+    }
+
+    var vaxDone = e.target.closest('[data-vax-done]');
+    if(vaxDone){
+      state.vaccines[vaxDone.getAttribute('data-vax-done')] = true;
+      save(); renderVax();
+      if(state.familyCode) pushFamilySnapshot();
+      return;
+    }
+    if(e.target.closest('[data-open-vax-modal]')){
+      openModal(vaxModalHtml());
+      return;
+    }
+
+    if(e.target.closest('[data-open-monthly-card]')){
+      openModal(shareCardModalHtml());
+      buildMonthlyCard();
+      return;
+    }
+
+    if(e.target.closest('[data-family-create]')){
+      handleFamilyCreate();
+      return;
+    }
+    if(e.target.closest('[data-family-join]')){
+      handleFamilyJoin();
+      return;
+    }
+    if(e.target.closest('[data-family-sync]')){
+      handleFamilySync();
+      return;
+    }
+    if(e.target.closest('[data-family-leave]')){
+      handleFamilyLeave();
+      return;
+    }
+    if(e.target.closest('[data-family-copy]')){
+      try{
+        navigator.clipboard.writeText(state.familyCode || '');
+        showToast('코드를 복사했어요');
+      }catch(e){}
+      return;
+    }
+
+    var reactBtn = e.target.closest('[data-react-comment]');
+    if(reactBtn){
+      handleCommentReact(reactBtn.getAttribute('data-react-comment'), reactBtn.getAttribute('data-react-emoji'));
       return;
     }
 
@@ -1535,6 +1894,7 @@
     });
     save();
     closeModal(); renderGrowth();
+    if(state.familyCode) pushFamilySnapshot();
     showToast('성장 기록이 저장됐어요');
   }
 
@@ -1548,6 +1908,8 @@
     }catch(e){ return []; }
   }
 
+  var COMMENT_REACTIONS = ['\ud83d\udc4d','\u2764\ufe0f','\ud83d\ude02','\ud83d\ude22'];
+
   function renderCommentsList(list){
     var el = document.getElementById('comments-list');
     if(!el) return;
@@ -1556,10 +1918,16 @@
       return;
     }
     el.innerHTML = list.map(function(c){
-      return '<div class="col" style="gap:2px;"><div class="row" style="align-items:center; gap:6px;">' +
+      var reactions = c.reactions || {};
+      var reactHtml = COMMENT_REACTIONS.map(function(em){
+        var count = reactions[em] || 0;
+        return '<button type="button" data-react-comment="' + c.id + '" data-react-emoji="' + em + '" style="border:none; background:var(--pill-bg); border-radius:999px; padding:3px 8px; font-size:11.5px; display:inline-flex; align-items:center; gap:3px; color:var(--text2);">' + em + (count ? (' ' + count) : '') + '</button>';
+      }).join('');
+      return '<div class="col" style="gap:4px;"><div class="row" style="align-items:center; gap:6px;">' +
         '<span style="font-size:12.5px; font-weight:700;">' + escapeHtml(c.author) + '</span>' +
         '<span class="helper">' + timeAgo(c.created_at) + '</span></div>' +
-        '<p style="font-size:13px; line-height:1.5;">' + escapeHtml(c.content) + '</p></div>';
+        '<p style="font-size:13px; line-height:1.5;">' + escapeHtml(c.content) + '</p>' +
+        '<div class="row" style="gap:5px;">' + reactHtml + '</div></div>';
     }).join('');
   }
 
@@ -1593,6 +1961,19 @@
     if(titleEl && post) titleEl.textContent = '댓글 ' + post.comments + '개';
     fetchComments(postId).then(renderCommentsList);
     renderCommunity(); renderHome();
+  }
+
+  async function handleCommentReact(commentId, emoji){
+    if(!sb){ showToast('온라인 상태에서만 반응할 수 있어요'); return; }
+    try{
+      var cur = await sb.from('post_comments').select('reactions').eq('id', commentId).single();
+      var reactions = (cur.data && cur.data.reactions) || {};
+      reactions[emoji] = (reactions[emoji] || 0) + 1;
+      await sb.from('post_comments').update({ reactions: reactions }).eq('id', commentId);
+      var pidBtn = document.getElementById('comment-submit');
+      var pid = pidBtn ? pidBtn.getAttribute('data-comment-post') : null;
+      if(pid) fetchComments(pid).then(renderCommentsList);
+    }catch(e){}
   }
 
   // ---------- 사진 카드 만들기 ----------
@@ -1702,6 +2083,16 @@
     }
   });
   document.addEventListener('change', function(e){
+    var vaxCheck = e.target.closest('[data-vax-check]');
+    if(vaxCheck){
+      var vid = vaxCheck.getAttribute('data-vax-check');
+      state.vaccines[vid] = vaxCheck.checked;
+      save(); renderVax();
+      var modalCardEl = document.getElementById('modal-card');
+      if(modalCardEl && modalCardEl.contains(vaxCheck)){ modalCardEl.innerHTML = vaxModalHtml(); }
+      if(state.familyCode) pushFamilySnapshot();
+      return;
+    }
     if(e.target.id === 'due-date'){ state.dueDate = e.target.value; save(); renderOnboarding(); }
     if(e.target.id === 'birth-month'){ state.birthMonth = e.target.value; save(); renderOnboarding(); }
     if(e.target.id === 'entry-consent'){ updateEntrySubmit(); }
