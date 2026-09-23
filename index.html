@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+<html lang="ko">
 <title>다다맘</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&display=swap">
@@ -141,6 +143,10 @@
     box-shadow:var(--shadow); opacity:0; pointer-events:none; transition:opacity .2s ease; z-index:50; max-width:80%; text-align:center;
   }
   .toast.show{ opacity:1; }
+
+  /* 320px 이하 화면에서도 가로 스크롤 카드열의 스크롤바가 보이지 않도록 */
+  [style*="overflow-x:auto"]{ scrollbar-width:none; -ms-overflow-style:none; }
+  [style*="overflow-x:auto"]::-webkit-scrollbar{ display:none; height:0; }
 </style>
 
 <div class="app" id="app">
@@ -208,9 +214,9 @@
   <section class="screen" id="screen-home">
     <div class="scroll pad">
       <div class="row" style="align-items:center; justify-content:space-between;">
-        <div class="col" style="gap:4px;">
+        <div class="col" style="gap:4px; min-width:0; flex:1;">
           <span style="font-size:13px; color:var(--text2);">안녕하세요</span>
-          <h1 class="display" id="home-name" style="font-size:21px;"></h1>
+          <h1 class="display" id="home-name" style="font-size:21px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></h1>
         </div>
         <a href="#my" class="pill" style="display:flex; align-items:center; gap:6px; padding:8px 12px; background:var(--surface); border:1px solid var(--border); font-size:12.5px; color:var(--text2); text-decoration:none;">
           <span id="home-chip"></span>
@@ -232,6 +238,7 @@
         <span class="helper" id="home-info-label"></span>
         <h2 class="display" id="home-info-headline" style="font-size:16px;"></h2>
         <p id="home-info-tip" style="font-size:13px; color:var(--text2); line-height:1.6;"></p>
+        <span class="helper" style="opacity:0.75;">일반적인 정보이며 개인차가 있을 수 있어요. 정확한 평가는 소아과·산부인과 상담을 통해 확인해주세요.</span>
       </div>
 
       <div class="col" style="gap:12px;">
@@ -268,7 +275,7 @@
         홈으로
       </a>
       <div class="col" style="gap:8px;">
-        <span class="eyebrow">D-6 · 10~24개월 추천</span>
+        <span class="eyebrow" id="challenge-eyebrow">D-6 · 10~24개월 추천</span>
         <h1 class="display" style="font-size:24px;">우리 아이 첫걸음 챌린지</h1>
         <p style="font-size:13.5px; color:var(--text2); line-height:1.6;">기억하고 싶은 걸음마 순간을 짧은 메모나 영상으로 남겨보세요. 아직 첫걸음 전이어도, 다음 챌린지에서 함께해요.</p>
       </div>
@@ -407,17 +414,17 @@
       </div>
 
       <div class="col" style="gap:10px;">
-        <a href="#community" class="card row" style="align-items:center; gap:14px; padding:16px; text-decoration:none; color:var(--text);">
+        <a href="#community" data-my-link="posts" class="card row" style="align-items:center; gap:14px; padding:16px; text-decoration:none; color:var(--text);">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.9" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 4v16M4 9h16"/></svg>
           <span style="flex:1; font-size:14px; font-weight:700;">내 게시물</span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
         </a>
-        <a href="#challenge" class="card row" style="align-items:center; gap:14px; padding:16px; text-decoration:none; color:var(--text);">
+        <a href="#challenge" data-my-link="challenge" class="card row" style="align-items:center; gap:14px; padding:16px; text-decoration:none; color:var(--text);">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.9" aria-hidden="true"><path d="M5 3v18"/><path d="M5 4h11l-2 4 2 4H5"/></svg>
           <span style="flex:1; font-size:14px; font-weight:700;">참여이력</span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
         </a>
-        <a href="#benefit" class="card row" style="align-items:center; gap:14px; padding:16px; text-decoration:none; color:var(--text);">
+        <a href="#benefit" data-my-link="benefit" class="card row" style="align-items:center; gap:14px; padding:16px; text-decoration:none; color:var(--text);">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.9" aria-hidden="true"><rect x="3" y="8" width="18" height="13" rx="1.5"/><path d="M3 12h18"/><path d="M12 8v13"/></svg>
           <span style="flex:1; font-size:14px; font-weight:700;">혜택함</span>
           <span id="my-benefit-badge" style="font-size:11.5px; font-weight:700; color:var(--accent2); background:var(--accent-soft); padding:2px 8px; border-radius:999px;">0</span>
@@ -459,6 +466,17 @@
     });
   }
 
+  function isVideoUrl(u){
+    return /\.(mp4|mov|webm|m4v|3gp|avi)(\?.*)?$/i.test(u || '');
+  }
+  function mediaTag(url, styleStr){
+    if(!url) return '';
+    if(isVideoUrl(url)){
+      return '<video src="' + escapeHtml(url) + '" style="' + styleStr + '" controls playsinline preload="metadata"></video>';
+    }
+    return '<img src="' + escapeHtml(url) + '" alt="" style="' + styleStr + '">';
+  }
+
   var NAV = [
     {id:'home', label:'홈', icon:'<path d="M3 11l9-7 9 7"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/>'},
     {id:'challenge', label:'챌린지', icon:'<path d="M5 3v18"/><path d="M5 4h11l-2 4 2 4H5"/>'},
@@ -472,6 +490,24 @@
     {key:'b', brand:'베베따뜻', title:'아기 실리콘 식기 세트', deadline:'10/2', total:60, bg:'var(--chip-b)', eligibility:'parenting'},
     {key:'c', brand:'포근솜', title:'신생아 고보습 크림', deadline:'10/5', total:30, bg:'var(--chip-c)', eligibility:'pregnant'}
   ];
+  // TODO: 실제 캠페인 마감일로 교체해주세요 (지금은 플레이스홀더 값입니다)
+  var CHALLENGE_DEADLINE = '2026-10-15';
+  function daysUntil(dateStr){
+    var target = new Date(dateStr + 'T23:59:59');
+    return Math.ceil((target.getTime() - Date.now()) / 86400000);
+  }
+  function parseMD(mdStr){
+    var parts = (mdStr || '').split('/');
+    if(parts.length !== 2) return null;
+    var mo = +parts[0], da = +parts[1];
+    if(!mo || !da) return null;
+    var y = new Date().getFullYear();
+    return new Date(y, mo - 1, da, 23, 59, 59);
+  }
+  function trialExpired(t){
+    var d = parseMD(t.deadline);
+    return d ? (Date.now() > d.getTime()) : false;
+  }
   var REGIONS = ['서울', '인천', '경기', '기타'];
   var INTERESTS = ['이유식', '수면교육', '산후관리', '장난감', '안전용품', '외출템'];
   var QNAS = [
@@ -497,6 +533,7 @@
       appliedCount:{a:0, b:0, c:0},
       myVotes:[], myLikes:[], myEntries:[], myPosts:[],
       peerOnly:false,
+      viewMineOnly:null,
       careLog:[],
       growthRecords:[],
       growthMetric:'weight',
@@ -818,7 +855,19 @@
     {headline:'간단한 문장을 따라 말해요', tip:'감정 표현이 풍부해지는 시기예요'},
     {headline:'또래에게 관심을 보여요', tip:'짧은 놀이 약속을 잡아봐도 좋아요'},
     {headline:'또래와 나란히 놀아요', tip:'어린이집 적응을 고려해볼 시기예요'},
-    {headline:'두 단어 이상 문장을 말해요', tip:'예방접종 스케줄을 다시 확인해보세요'}
+    {headline:'두 단어 이상 문장을 말해요', tip:'예방접종 스케줄을 다시 확인해보세요'},
+    {headline:'자기 주장이 강해지는 시기예요', tip:'떼쓰기가 늘어도 자연스러운 발달 과정이에요'},
+    {headline:'색깔과 모양을 구분하기 시작해요', tip:'그림책과 놀이로 색·모양 놀이를 해보세요'},
+    {headline:'간단한 규칙 놀이를 즐겨요', tip:'차례 지키기 같은 규칙을 놀이로 알려주세요'},
+    {headline:'혼자 하고 싶어하는 마음이 커져요', tip:'옷 입기 등 스스로 해볼 기회를 주세요'},
+    {headline:'세 단어 이상 문장을 말해요', tip:'하루 일과를 이야기로 나눠보세요'},
+    {headline:'배변훈련이 자리잡아가는 시기예요', tip:'조급해하지 말고 아이 속도에 맞춰주세요'},
+    {headline:'또래와 함께 노는 걸 즐거워해요', tip:'짧은 사회놀이 시간을 만들어보세요'},
+    {headline:'감정 표현이 더 풍부해져요', tip:'감정에 이름을 붙여 말해주면 도움이 돼요'},
+    {headline:'질문이 부쩍 많아지는 시기예요', tip:'궁금증에 짧고 쉬운 말로 답해주세요'},
+    {headline:'혼자 옷을 입고 벗으려 해요', tip:'단추나 지퍼는 아직 도움이 필요할 수 있어요'},
+    {headline:'상상 놀이를 즐기기 시작해요', tip:'역할놀이로 함께 이야기를 만들어보세요'},
+    {headline:'어린이집·유치원 적응기를 준비해요', tip:'새로운 환경 적응은 시간이 걸릴 수 있어요'}
   ];
 
   function weekMonthInfo(){
@@ -832,8 +881,12 @@
     if(state.kidType === 'parenting'){
       var m = ageMonths(state.birthMonth);
       if(m == null) return null;
-      var idxM = Math.max(0, Math.min(m, MONTH_INFO.length - 1));
-      var infoM = MONTH_INFO[idxM];
+      if(m > MONTH_INFO.length - 1){
+        // beyond our authored range: show an honest generic message
+        // instead of silently reusing a younger month's specific info.
+        return { label: m + '개월 정보', headline:'다양한 발달을 보이는 시기예요', tip:'자세한 월령별 정보는 다음 업데이트에서 만나요. 궁금한 점은 소아과 상담을 통해 확인해보세요.' };
+      }
+      var infoM = MONTH_INFO[m];
       return { label: m + '개월 정보', headline: infoM.headline, tip: infoM.tip };
     }
     return null;
@@ -861,7 +914,8 @@
   function articleModalHtml(a){
     return '<div class="modal-head"><h3 class="display">' + escapeHtml(a.title) + '</h3><button class="modal-close" data-close-modal aria-label="닫기">\u2715</button></div>' +
       '<p class="modal-desc">' + escapeHtml(a.summary) + '</p>' +
-      '<div class="col" style="gap:10px; max-height:52vh; overflow-y:auto;"><p style="font-size:13.5px; line-height:1.7; color:var(--text);">' + escapeHtml(a.body) + '</p></div>';
+      '<div class="col" style="gap:10px; max-height:52vh; overflow-y:auto;"><p style="font-size:13.5px; line-height:1.7; color:var(--text);">' + escapeHtml(a.body) + '</p></div>' +
+      '<span class="helper" style="opacity:0.75;">일반 육아 정보이며 진료를 대체하지 않아요. 아이 상태가 걱정된다면 소아과 상담을 받아보세요.</span>';
   }
 
   // ---------- HOME ----------
@@ -984,11 +1038,30 @@
       btn.setAttribute('aria-selected', on ? 'true' : 'false');
     });
 
+    var dLeft = daysUntil(CHALLENGE_DEADLINE);
+    var challengeClosed = dLeft < 0;
+    var eyebrowEl = document.getElementById('challenge-eyebrow');
+    if(eyebrowEl){ eyebrowEl.textContent = (dLeft > 0 ? ('D-' + dLeft) : (dLeft === 0 ? 'D-DAY' : '모집 마감')) + ' · 10~24개월 추천'; }
+    var partBtn = document.querySelector('[data-open-challenge-modal]');
+    if(partBtn){
+      var ineligible = state.kidType === 'pregnant';
+      partBtn.disabled = ineligible || challengeClosed;
+      partBtn.textContent = challengeClosed ? '모집이 마감됐어요' : (ineligible ? '육아 단계에서 참여할 수 있어요' : '우리 아이도 참여하기');
+    }
+
     var list = sortedEntries();
+    if(state.viewMineOnly === 'challenge'){ list = list.filter(function(e){ return e.mine; }); }
     document.getElementById('entry-count').textContent = list.length;
-    document.getElementById('entries').innerHTML = list.map(function(e){
+    var challengeMineBanner = state.viewMineOnly === 'challenge'
+      ? '<div class="row" style="align-items:center; justify-content:space-between; background:var(--accent-soft); border-radius:12px; padding:10px 14px; margin-bottom:10px;"><span style="font-size:12.5px; font-weight:700; color:var(--accent2);">내 참여 기록만 보는 중</span><button type="button" data-clear-my-filter class="link-quiet" style="background:none; border:none;">전체보기</button></div>'
+      : '';
+    if(list.length === 0){
+      document.getElementById('entries').innerHTML = challengeMineBanner + '<div class="card col" style="padding:18px; align-items:center; gap:6px;"><span class="helper">아직 참여한 기록이 없어요</span></div>';
+      return;
+    }
+    document.getElementById('entries').innerHTML = challengeMineBanner + list.map(function(e){
       var thumb = e.media_url
-        ? '<img src="' + escapeHtml(e.media_url) + '" alt="" style="width:100%; height:100%; object-fit:cover; border-radius:14px;">'
+        ? mediaTag(e.media_url, 'width:100%; height:100%; object-fit:cover; border-radius:14px;')
         : '<svg width="18" height="18" viewBox="0 0 24 24" fill="var(--text2)" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
       return '<div class="card row" style="gap:12px; padding:14px; align-items:center;">' +
         '<div style="flex:0 0 auto; width:64px; height:64px; border-radius:14px; background:var(--border); overflow:hidden; display:flex; align-items:center; justify-content:center;" role="img" aria-label="' + escapeHtml(e.name) + ' 참가 영상 썸네일">' +
@@ -1012,15 +1085,24 @@
 
     var body = document.getElementById('benefit-body');
     if(state.benefitTab === 'trial'){
-      body.innerHTML = TRIALS.map(function(t){
+      var trialSource = state.viewMineOnly === 'benefit' ? TRIALS.filter(function(t){ return state.applied[t.key]; }) : TRIALS;
+      var benefitMineBanner = state.viewMineOnly === 'benefit'
+        ? '<div class="row" style="align-items:center; justify-content:space-between; background:var(--accent-soft); border-radius:12px; padding:10px 14px;"><span style="font-size:12.5px; font-weight:700; color:var(--accent2);">내 신청 내역만 보는 중</span><button type="button" data-clear-my-filter class="link-quiet" style="background:none; border:none;">전체보기</button></div>'
+        : '';
+      if(trialSource.length === 0){
+        body.innerHTML = benefitMineBanner + '<div class="card col" style="padding:18px; align-items:center; gap:6px;"><span class="helper">아직 신청한 체험단이 없어요</span></div>';
+        return;
+      }
+      body.innerHTML = benefitMineBanner + trialSource.map(function(t){
         var done = state.applied[t.key];
         var count = state.appliedCount[t.key];
-        var full = count >= t.total;
+        var expired = trialExpired(t);
+        var full = count >= t.total || expired;
         var pct = Math.round(count / t.total * 100);
         var matches = t.eligibility === 'both' || t.eligibility === state.kidType;
         var eligLabel = t.eligibility === 'both' ? '전체' : (t.eligibility === 'pregnant' ? '임산부' : '10~24개월');
-        var btnLabel = done ? '신청 완료' : (full ? '모집 마감' : '신청하기');
-        var btnDisabled = done || full;
+        var btnLabel = done ? '신청 완료' : (full ? '모집 마감' : (!matches ? '대상이 아니에요' : '신청하기'));
+        var btnDisabled = done || full || !matches;
         return '<div class="card col" style="gap:10px; padding:16px;">' +
           '<div class="row" style="gap:12px;">' +
           '<div style="flex:0 0 auto; width:68px; height:68px; border-radius:14px; background:' + t.bg + ';" role="img" aria-label="' + escapeHtml(t.title) + ' 제품 사진"></div>' +
@@ -1063,8 +1145,12 @@
       var posts = (state.peerOnly && myAgeValue != null)
         ? allPosts.filter(function(p){ return p.stage === state.kidType && p.age_value != null && Math.abs(p.age_value - myAgeValue) <= peerThreshold; })
         : allPosts;
+      if(state.viewMineOnly === 'posts'){ posts = posts.filter(function(p){ return p.mine; }); }
 
-      var filterBar = '<div class="row" style="align-items:center; justify-content:space-between;">' +
+      var mineBanner = state.viewMineOnly === 'posts'
+        ? '<div class="row" style="align-items:center; justify-content:space-between; background:var(--accent-soft); border-radius:12px; padding:10px 14px;"><span style="font-size:12.5px; font-weight:700; color:var(--accent2);">내 게시물만 보는 중</span><button type="button" data-clear-my-filter class="link-quiet" style="background:none; border:none;">전체보기</button></div>'
+        : '';
+      var filterBar = mineBanner + '<div class="row" style="align-items:center; justify-content:space-between;">' +
         '<div class="segmented round" role="tablist" aria-label="피드 필터">' +
         '<button data-peer-toggle="all" role="tab" aria-selected="' + (!state.peerOnly) + '">전체</button>' +
         '<button data-peer-toggle="peer" role="tab" aria-selected="' + (!!state.peerOnly) + '">또래 공감</button>' +
@@ -1072,7 +1158,7 @@
 
       var listHtml = posts.length ? posts.map(function(p){
         var media = p.media_url
-          ? '<img src="' + escapeHtml(p.media_url) + '" alt="" style="width:100%; height:160px; object-fit:cover; border-radius:16px;">'
+          ? mediaTag(p.media_url, 'width:100%; height:160px; object-fit:cover; border-radius:16px;')
           : (p.img ? '<div style="height:160px; border-radius:16px; background:' + p.bg + ';" role="img" aria-label="게시물 사진"></div>' : '');
         return '<div class="card col" style="gap:12px; padding:16px;">' +
           '<div class="row" style="align-items:center; gap:8px;"><div style="width:32px; height:32px; border-radius:999px; background:var(--border);" aria-hidden="true"></div>' +
@@ -1086,7 +1172,7 @@
           '<button data-open-comments="' + p.id + '" aria-label="댓글 보기, 현재 ' + p.comments + '개" style="display:flex; align-items:center; gap:5px; border:none; background:none; color:var(--text2); min-height:44px;">' +
           '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.8" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-8.9 8.4 9 9 0 0 1-3.6-.7L3 20l1.3-3.9a8.2 8.2 0 0 1-1-4A8.4 8.4 0 0 1 12.1 3a8.3 8.3 0 0 1 8.9 8.5z"/></svg>' +
           '<span style="font-size:12px;">' + p.comments + '</span></button></div></div>';
-      }).join('') : '<div class="card col" style="padding:18px; align-items:center; gap:6px;"><span style="font-size:13px; color:var(--text2);">아직 또래 글이 없어요</span><span class="helper">전체 보기로 다른 글도 둘러보세요</span></div>';
+      }).join('') : '<div class="card col" style="padding:18px; align-items:center; gap:6px;"><span style="font-size:13px; color:var(--text2);">' + (state.viewMineOnly === 'posts' ? '아직 작성한 글이 없어요' : '아직 또래 글이 없어요') + '</span><span class="helper">전체 보기로 다른 글도 둘러보세요</span></div>';
 
       body.innerHTML = filterBar + listHtml;
     } else {
@@ -1130,19 +1216,33 @@
     return state.careLog.filter(function(e){ return e.ts >= cutoff; }).sort(function(a,b){ return a.ts - b.ts; });
   }
 
-  function isSleeping(log){
-    for(var i = log.length - 1; i >= 0; i--){
-      if(log[i].type === 'sleep_start') return true;
-      if(log[i].type === 'sleep_end') return false;
+  function currentSleepStart(){
+    // 오늘 범위로 자르지 않고 전체 careLog를 훑어서, 자정 전에 시작된
+    // 수면이 자정 이후에도 "재우는 중"으로 올바르게 인식되도록 함
+    var sorted = state.careLog.slice().sort(function(a,b){ return a.ts - b.ts; });
+    for(var i = sorted.length - 1; i >= 0; i--){
+      if(sorted[i].type === 'sleep_start') return sorted[i].ts;
+      if(sorted[i].type === 'sleep_end') return null;
     }
-    return false;
+    return null;
   }
 
-  function sleepMinutesToday(log){
+  function isSleeping(){
+    return currentSleepStart() != null;
+  }
+
+  function sleepMinutesToday(){
+    var startOfDay = new Date(); startOfDay.setHours(0,0,0,0);
+    var dayStart = startOfDay.getTime();
+    var sorted = state.careLog.slice().sort(function(a,b){ return a.ts - b.ts; });
     var total = 0, start = null;
-    for(var i = 0; i < log.length; i++){
-      if(log[i].type === 'sleep_start') start = log[i].ts;
-      else if(log[i].type === 'sleep_end' && start != null){ total += (log[i].ts - start) / 60000; start = null; }
+    for(var i = 0; i < sorted.length; i++){
+      if(sorted[i].type === 'sleep_start') start = sorted[i].ts;
+      else if(sorted[i].type === 'sleep_end' && start != null){
+        var s = Math.max(start, dayStart), en = sorted[i].ts;
+        if(en > s) total += (en - s) / 60000;
+        start = null;
+      }
     }
     return total;
   }
@@ -1161,13 +1261,13 @@
       ? (feeds.length + '회 · ' + hhmm(feeds[feeds.length - 1].ts))
       : '기록 없음';
 
-    var sleeping = isSleeping(log);
+    var sleepStartTs = currentSleepStart();
+    var sleeping = sleepStartTs != null;
     document.getElementById('carelog-sleep-label').textContent = sleeping ? '기상하기' : '수면 시작';
     if(sleeping){
-      var lastStart = log.filter(function(e){ return e.type === 'sleep_start'; }).slice(-1)[0];
-      document.getElementById('carelog-count-sleep').textContent = '재우는 중 · ' + hhmm(lastStart.ts) + '~';
+      document.getElementById('carelog-count-sleep').textContent = '재우는 중 · ' + hhmm(sleepStartTs) + '~';
     } else {
-      var totalMin = Math.round(sleepMinutesToday(log));
+      var totalMin = Math.round(sleepMinutesToday());
       document.getElementById('carelog-count-sleep').textContent = totalMin > 0 ? (Math.round(totalMin / 6) / 10 + '시간') : '기록 없음';
     }
 
@@ -1218,7 +1318,7 @@
     el.innerHTML = order.map(function(label){
       var rows = grouped[label].map(function(it){
         var thumb = it.media_url
-          ? '<img src="' + escapeHtml(it.media_url) + '" alt="" style="width:44px; height:44px; border-radius:12px; object-fit:cover; flex:0 0 auto;">'
+          ? mediaTag(it.media_url, 'width:44px; height:44px; border-radius:12px; object-fit:cover; flex:0 0 auto;')
           : '<div style="width:44px; height:44px; border-radius:12px; background:var(--border); flex:0 0 auto;"></div>';
         var shareBtn = it.media_url
           ? '<button type="button" data-share-card="' + it._idx + '" aria-label="사진 카드로 저장" style="flex:0 0 auto; background:none; border:none; padding:6px; color:var(--text2); min-width:32px; min-height:32px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v14"/></svg></button>'
@@ -1405,7 +1505,7 @@
       return;
     }
     grid.innerHTML = items.slice(0,8).map(function(it){
-      return '<img src="' + escapeHtml(it.media_url) + '" alt="" style="width:100%; aspect-ratio:1; object-fit:cover; border-radius:10px;">';
+      return mediaTag(it.media_url, 'width:100%; aspect-ratio:1; object-fit:cover; border-radius:10px;');
     }).join('');
   }
 
@@ -1634,14 +1734,26 @@
   }
 
   // ---------- MODAL ----------
+  var _modalLastFocus = null;
   function openModal(html){
+    _modalLastFocus = document.activeElement;
     document.getElementById('modal-card').innerHTML = html;
     document.getElementById('modal-backdrop').hidden = false;
+    var card = document.getElementById('modal-card');
+    var focusable = card.querySelector('button, [href], input, textarea, select, [tabindex]:not([tabindex="-1"])');
+    if(focusable) focusable.focus();
   }
   function closeModal(){
     document.getElementById('modal-backdrop').hidden = true;
     document.getElementById('modal-card').innerHTML = '';
+    if(_modalLastFocus && typeof _modalLastFocus.focus === 'function'){ _modalLastFocus.focus(); }
+    _modalLastFocus = null;
   }
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && !document.getElementById('modal-backdrop').hidden){
+      closeModal();
+    }
+  });
 
   function challengeModalHtml(){
     return '<div class="modal-head"><h3 class="display">우리 아이도 참여하기</h3><button class="modal-close" data-close-modal aria-label="닫기">✕</button></div>' +
@@ -1657,7 +1769,12 @@
     return '<div class="modal-head"><h3 class="display">이야기 남기기</h3><button class="modal-close" data-close-modal aria-label="닫기">✕</button></div>' +
       '<div class="field"><label for="post-photo">사진 (선택)</label><input type="file" id="post-photo" accept="image/*"></div>' +
       '<div class="field"><label for="post-text">무슨 이야기를 나누고 싶으세요? *</label><textarea id="post-text" rows="4" placeholder="오늘 있었던 일을 편하게 적어보세요"></textarea></div>' +
-      '<label class="check-row"><input type="checkbox" id="post-consent"> 아이 사진이 포함된다면 공개범위를 확인했어요 *</label>' +
+      '<div class="field"><label>공개범위 *</label>' +
+      '<div class="segmented round" role="tablist" aria-label="공개범위 선택" id="post-visibility-group" style="width:100%;">' +
+      '<button type="button" data-post-visibility="public" role="tab" aria-selected="true" style="flex:1;">전체 공개</button>' +
+      '<button type="button" data-post-visibility="private" role="tab" aria-selected="false" style="flex:1;">나만 보기</button>' +
+      '</div><span class="helper" id="post-visibility-hint">커뮤니티의 모든 사람이 볼 수 있어요</span></div>' +
+      '<label class="check-row"><input type="checkbox" id="post-consent"> 아이 사진이 포함된다면 위 공개범위를 확인했고, 선택한 범위로 게시하는 것에 동의해요 *</label>' +
       '<button class="btn-primary" id="post-submit" style="width:100%;" disabled>등록하기</button>';
   }
 
@@ -1723,7 +1840,13 @@
   // ---------- EVENTS ----------
   document.addEventListener('click', function(e){
     var goto = e.target.closest('[data-goto]');
-    if(goto){ location.hash = '#' + goto.getAttribute('data-goto'); return; }
+    if(goto){ state.viewMineOnly = null; location.hash = '#' + goto.getAttribute('data-goto'); return; }
+
+    var myLink = e.target.closest('[data-my-link]');
+    if(myLink){ state.viewMineOnly = myLink.getAttribute('data-my-link'); return; }
+
+    var clearFilter = e.target.closest('[data-clear-my-filter]');
+    if(clearFilter){ state.viewMineOnly = null; renderChallenge(); renderCommunity(); renderBenefit(); return; }
 
     var typePick = e.target.closest('[data-type-pick]');
     if(typePick){ state.kidType = typePick.getAttribute('data-type-pick'); save(); renderOnboarding(); return; }
@@ -1793,7 +1916,7 @@
       if(ctype === 'feed'){
         state.careLog.push({ id:'c' + Date.now(), type:'feed', ts:Date.now() });
       } else if(ctype === 'sleep'){
-        state.careLog.push({ id:'c' + Date.now(), type: isSleeping(todayCareLog()) ? 'sleep_end' : 'sleep_start', ts:Date.now() });
+        state.careLog.push({ id:'c' + Date.now(), type: isSleeping() ? 'sleep_end' : 'sleep_start', ts:Date.now() });
       }
       save(); renderCareLog();
       if(state.familyCode) pushFamilySnapshot();
@@ -1808,6 +1931,19 @@
     if(peerToggle){
       state.peerOnly = peerToggle.getAttribute('data-peer-toggle') === 'peer';
       save(); renderCommunity();
+      return;
+    }
+
+    var postVis = e.target.closest('[data-post-visibility]');
+    if(postVis){
+      var visGroup = document.getElementById('post-visibility-group');
+      if(visGroup){
+        visGroup.querySelectorAll('[data-post-visibility]').forEach(function(b){ b.setAttribute('aria-selected', 'false'); });
+        postVis.setAttribute('aria-selected', 'true');
+        var visHint = document.getElementById('post-visibility-hint');
+        var visVal = postVis.getAttribute('data-post-visibility');
+        if(visHint){ visHint.textContent = visVal === 'private' ? '나만 볼 수 있어요 (커뮤니티에는 게시되지 않아요)' : '커뮤니티의 모든 사람이 볼 수 있어요'; }
+      }
       return;
     }
 
@@ -1953,7 +2089,9 @@
     var mediaUrl = file ? await uploadMedia(file) : '';
     var name = state.nickname || '우리 아이';
     var age = ageLabel() || '참가자';
-    var newEntry = { id:'e' + Date.now(), name:name, age:age, note:noteVal, media_url:mediaUrl, votes:0, liked:false, mine:true, createdAt: Date.now() };
+    var brandConsent2El = document.getElementById('entry-consent2');
+    var newEntry = { id:'e' + Date.now(), name:name, age:age, note:noteVal, media_url:mediaUrl, votes:0, liked:false, mine:true, createdAt: Date.now(),
+      consent: { photoConsent:true, brandUse: !!(brandConsent2El && brandConsent2El.checked), docVersion:'v1', consentedAt: new Date().toISOString() } };
     if(sb){
       var res = await sb.from('challenge_entries').insert({ name:name, age:age, note:noteVal, media_url:mediaUrl }).select().single();
       if(res.error || !res.data){
@@ -1985,8 +2123,11 @@
     var author = state.nickname ? state.nickname + '맘·아빠' : '나';
     var myStage = state.kidType;
     var myAgeVal = myStage === 'pregnant' ? pregWeeks(state.dueDate) : (myStage === 'parenting' ? ageMonths(state.birthMonth) : null);
-    var newPost = { id:'p' + Date.now(), author:author, time:'방금 전', bg:'var(--chip-a)', text:textVal, media_url:mediaUrl, likes:0, liked:false, comments:0, stage:myStage, age_value:myAgeVal, mine:true, img: !!mediaUrl, createdAt: Date.now() };
-    if(sb){
+    var visBtn = document.querySelector('#post-visibility-group [data-post-visibility][aria-selected="true"]');
+    var visibility = visBtn ? visBtn.getAttribute('data-post-visibility') : 'public';
+    var newPost = { id:'p' + Date.now(), author:author, time:'방금 전', bg:'var(--chip-a)', text:textVal, media_url:mediaUrl, likes:0, liked:false, comments:0, stage:myStage, age_value:myAgeVal, mine:true, img: !!mediaUrl, createdAt: Date.now(),
+      visibility: visibility, consent: { scope: visibility, docVersion:'v1', consentedAt: new Date().toISOString() } };
+    if(sb && visibility !== 'private'){
       var res = await sb.from('community_posts').insert({ author:author, text:textVal, media_url:mediaUrl, stage:myStage, age_value:myAgeVal }).select().single();
       if(res.error || !res.data){
         if(res.error) console.error('community_posts insert error', res.error);
@@ -1998,12 +2139,13 @@
       newPost.createdAt = new Date(res.data.created_at).getTime();
       state.myPosts.push(res.data.id);
     } else {
+      // '나만 보기'는 서버에 전송하지 않고 이 기기에만 저장합니다.
       state.myPosts.push(newPost.id);
     }
     state.posts.unshift(newPost);
     save();
     closeModal(); renderCommunity(); renderHome();
-    showToast('등록됐어요');
+    showToast(visibility === 'private' ? '나만 보기로 저장했어요' : '등록됐어요');
   }
 
   async function handleApplySubmit(akey){
