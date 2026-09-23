@@ -31,6 +31,7 @@
   }
 
   *{box-sizing:border-box;}
+  [hidden]{ display:none !important; }
   html,body{height:100%;}
   body{
     margin:0; background:var(--bg); color:var(--text);
@@ -217,6 +218,14 @@
         </a>
       </div>
 
+      <div class="card" id="home-dday-card" hidden style="padding:18px; display:flex; align-items:center; justify-content:space-between;">
+        <div class="col" style="gap:2px;">
+          <span class="helper" id="home-dday-label"></span>
+          <span class="display" id="home-dday-value" style="font-size:26px; color:var(--accent);"></span>
+        </div>
+        <div style="font-size:30px;" aria-hidden="true" id="home-dday-emoji"></div>
+      </div>
+
       <div id="home-hero"></div>
 
       <div class="col" style="gap:12px;">
@@ -344,6 +353,19 @@
         <button type="button" data-care-undo class="link-quiet" style="align-self:flex-start; background:none; border:none; padding:2px 0;">방금 기록 취소</button>
       </div>
 
+      <div class="card col" id="growth-card" style="gap:14px; padding:18px;">
+        <div class="row" style="align-items:center; justify-content:space-between;">
+          <h2 class="display" style="font-size:16px;">성장기록</h2>
+          <button type="button" data-open-growth-modal class="link-quiet" style="background:none; border:none; padding:2px 0;">+ 기록 추가</button>
+        </div>
+        <div class="segmented round" role="tablist" aria-label="성장 지표" id="growth-tabs" style="width:fit-content;">
+          <button data-growth-metric="weight" role="tab">체중</button>
+          <button data-growth-metric="height" role="tab">키</button>
+        </div>
+        <div id="growth-chart"></div>
+        <div class="col" style="gap:5px;" id="growth-list"></div>
+      </div>
+
       <div class="col" style="gap:10px;">
         <h2 class="display" style="font-size:16px;">성장 타임라인</h2>
         <div class="col" style="gap:10px;" id="timeline-list"></div>
@@ -441,6 +463,8 @@
       myVotes:[], myLikes:[], myEntries:[], myPosts:[],
       peerOnly:false,
       careLog:[],
+      growthRecords:[],
+      growthMetric:'weight',
       entries:[
         {id:'e1', name:'서윤', age:'11개월', votes:128, liked:false, note:'', mine:false, createdAt: now - 2*3600*1000},
         {id:'e2', name:'민준', age:'13개월', votes:96, liked:false, note:'', mine:false, createdAt: now - 5*3600*1000},
@@ -469,7 +493,8 @@
         myLikes: Array.isArray(saved.myLikes) ? saved.myLikes : d.myLikes,
         myEntries: Array.isArray(saved.myEntries) ? saved.myEntries : d.myEntries,
         myPosts: Array.isArray(saved.myPosts) ? saved.myPosts : d.myPosts,
-        careLog: Array.isArray(saved.careLog) ? saved.careLog.filter(function(e){ return Date.now() - e.ts < 14*86400000; }) : d.careLog
+        careLog: Array.isArray(saved.careLog) ? saved.careLog.filter(function(e){ return Date.now() - e.ts < 14*86400000; }) : d.careLog,
+        growthRecords: Array.isArray(saved.growthRecords) ? saved.growthRecords : d.growthRecords
       });
     }catch(e){ return d; }
   }
@@ -693,9 +718,40 @@
     return list.length ? list : TRIALS;
   }
 
+  function ddayInfo(){
+    if(state.kidType === 'pregnant' && state.dueDate){
+      var due = new Date(state.dueDate + 'T00:00:00');
+      var today = new Date(); today.setHours(0,0,0,0);
+      var diff = Math.round((due - today) / DAY);
+      if(diff > 0) return { label:'출산예정일까지', value:'D-' + diff, emoji:'🤰' };
+      if(diff === 0) return { label:'출산예정일', value:'D-DAY', emoji:'👶' };
+      return { label:'예정일이 지났어요', value:'D+' + Math.abs(diff), emoji:'👶' };
+    }
+    if(state.kidType === 'parenting' && state.birthMonth){
+      var parts = state.birthMonth.split('-');
+      var by = +parts[0], bm = +parts[1];
+      if(!by || !bm) return null;
+      var approxBirth = new Date(by, bm - 1, 15);
+      var days = Math.max(0, Math.round((Date.now() - approxBirth.getTime()) / DAY));
+      return { label:'태어난 지 (약)', value:days + '일째', emoji:'🍼' };
+    }
+    return null;
+  }
+
   function renderHome(){
     document.getElementById('home-name').textContent = (state.nickname ? state.nickname + '님' : '다다맘님');
     document.getElementById('home-chip').textContent = profileSummary();
+
+    var dd = ddayInfo();
+    var ddCard = document.getElementById('home-dday-card');
+    if(dd){
+      ddCard.hidden = false;
+      document.getElementById('home-dday-label').textContent = dd.label;
+      document.getElementById('home-dday-value').textContent = dd.value;
+      document.getElementById('home-dday-emoji').textContent = dd.emoji;
+    } else {
+      ddCard.hidden = true;
+    }
 
     var hero = document.getElementById('home-hero');
     if(state.kidType === 'pregnant'){
@@ -849,9 +905,9 @@
           '<button data-postlike="' + p.id + '" aria-pressed="' + p.liked + '" aria-label="좋아요, 현재 ' + p.likes + '개" style="display:flex; align-items:center; gap:5px; border:none; background:none; color:var(--text2); min-height:44px;">' +
           '<svg width="17" height="17" viewBox="0 0 24 24" fill="' + (p.liked ? 'var(--accent)' : 'none') + '" stroke="var(--accent)" stroke-width="1.8" aria-hidden="true"><path d="M12 21s-7.5-4.6-10-9.3C0.4 8.4 2.4 5 6 5c2 0 3.4 1 4 2.3C10.6 6 12 5 14 5c3.6 0 5.6 3.4 4 6.7-2.5 4.7-10 9.3-10 9.3z"/></svg>' +
           '<span style="font-size:12px;">' + p.likes + '</span></button>' +
-          '<span style="display:flex; align-items:center; gap:5px; color:var(--text2);">' +
+          '<button data-open-comments="' + p.id + '" aria-label="댓글 보기, 현재 ' + p.comments + '개" style="display:flex; align-items:center; gap:5px; border:none; background:none; color:var(--text2); min-height:44px;">' +
           '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.8" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-8.9 8.4 9 9 0 0 1-3.6-.7L3 20l1.3-3.9a8.2 8.2 0 0 1-1-4A8.4 8.4 0 0 1 12.1 3a8.3 8.3 0 0 1 8.9 8.5z"/></svg>' +
-          '<span style="font-size:12px;">' + p.comments + '</span></span></div></div>';
+          '<span style="font-size:12px;">' + p.comments + '</span></button></div></div>';
       }).join('') : '<div class="card col" style="padding:18px; align-items:center; gap:6px;"><span style="font-size:13px; color:var(--text2);">아직 또래 글이 없어요</span><span class="helper">전체 보기로 다른 글도 둘러보세요</span></div>';
 
       body.innerHTML = filterBar + listHtml;
@@ -876,6 +932,7 @@
     document.getElementById('my-benefit-badge').textContent = benefitCount;
     document.getElementById('my-stat-post').textContent = state.posts.filter(function(p){ return p.mine; }).length;
     renderCareLog();
+    renderGrowth();
     renderTimeline();
   }
 
@@ -945,6 +1002,8 @@
   }
 
   // ---------- 성장 타임라인 ----------
+  var timelineCache = [];
+
   function timelineItems(){
     var items = [];
     state.entries.filter(function(e){ return e.mine; }).forEach(function(e){
@@ -961,6 +1020,8 @@
     var el = document.getElementById('timeline-list');
     if(!el) return;
     var items = timelineItems();
+    items.forEach(function(it,i){ it._idx = i; });
+    timelineCache = items;
     if(!items.length){
       el.innerHTML = '<div class="card col" style="padding:18px; align-items:center; gap:6px;">' +
         '<span style="font-size:13px; color:var(--text2);">아직 기록이 없어요</span>' +
@@ -978,12 +1039,99 @@
         var thumb = it.media_url
           ? '<img src="' + escapeHtml(it.media_url) + '" alt="" style="width:44px; height:44px; border-radius:10px; object-fit:cover; flex:0 0 auto;">'
           : '<div style="width:44px; height:44px; border-radius:10px; background:var(--border); flex:0 0 auto;"></div>';
+        var shareBtn = it.media_url
+          ? '<button type="button" data-share-card="' + it._idx + '" aria-label="사진 카드로 저장" style="flex:0 0 auto; background:none; border:none; padding:6px; color:var(--text2); min-width:32px; min-height:32px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v14"/></svg></button>'
+          : '';
         return '<div class="row" style="gap:10px; align-items:center;">' + thumb +
           '<div class="col" style="gap:2px; min-width:0; flex:1;"><span style="font-size:12.5px; line-height:1.5; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:block;">' + escapeHtml(it.text || '') + '</span>' +
-          '<span class="helper">' + it.kind + ' · ' + timeAgo(new Date(it.ts).toISOString()) + '</span></div></div>';
+          '<span class="helper">' + it.kind + ' · ' + timeAgo(new Date(it.ts).toISOString()) + '</span></div>' + shareBtn + '</div>';
       }).join('');
       return '<div class="card col" style="gap:10px; padding:14px;"><span class="eyebrow">' + escapeHtml(label) + '</span>' + rows + '</div>';
     }).join('');
+  }
+
+  // ---------- 성장기록 (키·몸무게) ----------
+  var GROWTH_REF = [
+    [0,50,3.4],[1,54,4.3],[2,58,5.1],[3,61,6.0],[4,63,6.7],[6,67,7.6],
+    [9,72,8.9],[12,76,9.6],[18,82,10.9],[24,87,12.2],[30,91,13.3],[36,95,14.2]
+  ];
+  function growthRefAt(months, key){
+    if(months == null) return null;
+    var idx = key === 'h' ? 1 : 2;
+    if(months <= GROWTH_REF[0][0]) return GROWTH_REF[0][idx];
+    for(var i=0;i<GROWTH_REF.length-1;i++){
+      var a = GROWTH_REF[i], b = GROWTH_REF[i+1];
+      if(months >= a[0] && months <= b[0]){
+        var t = (months - a[0]) / (b[0] - a[0]);
+        return a[idx] + (b[idx]-a[idx]) * t;
+      }
+    }
+    return GROWTH_REF[GROWTH_REF.length-1][idx];
+  }
+
+  function sortedGrowth(){
+    return state.growthRecords.slice().sort(function(a,b){ return a.ts - b.ts; });
+  }
+
+  function growthSvg(metric){
+    var recs = sortedGrowth().filter(function(r){ return r[metric] != null; });
+    var W=300,H=140,padL=30,padR=12,padT=16,padB=22;
+    if(recs.length < 1){
+      return '<div class="helper" style="padding:24px 0; text-align:center;">기록을 추가하면 그래프가 보여요</div>';
+    }
+    var months = recs.map(function(r){ return ageMonthsAt(state.birthMonth, r.ts) || 0; });
+    var vals = recs.map(function(r){ return r[metric]; });
+    var refVals = months.map(function(m){ return growthRefAt(m, metric==='height'?'h':'w'); });
+    var allVals = vals.concat(refVals.filter(function(v){ return v!=null; }));
+    var minX = Math.min.apply(null, months), maxX = Math.max.apply(null, months);
+    if(minX === maxX){ minX -= 1; maxX += 1; }
+    var minY = Math.min.apply(null, allVals), maxY = Math.max.apply(null, allVals);
+    var padY = (maxY - minY) * 0.2 || 1;
+    minY -= padY; maxY += padY;
+    function xf(m){ return padL + (m - minX) / (maxX - minX) * (W - padL - padR); }
+    function yf(v){ return H - padB - (v - minY) / (maxY - minY) * (H - padT - padB); }
+    function pathOf(xs, ys){
+      var pts = [];
+      for(var i=0;i<xs.length;i++){ pts.push((i===0?'M':'L') + xf(xs[i]).toFixed(1) + ',' + yf(ys[i]).toFixed(1)); }
+      return pts.join(' ');
+    }
+    var refPath = pathOf(months, refVals);
+    var userPath = pathOf(months, vals);
+    var dots = months.map(function(m,i){ return '<circle cx="'+xf(m).toFixed(1)+'" cy="'+yf(vals[i]).toFixed(1)+'" r="3.5" fill="var(--accent)" />'; }).join('');
+    var unit = metric === 'height' ? 'cm' : 'kg';
+    var lastLabel = '<text x="'+xf(months[months.length-1]).toFixed(1)+'" y="'+Math.max(10,(yf(vals[vals.length-1])-8)).toFixed(1)+'" font-size="11" fill="var(--text)" text-anchor="middle" font-weight="700">'+vals[vals.length-1]+unit+'</text>';
+    return '<svg viewBox="0 0 '+W+' '+H+'" width="100%" height="140" role="img" aria-label="'+(metric==='height'?'키':'몸무게')+' 성장 그래프">' +
+      '<path d="'+refPath+'" fill="none" stroke="var(--text2)" stroke-width="1.5" stroke-dasharray="4 3" />' +
+      '<path d="'+userPath+'" fill="none" stroke="var(--accent)" stroke-width="2.2" />' +
+      dots + lastLabel +
+      '<text x="'+padL+'" y="12" font-size="10" fill="var(--text2)">또래 평균(점선) 대비</text>' +
+      '</svg>';
+  }
+
+  function renderGrowth(){
+    var card = document.getElementById('growth-card');
+    if(!card) return;
+    if(state.kidType !== 'parenting'){ card.hidden = true; return; }
+    card.hidden = false;
+    document.querySelectorAll('#growth-tabs [data-growth-metric]').forEach(function(btn){
+      var on = btn.getAttribute('data-growth-metric') === state.growthMetric;
+      btn.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    document.getElementById('growth-chart').innerHTML = growthSvg(state.growthMetric);
+    var recs = sortedGrowth();
+    var listEl = document.getElementById('growth-list');
+    if(!recs.length){
+      listEl.innerHTML = '<span class="helper">아직 기록이 없어요</span>';
+    } else {
+      listEl.innerHTML = recs.slice().reverse().slice(0,5).map(function(r){
+        var d = new Date(r.ts);
+        var dateStr = (d.getMonth()+1) + '/' + d.getDate();
+        var parts = [];
+        if(r.height!=null) parts.push(r.height+'cm');
+        if(r.weight!=null) parts.push(r.weight+'kg');
+        return '<div class="row" style="justify-content:space-between; font-size:12.5px; color:var(--text2);"><span>'+dateStr+'</span><span>'+parts.join(' · ')+'</span></div>';
+      }).join('');
+    }
   }
 
   function renderAll(active){
@@ -1055,6 +1203,34 @@
       '<label class="check-row"><input type="checkbox" id="apply-consent"> 배송을 위해 연락처와 주소를 제공하는 것에 동의해요 *</label>' +
       '<label class="check-row"><input type="checkbox" id="apply-consent2"> 브랜드가 제 후기를 광고에 활용하는 것에 동의해요 (선택)</label>' +
       '<button class="btn-primary" id="apply-submit" data-apply-key="' + trial.key + '" style="width:100%;" disabled>신청 완료하기</button>';
+  }
+
+  function growthModalHtml(){
+    return '<div class="modal-head"><h3 class="display">성장 기록 추가</h3><button class="modal-close" data-close-modal aria-label="닫기">✕</button></div>' +
+      '<div class="field"><label for="growth-height">키 (cm, 선택)</label><input type="text" inputmode="decimal" id="growth-height" placeholder="예: 72.5"></div>' +
+      '<div class="field"><label for="growth-weight">몸무게 (kg, 선택)</label><input type="text" inputmode="decimal" id="growth-weight" placeholder="예: 8.9"></div>' +
+      '<span class="helper">또래 평균은 참고용이며, 정확한 성장 평가는 영유아 검진을 통해 확인해주세요.</span>' +
+      '<button class="btn-primary" id="growth-submit" style="width:100%;" disabled>기록하기</button>';
+  }
+
+  function commentsModalHtml(post){
+    var preview = post.text && post.text.length > 60 ? post.text.slice(0,60) + '…' : (post.text || '');
+    return '<div class="modal-head"><h3 class="display" id="comments-modal-title">댓글 ' + (post.comments||0) + '개</h3><button class="modal-close" data-close-modal aria-label="닫기">✕</button></div>' +
+      '<p class="modal-desc">' + escapeHtml(preview) + '</p>' +
+      '<div class="col" style="gap:12px; max-height:38vh; overflow-y:auto;" id="comments-list"><span class="helper">불러오는 중...</span></div>' +
+      '<div class="row" style="gap:8px; align-items:flex-end;">' +
+      '<div class="field" style="flex:1; gap:0;"><textarea id="comment-text" rows="2" placeholder="따뜻한 댓글을 남겨보세요"></textarea></div>' +
+      '<button class="btn-primary" id="comment-submit" data-comment-post="' + post.id + '" style="width:60px; height:44px; font-size:13px; flex:0 0 auto;" disabled>등록</button>' +
+      '</div>';
+  }
+
+  function shareCardModalHtml(){
+    return '<div class="modal-head"><h3 class="display">사진 카드 만들기</h3><button class="modal-close" data-close-modal aria-label="닫기">✕</button></div>' +
+      '<div id="share-card-preview" style="display:flex; justify-content:center; padding:8px 0;"><span class="helper">이미지를 준비하는 중...</span></div>' +
+      '<div class="row" style="gap:8px;">' +
+      '<button class="btn-ghost" style="flex:1;" id="share-card-download">다운로드</button>' +
+      '<button class="btn-primary" style="flex:1;" id="share-card-share">공유하기</button>' +
+      '</div>';
   }
 
   function updateEntrySubmit(){
@@ -1170,6 +1346,25 @@
       return;
     }
 
+    var gmetric = e.target.closest('[data-growth-metric]');
+    if(gmetric){
+      state.growthMetric = gmetric.getAttribute('data-growth-metric');
+      save(); renderGrowth();
+      return;
+    }
+    if(e.target.closest('[data-open-growth-modal]')){
+      openModal(growthModalHtml());
+      return;
+    }
+
+    var shareCardBtn = e.target.closest('[data-share-card]');
+    if(shareCardBtn){
+      var scIdx = +shareCardBtn.getAttribute('data-share-card');
+      var scIt = timelineCache[scIdx];
+      if(scIt) openShareCardModal(scIt);
+      return;
+    }
+
     var toastBtn = e.target.closest('[data-toast]');
     if(toastBtn){ showToast(toastBtn.getAttribute('data-toast')); return; }
 
@@ -1179,6 +1374,16 @@
     }
     if(e.target.closest('[data-open-compose]')){
       openModal(composeModalHtml());
+      return;
+    }
+    var openComments = e.target.closest('[data-open-comments]');
+    if(openComments){
+      var cpid = openComments.getAttribute('data-open-comments');
+      var cpost = state.posts.filter(function(x){ return x.id === cpid; })[0];
+      if(cpost){
+        openModal(commentsModalHtml(cpost));
+        fetchComments(cpid).then(renderCommentsList);
+      }
       return;
     }
     var openApply = e.target.closest('[data-open-apply]');
@@ -1204,6 +1409,15 @@
     var applySubmit = e.target.closest('#apply-submit');
     if(applySubmit){
       handleApplySubmit(applySubmit.getAttribute('data-apply-key'));
+      return;
+    }
+    if(e.target.closest('#growth-submit')){
+      handleGrowthSubmit();
+      return;
+    }
+    var commentSubmit = e.target.closest('#comment-submit');
+    if(commentSubmit){
+      handleCommentSubmit(commentSubmit.getAttribute('data-comment-post'));
       return;
     }
   });
@@ -1297,12 +1511,195 @@
     showToast('신청이 접수됐어요');
   }
 
+  // ---------- 성장기록 입력 ----------
+  function updateGrowthSubmit(){
+    var h = document.getElementById('growth-height');
+    var w = document.getElementById('growth-weight');
+    var btn = document.getElementById('growth-submit');
+    if(!btn) return;
+    var hv = h && h.value.trim() ? parseFloat(h.value) : null;
+    var wv = w && w.value.trim() ? parseFloat(w.value) : null;
+    btn.disabled = !((hv!=null && !isNaN(hv)) || (wv!=null && !isNaN(wv)));
+  }
+
+  function handleGrowthSubmit(){
+    var h = document.getElementById('growth-height');
+    var w = document.getElementById('growth-weight');
+    var hv = h && h.value.trim() ? parseFloat(h.value) : null;
+    var wv = w && w.value.trim() ? parseFloat(w.value) : null;
+    if((hv==null || isNaN(hv)) && (wv==null || isNaN(wv))) return;
+    state.growthRecords.push({
+      id:'g' + Date.now(), ts:Date.now(),
+      height:(hv!=null && !isNaN(hv)) ? hv : null,
+      weight:(wv!=null && !isNaN(wv)) ? wv : null
+    });
+    save();
+    closeModal(); renderGrowth();
+    showToast('성장 기록이 저장됐어요');
+  }
+
+  // ---------- 댓글 ----------
+  async function fetchComments(postId){
+    if(!sb) return [];
+    try{
+      var res = await sb.from('post_comments').select('*').eq('post_id', postId).order('created_at', {ascending:true}).limit(200);
+      if(res.error || !res.data) return [];
+      return res.data;
+    }catch(e){ return []; }
+  }
+
+  function renderCommentsList(list){
+    var el = document.getElementById('comments-list');
+    if(!el) return;
+    if(!list.length){
+      el.innerHTML = '<span class="helper">첫 댓글을 남겨보세요</span>';
+      return;
+    }
+    el.innerHTML = list.map(function(c){
+      return '<div class="col" style="gap:2px;"><div class="row" style="align-items:center; gap:6px;">' +
+        '<span style="font-size:12.5px; font-weight:700;">' + escapeHtml(c.author) + '</span>' +
+        '<span class="helper">' + timeAgo(c.created_at) + '</span></div>' +
+        '<p style="font-size:13px; line-height:1.5;">' + escapeHtml(c.content) + '</p></div>';
+    }).join('');
+  }
+
+  async function handleCommentSubmit(postId){
+    var btn = document.getElementById('comment-submit');
+    var textEl = document.getElementById('comment-text');
+    var val = textEl.value.trim();
+    if(!val) return;
+    if(!sb){
+      showToast('댓글 기능은 온라인 상태에서만 사용할 수 있어요');
+      return;
+    }
+    if(btn) btn.disabled = true;
+    var author = state.nickname ? state.nickname + '맘·아빠' : '나';
+    var post = state.posts.filter(function(x){ return x.id === postId; })[0];
+    var res = await sb.from('post_comments').insert({ post_id: postId, author: author, content: val }).select().single();
+    if(res.error || !res.data){
+      if(res.error) console.error('post_comments insert error', res.error);
+      showToast('댓글 등록 실패: ' + (res.error && res.error.message ? res.error.message : '다시 시도해주세요'));
+      if(btn) btn.disabled = false;
+      return;
+    }
+    if(post){
+      post.comments = (post.comments || 0) + 1;
+      sb.from('community_posts').update({ comments: post.comments }).eq('id', postId).then(function(){});
+      save();
+    }
+    textEl.value = '';
+    if(btn) btn.disabled = true;
+    var titleEl = document.getElementById('comments-modal-title');
+    if(titleEl && post) titleEl.textContent = '댓글 ' + post.comments + '개';
+    fetchComments(postId).then(renderCommentsList);
+    renderCommunity(); renderHome();
+  }
+
+  // ---------- 사진 카드 만들기 ----------
+  function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight, maxLines){
+    var words = String(text || '').split(' ');
+    var line = '', lines = [];
+    for(var i=0;i<words.length;i++){
+      var test = line + words[i] + ' ';
+      if(ctx.measureText(test).width > maxWidth && line){
+        lines.push(line);
+        line = words[i] + ' ';
+        if(lines.length === maxLines) break;
+      } else {
+        line = test;
+      }
+    }
+    if(lines.length < maxLines && line.trim()) lines.push(line);
+    lines.slice(0, maxLines).forEach(function(l, i){ ctx.fillText(l.trim(), x, y + i * lineHeight); });
+  }
+
+  function buildShareCard(it){
+    var img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = function(){
+      try{
+        var W = 600, boxH = 600, H = 760;
+        var canvas = document.createElement('canvas');
+        canvas.width = W; canvas.height = H;
+        var ctx = canvas.getContext('2d');
+        var ratio = img.width / img.height;
+        var sx, sy, sw, sh;
+        if(ratio > 1){ sh = img.height; sw = sh; sy = 0; sx = (img.width - sw) / 2; }
+        else { sw = img.width; sh = sw; sx = 0; sy = (img.height - sh) / 2; }
+        ctx.drawImage(img, sx, sy, sw, sh, 0, 0, W, boxH);
+        ctx.fillStyle = '#FFFBF5';
+        ctx.fillRect(0, boxH, W, H - boxH);
+        ctx.fillStyle = '#FF7A59';
+        ctx.font = '700 40px sans-serif';
+        ctx.textBaseline = 'top';
+        ctx.fillText(ageLabelAt(it.ts) || '', 32, boxH + 22);
+        var d = new Date(it.ts);
+        ctx.fillStyle = '#6E5F50';
+        ctx.font = '400 20px sans-serif';
+        ctx.fillText(d.getFullYear() + '.' + (d.getMonth()+1) + '.' + d.getDate(), 32, boxH + 76);
+        ctx.fillStyle = '#2B2118';
+        ctx.font = '400 22px sans-serif';
+        wrapCanvasText(ctx, it.text || '', 32, boxH + 114, W - 64, 30, 2);
+        ctx.fillStyle = '#B0A392';
+        ctx.font = '700 16px sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText('다다맘', W - 32, H - 34);
+        ctx.textAlign = 'left';
+        canvas.toBlob(function(blob){
+          if(!blob){
+            var pf = document.getElementById('share-card-preview');
+            if(pf) pf.innerHTML = '<span class="helper">이미지를 만들지 못했어요</span>';
+            return;
+          }
+          var url = URL.createObjectURL(blob);
+          var prev = document.getElementById('share-card-preview');
+          if(prev) prev.innerHTML = '<img src="' + url + '" alt="성장 카드 미리보기" style="width:100%; max-width:260px; border-radius:14px; border:1px solid var(--border);">';
+          var dlBtn = document.getElementById('share-card-download');
+          if(dlBtn) dlBtn.onclick = function(){
+            var a = document.createElement('a');
+            a.href = url; a.download = 'dadamom-' + Date.now() + '.png';
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+          };
+          var shBtn = document.getElementById('share-card-share');
+          if(shBtn) shBtn.onclick = async function(){
+            try{
+              var file = new File([blob], 'dadamom.png', {type:'image/png'});
+              if(navigator.canShare && navigator.canShare({files:[file]})){
+                await navigator.share({files:[file], title:'다다맘 성장기록'});
+              } else {
+                showToast('이 브라우저에서는 공유가 지원되지 않아요. 다운로드를 이용해주세요');
+              }
+            }catch(e){}
+          };
+        }, 'image/png');
+      }catch(e){
+        var pf2 = document.getElementById('share-card-preview');
+        if(pf2) pf2.innerHTML = '<span class="helper">이미지를 만들지 못했어요</span>';
+      }
+    };
+    img.onerror = function(){
+      var prev = document.getElementById('share-card-preview');
+      if(prev) prev.innerHTML = '<span class="helper">사진을 불러오지 못했어요</span>';
+    };
+    img.src = it.media_url;
+  }
+
+  function openShareCardModal(it){
+    openModal(shareCardModalHtml());
+    buildShareCard(it);
+  }
+
   document.addEventListener('input', function(e){
     if(e.target.id === 'nickname-input'){ state.nickname = e.target.value; save(); }
     if(e.target.id === 'due-date'){ state.dueDate = e.target.value; save(); renderOnboarding(); }
     if(e.target.id === 'birth-month'){ state.birthMonth = e.target.value; save(); renderOnboarding(); }
     if(e.target.id === 'entry-note'){ updateEntrySubmit(); }
     if(e.target.id === 'post-text'){ updatePostSubmit(); }
+    if(e.target.id === 'growth-height' || e.target.id === 'growth-weight'){ updateGrowthSubmit(); }
+    if(e.target.id === 'comment-text'){
+      var cbtn = document.getElementById('comment-submit');
+      if(cbtn) cbtn.disabled = !e.target.value.trim();
+    }
   });
   document.addEventListener('change', function(e){
     if(e.target.id === 'due-date'){ state.dueDate = e.target.value; save(); renderOnboarding(); }
