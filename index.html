@@ -1,0 +1,1322 @@
+<title>다다맘</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&display=swap">
+<style>
+  :root{
+    color-scheme: light;
+    --bg:#FFFBF5; --surface:#FFFFFF; --border:#F0E4D6;
+    --text:#2B2118; --text2:#6E5F50;
+    --accent:#FF7A59; --accent-ink:#FFFFFF; --accent-soft:#FFF3EE;
+    --accent2:#8A6512; --accent2-soft:#FFF3D6;
+    --chip-a:#FFF3D6; --chip-a-ink:#8A6512;
+    --chip-b:#FFE8DE; --chip-b-ink:#B84B2E;
+    --chip-c:#EAF2E9; --chip-c-ink:#3F6B49;
+    --pill-bg:#F0E4D6; --track:#F0E4D6;
+    --shadow: 0 10px 24px rgba(43,33,24,0.10);
+    --overlay: rgba(28,20,14,0.45);
+  }
+  /* 항상 밝고 산뜻한 라이트 테마로 고정 (기기의 다크모드 설정과 무관) */
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --bg:#1C1712; --surface:#25201A; --border:#3A2F24;
+    --text:#F5EDE3; --text2:#C2B3A2;
+    --accent:#FF8B6B; --accent-ink:#241812; --accent-soft:#3A2A20;
+    --accent2:#E0B355; --accent2-soft:#3A2E17;
+    --chip-a:#3A2E17; --chip-a-ink:#E7C067;
+    --chip-b:#3A2620; --chip-b-ink:#F0937A;
+    --chip-c:#22301F; --chip-c-ink:#94D19E;
+    --pill-bg:#332A22; --track:#332A22;
+    --shadow: 0 10px 24px rgba(0,0,0,0.35);
+    --overlay: rgba(0,0,0,0.55);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:'Gowun Dodum','Apple SD Gothic Neo',sans-serif;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .display{font-family:'Gowun Batang',serif;}
+  button{font-family:inherit; cursor:pointer;}
+  a{color:inherit;}
+  h1,h2,p{margin:0;}
+  input,textarea{font-family:inherit; font-size:14px; color:var(--text);}
+
+  *:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:6px; }
+
+  .app{
+    max-width:430px; margin:0 auto; height:100%; overflow:hidden;
+    display:flex; flex-direction:column; position:relative;
+    background:var(--bg);
+    box-shadow:var(--shadow);
+  }
+
+  .screen{ display:flex; flex-direction:column; flex:1 1 auto; min-height:0; }
+  .screen[hidden]{ display:none; }
+
+  .scroll{ flex:1 1 auto; overflow-y:auto; min-height:0; padding-block:24px 12px; display:flex; flex-direction:column; gap:20px; }
+
+  .navbar{
+    flex:0 0 auto; display:flex; align-items:center; justify-content:space-around;
+    background:var(--surface); border-top:1px solid var(--border);
+    padding:8px 4px calc(12px + env(safe-area-inset-bottom,0px));
+  }
+  .navbar button{
+    background:none; border:none; display:flex; flex-direction:column; align-items:center; gap:4px;
+    color:var(--text2); font-size:11px; font-family:inherit; padding:6px 10px; min-width:56px;
+  }
+  .navbar button.active{ color:var(--accent); font-weight:700; }
+  .navbar svg{ display:block; }
+
+  .card{ background:var(--surface); border:1px solid var(--border); border-radius:16px; }
+  .pill{ border-radius:999px; }
+  .btn-primary{
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    height:50px; border-radius:14px; background:var(--accent); color:var(--accent-ink);
+    font-size:15px; font-weight:700; border:none; text-decoration:none;
+  }
+  .btn-primary:disabled{ opacity:.5; cursor:not-allowed; }
+  .btn-ghost{
+    display:flex; align-items:center; justify-content:center;
+    height:44px; border-radius:12px; border:1px solid var(--border); background:var(--surface);
+    color:var(--text2); font-size:13px; font-weight:700; text-decoration:none;
+  }
+  .chip{
+    padding:11px 16px; border-radius:999px; border:1px solid var(--border); background:var(--surface);
+    color:var(--text2); font-size:13.5px; min-height:44px;
+  }
+  .chip.on{ border:2px solid var(--accent); background:var(--accent-soft); color:var(--accent); font-weight:700; }
+  .eyebrow{
+    display:inline-flex; width:fit-content; font-size:12px; font-weight:700; color:var(--accent2);
+    background:var(--accent-soft); padding:4px 10px; border-radius:999px;
+  }
+  .row{ display:flex; }
+  .col{ display:flex; flex-direction:column; }
+  .link-quiet{ font-size:12.5px; color:var(--text2); text-decoration:none; }
+  .pad{ padding-inline:20px; }
+
+  .hero{ display:block; padding:22px; border-radius:20px; background:var(--accent); color:var(--accent-ink); text-decoration:none; }
+  .hero-eyebrow{ display:inline-flex; font-size:12px; font-weight:700; background:rgba(0,0,0,0.16); padding:4px 10px; border-radius:999px; }
+  .hero-title{ font-size:22px; line-height:1.35; margin:12px 0 6px; }
+  .hero-sub{ font-size:13px; line-height:1.6; opacity:0.95; margin:0 0 16px; }
+  .hero-cta{ display:inline-flex; align-items:center; gap:6px; font-size:13.5px; font-weight:700; background:var(--surface); color:var(--accent); padding:10px 16px; border-radius:12px; }
+
+  .segmented{ display:flex; gap:6px; background:var(--pill-bg); padding:4px; border-radius:12px; }
+  .segmented button{ flex:1; padding:9px 0; border-radius:9px; border:none; font-size:12.5px; font-weight:700; background:none; color:var(--text2); }
+  .segmented button[aria-selected="true"]{ background:var(--surface); color:var(--text); }
+  .segmented.round{ border-radius:999px; width:fit-content; }
+  .segmented.round button{ padding:7px 14px; border-radius:999px; }
+
+  .badge-ad{ font-size:10px; font-weight:700; color:var(--text2); border:1px solid var(--border); padding:1px 6px; border-radius:6px; letter-spacing:.02em; }
+  .badge-match{ font-size:10.5px; font-weight:700; color:var(--chip-c-ink); background:var(--chip-c); padding:2px 8px; border-radius:999px; }
+
+  .field{ display:flex; flex-direction:column; gap:6px; }
+  .field label{ font-size:13px; font-weight:700; color:var(--text2); }
+  .field input[type="text"], .field input[type="date"], .field input[type="month"], .field textarea{
+    border:1px solid var(--border); border-radius:12px; padding:12px 14px; background:var(--surface); color:var(--text); width:100%;
+  }
+  .field textarea{ resize:vertical; min-height:72px; }
+  .helper{ font-size:12px; color:var(--text2); }
+  .check-row{ display:flex; align-items:flex-start; gap:10px; font-size:13px; color:var(--text2); line-height:1.5; padding:4px 0; }
+  .check-row input{ margin-top:3px; width:18px; height:18px; flex:0 0 auto; }
+
+  .modal-backdrop{
+    position:fixed; inset:0; background:var(--overlay); display:flex; align-items:flex-end; justify-content:center; z-index:40;
+  }
+  .modal-backdrop[hidden]{ display:none; }
+  .modal-card{
+    width:100%; max-width:430px; background:var(--surface); border-radius:20px 20px 0 0;
+    padding:24px 20px calc(24px + env(safe-area-inset-bottom,0px)); display:flex; flex-direction:column; gap:14px;
+    max-height:86vh; overflow-y:auto;
+  }
+  .modal-head{ display:flex; align-items:center; justify-content:space-between; }
+  .modal-close{ background:none; border:none; font-size:18px; color:var(--text2); padding:6px; line-height:1; }
+  .modal-desc{ font-size:13px; color:var(--text2); line-height:1.6; margin:0; }
+
+  .toast{
+    position:fixed; left:50%; bottom:calc(100px + env(safe-area-inset-bottom,0px)); transform:translateX(-50%);
+    background:var(--text); color:var(--bg); padding:10px 18px; border-radius:999px; font-size:13px;
+    box-shadow:var(--shadow); opacity:0; pointer-events:none; transition:opacity .2s ease; z-index:50; max-width:80%; text-align:center;
+  }
+  .toast.show{ opacity:1; }
+</style>
+
+<div class="app" id="app">
+
+  <!-- ONBOARDING -->
+  <section class="screen" id="screen-onboarding">
+    <div class="scroll pad" style="padding-block-start:36px;">
+      <div class="col" style="gap:6px;">
+        <span style="font-size:13px; color:var(--accent); font-weight:700;">다다맘 시작하기</span>
+        <h1 class="display" style="font-size:26px; line-height:1.4;">지금 어느 단계인가요?</h1>
+        <p style="font-size:14px; color:var(--text2); line-height:1.6;">현재 단계에 맞는 정보와 참여할 수 있는 캠페인만 보여드릴게요.</p>
+      </div>
+
+      <div class="col" style="gap:12px;">
+        <button class="card" data-type-pick="pregnant" aria-pressed="false" style="display:flex; align-items:center; gap:14px; text-align:left; padding:18px; color:var(--text);">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="6" r="3"/><path d="M8 21v-4a5 5 0 0 1 10 0"/><path d="M6 21c0-3 1-5 2.5-6.2"/></svg>
+          <span class="col" style="gap:2px;">
+            <span style="font-size:16px; font-weight:700;">임신 중이에요</span>
+            <span style="font-size:12.5px; color:var(--text2);">출산 준비 정보와 체험단을 받아볼게요</span>
+          </span>
+        </button>
+        <button class="card" data-type-pick="parenting" aria-pressed="false" style="display:flex; align-items:center; gap:14px; text-align:left; padding:18px; color:var(--text);">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" aria-hidden="true"><circle cx="9" cy="7" r="3"/><path d="M2 20c0-3.3 3.1-6 7-6s7 2.7 7 6"/><path d="M17 8.5c1.4.4 2.4 1.6 2.4 3.1 0 1.8-1.6 3.2-3.4 3.2"/></svg>
+          <span class="col" style="gap:2px;">
+            <span style="font-size:16px; font-weight:700;">육아 중이에요</span>
+            <span style="font-size:12.5px; color:var(--text2);">월령에 맞는 챌린지와 정보를 받아볼게요</span>
+          </span>
+        </button>
+      </div>
+
+      <div class="field">
+        <label for="nickname-input">아이 애칭 (선택)</label>
+        <input type="text" id="nickname-input" maxlength="12" placeholder="예: 콩이, 서윤">
+      </div>
+
+      <div class="card col" id="due-block" hidden style="gap:8px; padding:18px;">
+        <label for="due-date" style="font-size:13px; font-weight:700; color:var(--text2);">출산예정일 *</label>
+        <input type="date" id="due-date">
+        <span class="helper" id="due-preview" aria-live="polite"></span>
+      </div>
+
+      <div class="card col" id="birth-block" hidden style="gap:8px; padding:18px;">
+        <label for="birth-month" style="font-size:13px; font-weight:700; color:var(--text2);">아이 생년월 *</label>
+        <input type="month" id="birth-month">
+        <span class="helper" id="birth-preview" aria-live="polite"></span>
+      </div>
+
+      <div class="col" style="gap:10px;">
+        <span style="font-size:13px; font-weight:700; color:var(--text2);">지역 *</span>
+        <div class="row" style="flex-wrap:wrap; gap:8px;" id="region-group" role="group" aria-label="지역 선택"></div>
+      </div>
+
+      <div class="col" style="gap:10px;">
+        <span style="font-size:13px; font-weight:700; color:var(--text2);">관심 분야 (복수 선택, 선택)</span>
+        <div class="row" style="flex-wrap:wrap; gap:8px;" id="interest-group" role="group" aria-label="관심 분야 선택"></div>
+      </div>
+    </div>
+    <div class="pad col" style="flex:0 0 auto; gap:8px; padding-block:16px calc(22px + env(safe-area-inset-bottom,0px)); border-top:1px solid var(--border); background:var(--bg);">
+      <button id="start-btn" class="btn-primary" disabled>다다맘 시작하기</button>
+      <span class="helper" id="start-helper" style="text-align:center;">단계 · 날짜 · 지역을 선택하면 시작할 수 있어요</span>
+    </div>
+  </section>
+
+  <!-- HOME -->
+  <section class="screen" id="screen-home">
+    <div class="scroll pad">
+      <div class="row" style="align-items:center; justify-content:space-between;">
+        <div class="col" style="gap:4px;">
+          <span style="font-size:13px; color:var(--text2);">안녕하세요</span>
+          <h1 class="display" id="home-name" style="font-size:21px;"></h1>
+        </div>
+        <a href="#my" class="pill" style="display:flex; align-items:center; gap:6px; padding:8px 12px; background:var(--surface); border:1px solid var(--border); font-size:12.5px; color:var(--text2); text-decoration:none;">
+          <span id="home-chip"></span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+        </a>
+      </div>
+
+      <div id="home-hero"></div>
+
+      <div class="col" style="gap:12px;">
+        <div class="row" style="align-items:center; justify-content:space-between;">
+          <h2 class="display" style="font-size:17px;">지금 신청 가능한 체험단</h2>
+          <a href="#benefit" class="link-quiet">전체보기</a>
+        </div>
+        <div class="row" style="gap:12px; overflow-x:auto; margin-inline:-20px; padding-inline:20px;" id="home-trials"></div>
+      </div>
+
+      <div class="col" style="gap:12px; padding-bottom:8px;">
+        <div class="row" style="align-items:center; justify-content:space-between;">
+          <h2 class="display" style="font-size:17px;">인기 콘텐츠</h2>
+          <a href="#community" class="link-quiet">커뮤니티 가기</a>
+        </div>
+        <div class="col" style="gap:12px;" id="home-posts"></div>
+      </div>
+    </div>
+    <nav class="navbar" data-nav aria-label="주요 메뉴"></nav>
+  </section>
+
+  <!-- CHALLENGE -->
+  <section class="screen" id="screen-challenge">
+    <div class="scroll pad">
+      <a href="#home" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--text2); text-decoration:none;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+        홈으로
+      </a>
+      <div class="col" style="gap:8px;">
+        <span class="eyebrow">D-6 · 10~24개월 추천</span>
+        <h1 class="display" style="font-size:24px;">우리 아이 첫걸음 챌린지</h1>
+        <p style="font-size:13.5px; color:var(--text2); line-height:1.6;">기억하고 싶은 걸음마 순간을 짧은 메모나 영상으로 남겨보세요. 아직 첫걸음 전이어도, 다음 챌린지에서 함께해요.</p>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:8px;">
+        <div class="card col" style="align-items:center; gap:6px; padding:12px 4px;"><span style="font-size:11px; color:var(--text2);">첫걸음상</span><span style="font-size:13px; font-weight:700;">10만원</span></div>
+        <div class="card col" style="align-items:center; gap:6px; padding:12px 4px;"><span style="font-size:11px; color:var(--text2);">웃음상</span><span style="font-size:13px; font-weight:700;">5만원</span></div>
+        <div class="card col" style="align-items:center; gap:6px; padding:12px 4px;"><span style="font-size:11px; color:var(--text2);">도전상</span><span style="font-size:13px; font-weight:700;">5만원</span></div>
+        <div class="card col" style="align-items:center; gap:6px; padding:12px 4px;"><span style="font-size:11px; color:var(--text2);">인기상</span><span style="font-size:13px; font-weight:700;">5만원</span></div>
+      </div>
+      <div class="row" style="align-items:center; justify-content:space-between; padding-top:4px;">
+        <h2 class="display" style="font-size:16px;">참가 영상 <span id="entry-count" aria-live="polite">0</span>개</h2>
+        <div class="segmented round" role="tablist" aria-label="정렬" id="sort-group">
+          <button data-sort="new" role="tab">최신순</button>
+          <button data-sort="pop" role="tab">인기순</button>
+        </div>
+      </div>
+      <div class="col" style="gap:12px; padding-bottom:8px;" id="entries"></div>
+    </div>
+    <div class="pad" style="flex:0 0 auto; padding-block:14px; border-top:1px solid var(--border); background:var(--surface);">
+      <button class="btn-primary" style="width:100%;" data-open-challenge-modal>우리 아이도 참여하기</button>
+    </div>
+    <nav class="navbar" data-nav aria-label="주요 메뉴"></nav>
+  </section>
+
+  <!-- BENEFIT -->
+  <section class="screen" id="screen-benefit">
+    <div class="pad" style="flex:0 0 auto; padding-block-start:28px;">
+      <h1 class="display" style="font-size:22px; margin-bottom:16px;">혜택</h1>
+      <div class="segmented" role="tablist" aria-label="혜택 종류" id="benefit-tabs">
+        <button data-benefit-tab="trial" role="tab">체험단</button>
+        <button data-benefit-tab="event" role="tab">이벤트</button>
+      </div>
+    </div>
+    <div class="scroll pad" id="benefit-body"></div>
+    <nav class="navbar" data-nav aria-label="주요 메뉴"></nav>
+  </section>
+
+  <!-- COMMUNITY -->
+  <section class="screen" id="screen-community">
+    <div class="pad row" style="flex:0 0 auto; padding-block-start:28px; align-items:center; justify-content:space-between;">
+      <h1 class="display" style="font-size:22px;">커뮤니티</h1>
+      <div class="segmented round" role="tablist" aria-label="커뮤니티 종류" id="community-tabs">
+        <button data-community-tab="brag" role="tab">자랑</button>
+        <button data-community-tab="qna" role="tab">Q&amp;A</button>
+      </div>
+    </div>
+    <div class="scroll pad" id="community-body" style="position:relative;"></div>
+    <button id="fab" data-open-compose aria-label="새 글쓰기" style="position:absolute; right:20px; bottom:96px; width:52px; height:52px; border-radius:999px; background:var(--accent); border:none; box-shadow:0 8px 18px rgba(255,122,89,0.35); display:flex; align-items:center; justify-content:center;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent-ink)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+    </button>
+    <nav class="navbar" data-nav aria-label="주요 메뉴"></nav>
+  </section>
+
+  <!-- MY -->
+  <section class="screen" id="screen-my">
+    <div class="scroll pad">
+      <div class="card col" style="gap:14px; padding:20px;">
+        <div class="row" style="align-items:center; gap:14px;">
+          <div style="width:56px; height:56px; border-radius:999px; background:var(--chip-b);" aria-hidden="true"></div>
+          <div class="col" style="gap:4px;">
+            <div class="row" style="align-items:center; gap:6px;">
+              <span class="display" id="my-name" style="font-size:17px;"></span>
+              <span style="font-size:10.5px; font-weight:700; color:var(--chip-a-ink); background:var(--chip-a); padding:2px 8px; border-radius:999px;">창립회원</span>
+            </div>
+            <span style="font-size:12.5px; color:var(--text2);" id="my-sub"></span>
+          </div>
+        </div>
+        <a href="#onboarding" class="btn-ghost">아이 정보 수정</a>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:10px;">
+        <div class="card col" style="align-items:center; gap:4px; padding:14px 0;"><span class="display" id="my-stat-challenge" style="font-size:19px;">0</span><span style="font-size:11.5px; color:var(--text2);">참여 챌린지</span></div>
+        <div class="card col" style="align-items:center; gap:4px; padding:14px 0;"><span class="display" id="my-stat-benefit" style="font-size:19px;">0</span><span style="font-size:11.5px; color:var(--text2);">신청 체험단</span></div>
+        <div class="card col" style="align-items:center; gap:4px; padding:14px 0;"><span class="display" id="my-stat-post" style="font-size:19px;">0</span><span style="font-size:11.5px; color:var(--text2);">내 게시물</span></div>
+      </div>
+
+      <div class="card col" id="carelog-card" style="gap:14px; padding:18px;">
+        <div class="row" style="align-items:center; justify-content:space-between;">
+          <h2 class="display" style="font-size:16px;">오늘의 기록</h2>
+          <span class="helper" id="carelog-date"></span>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px;">
+          <button type="button" class="card col" data-care-log="feed" style="align-items:center; gap:6px; padding:14px 0;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" aria-hidden="true"><path d="M10 2h4"/><path d="M11 2v3.5c0 .5-.2 1-.6 1.4L9 8.3A3 3 0 0 0 8 10.5V19a3 3 0 0 0 3 3h2a3 3 0 0 0 3-3v-8.5a3 3 0 0 0-1-2.2L13.6 6.9A2 2 0 0 1 13 5.5V2"/><path d="M8 14h8"/></svg>
+            <span style="font-size:12.5px; font-weight:700;">수유 기록</span>
+            <span class="helper" id="carelog-count-feed">기록 없음</span>
+          </button>
+          <button type="button" class="card col" data-care-log="sleep" style="align-items:center; gap:6px; padding:14px 0;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>
+            <span style="font-size:12.5px; font-weight:700;" id="carelog-sleep-label">수면 시작</span>
+            <span class="helper" id="carelog-count-sleep">기록 없음</span>
+          </button>
+        </div>
+        <div class="col" style="gap:5px;" id="carelog-list"></div>
+        <button type="button" data-care-undo class="link-quiet" style="align-self:flex-start; background:none; border:none; padding:2px 0;">방금 기록 취소</button>
+      </div>
+
+      <div class="col" style="gap:10px;">
+        <h2 class="display" style="font-size:16px;">성장 타임라인</h2>
+        <div class="col" style="gap:10px;" id="timeline-list"></div>
+      </div>
+
+      <div class="col" style="gap:10px;">
+        <a href="#community" class="card row" style="align-items:center; gap:14px; padding:16px; text-decoration:none; color:var(--text);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.9" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 4v16M4 9h16"/></svg>
+          <span style="flex:1; font-size:14px; font-weight:700;">내 게시물</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+        </a>
+        <a href="#challenge" class="card row" style="align-items:center; gap:14px; padding:16px; text-decoration:none; color:var(--text);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.9" aria-hidden="true"><path d="M5 3v18"/><path d="M5 4h11l-2 4 2 4H5"/></svg>
+          <span style="flex:1; font-size:14px; font-weight:700;">참여이력</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+        </a>
+        <a href="#benefit" class="card row" style="align-items:center; gap:14px; padding:16px; text-decoration:none; color:var(--text);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.9" aria-hidden="true"><rect x="3" y="8" width="18" height="13" rx="1.5"/><path d="M3 12h18"/><path d="M12 8v13"/></svg>
+          <span style="flex:1; font-size:14px; font-weight:700;">혜택함</span>
+          <span id="my-benefit-badge" style="font-size:11.5px; font-weight:700; color:var(--accent2); background:var(--accent-soft); padding:2px 8px; border-radius:999px;">0</span>
+        </a>
+        <button type="button" class="card row" data-toast="설정은 다음 업데이트에서 만나요" style="align-items:center; gap:14px; padding:16px; border:1px solid var(--border); text-align:left; width:100%;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.9" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.6 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.6 1z"/></svg>
+          <span style="flex:1; font-size:14px; font-weight:700; color:var(--text2);">설정</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+      </div>
+    </div>
+    <nav class="navbar" data-nav aria-label="주요 메뉴"></nav>
+  </section>
+
+</div>
+
+<div class="modal-backdrop" id="modal-backdrop" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" id="modal-card"></div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  var STORAGE_KEY = 'dadamom_v2';
+  var DAY = 86400000;
+  var SUPABASE_URL = 'https://hjqchbpxwviengdzvado.supabase.co';
+  var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqcWNoYnB4d3ZpZW5nZHp2YWRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxMzE5NDYsImV4cCI6MjEwNTcwNzk0Nn0.eNnZoYwfKu0ACJeSxHRYnLtCeYBZjKleHLZ03rvPGZE';
+  var sb = null;
+  try{
+    if(window.supabase && window.supabase.createClient){
+      sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    }
+  }catch(e){ sb = null; }
+
+  function escapeHtml(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
+  var NAV = [
+    {id:'home', label:'홈', icon:'<path d="M3 11l9-7 9 7"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/>'},
+    {id:'challenge', label:'챌린지', icon:'<path d="M5 3v18"/><path d="M5 4h11l-2 4 2 4H5"/>'},
+    {id:'benefit', label:'혜택', icon:'<rect x="3" y="8" width="18" height="13" rx="1.5"/><path d="M3 12h18"/><path d="M12 8v13"/>'},
+    {id:'community', label:'커뮤니티', icon:'<path d="M21 11.5a8.4 8.4 0 0 1-8.9 8.4 9 9 0 0 1-3.6-.7L3 20l1.3-3.9a8.2 8.2 0 0 1-1-4A8.4 8.4 0 0 1 12.1 3a8.3 8.3 0 0 1 8.9 8.5z"/>'},
+    {id:'my', label:'MY', icon:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4.5 5-6 8-6s6.5 1.5 8 6"/>'}
+  ];
+
+  var TRIALS = [
+    {key:'a', brand:'순수소', title:'실리콘 이유식 보관팩 3종', deadline:'9/28', total:80, bg:'var(--chip-a)', eligibility:'both'},
+    {key:'b', brand:'베베따뜻', title:'아기 실리콘 식기 세트', deadline:'10/2', total:60, bg:'var(--chip-b)', eligibility:'parenting'},
+    {key:'c', brand:'포근솜', title:'신생아 고보습 크림', deadline:'10/5', total:30, bg:'var(--chip-c)', eligibility:'pregnant'}
+  ];
+  var REGIONS = ['서울', '인천', '경기', '기타'];
+  var INTERESTS = ['이유식', '수면교육', '산후관리', '장난감', '안전용품', '외출템'];
+  var QNAS = [
+    {author:'10개월맘', q:'이유식 중기, 하루에 몇 번 먹이시나요?', answers:8, views:214},
+    {author:'예비맘 24주', q:'조리원 짐 언제부터 챙기셨어요?', answers:15, views:340},
+    {author:'18개월맘', q:'밤중수유 언제 끊으셨나요?', answers:6, views:128}
+  ];
+
+  function defaultState(){
+    var now = Date.now();
+    return {
+      onboarded:false,
+      nickname:'',
+      kidType:null,
+      dueDate:'',
+      birthMonth:'',
+      region:null,
+      interests:[],
+      benefitTab:'trial',
+      communityTab:'brag',
+      sortMode:'new',
+      applied:{a:false, b:false, c:false},
+      appliedCount:{a:0, b:0, c:0},
+      myVotes:[], myLikes:[], myEntries:[], myPosts:[],
+      peerOnly:false,
+      careLog:[],
+      entries:[
+        {id:'e1', name:'서윤', age:'11개월', votes:128, liked:false, note:'', mine:false, createdAt: now - 2*3600*1000},
+        {id:'e2', name:'민준', age:'13개월', votes:96, liked:false, note:'', mine:false, createdAt: now - 5*3600*1000},
+        {id:'e3', name:'하은', age:'10개월', votes:74, liked:false, note:'', mine:false, createdAt: now - 26*3600*1000}
+      ],
+      posts:[
+        {id:'p1', author:'서윤맘', time:'2시간 전', bg:'var(--chip-b)', text:'드디어 첫걸음 뗀 날, 눈물 나더라구요. 다들 이 순간 어떻게 기록하세요?', likes:128, liked:false, comments:34, mine:false, img:true, stage:'parenting', age_value:11, createdAt: now - 2*3600*1000},
+        {id:'p2', author:'예비맘 32주', time:'어제', bg:'var(--chip-c)', text:'태명 지었어요! 우리 콩이 만나기 3개월 남았네요 :)', likes:54, liked:false, comments:12, mine:false, img:true, stage:'pregnant', age_value:32, createdAt: now - 26*3600*1000}
+      ]
+    };
+  }
+
+  function loadState(){
+    var d = defaultState();
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return d;
+      var saved = JSON.parse(raw);
+      return Object.assign({}, d, saved, {
+        applied: Object.assign({}, d.applied, saved.applied),
+        appliedCount: Object.assign({}, d.appliedCount, saved.appliedCount),
+        entries: Array.isArray(saved.entries) ? saved.entries : d.entries,
+        posts: Array.isArray(saved.posts) ? saved.posts : d.posts,
+        interests: Array.isArray(saved.interests) ? saved.interests : d.interests,
+        myVotes: Array.isArray(saved.myVotes) ? saved.myVotes : d.myVotes,
+        myLikes: Array.isArray(saved.myLikes) ? saved.myLikes : d.myLikes,
+        myEntries: Array.isArray(saved.myEntries) ? saved.myEntries : d.myEntries,
+        myPosts: Array.isArray(saved.myPosts) ? saved.myPosts : d.myPosts,
+        careLog: Array.isArray(saved.careLog) ? saved.careLog.filter(function(e){ return Date.now() - e.ts < 14*86400000; }) : d.careLog
+      });
+    }catch(e){ return d; }
+  }
+
+  var state = loadState();
+
+  function save(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+  }
+
+  function pregWeeksAt(dueDateStr, ts){
+    if(!dueDateStr) return null;
+    var due = new Date(dueDateStr + 'T00:00:00');
+    if(isNaN(due.getTime())) return null;
+    var today = new Date(ts); today.setHours(0,0,0,0);
+    var daysUntilDue = Math.round((due - today) / DAY);
+    var week = 40 - Math.floor(daysUntilDue / 7);
+    if(week < 1) week = 1;
+    if(week > 42) week = 42;
+    return week;
+  }
+
+  function ageMonthsAt(birthMonthStr, ts){
+    if(!birthMonthStr) return null;
+    var parts = birthMonthStr.split('-');
+    var by = +parts[0], bm = +parts[1];
+    if(!by || !bm) return null;
+    var now = new Date(ts);
+    var months = (now.getFullYear() - by) * 12 + (now.getMonth() + 1 - bm);
+    return months < 0 ? 0 : months;
+  }
+
+  function pregWeeks(dueDateStr){ return pregWeeksAt(dueDateStr, Date.now()); }
+  function ageMonths(birthMonthStr){ return ageMonthsAt(birthMonthStr, Date.now()); }
+
+  function ageLabelAt(ts){
+    if(state.kidType === 'pregnant'){
+      var w = pregWeeksAt(state.dueDate, ts);
+      return w != null ? ('임신 ' + w + '주차') : '';
+    }
+    if(state.kidType === 'parenting'){
+      var m = ageMonthsAt(state.birthMonth, ts);
+      return m != null ? (m + '개월') : '';
+    }
+    return '';
+  }
+
+  function ageLabel(){ return ageLabelAt(Date.now()); }
+
+  function profileSummary(){
+    var parts = [state.nickname || '우리 아이'];
+    var age = ageLabel();
+    if(age) parts.push(age);
+    if(state.region) parts.push(state.region);
+    return parts.join(' · ');
+  }
+
+  function isProfileValid(){
+    if(!state.kidType || !state.region) return false;
+    if(state.kidType === 'pregnant' && !state.dueDate) return false;
+    if(state.kidType === 'parenting' && !state.birthMonth) return false;
+    return true;
+  }
+
+  // ---------- REMOTE (SUPABASE) ----------
+  function timeAgo(iso){
+    var t = new Date(iso).getTime();
+    var diff = Date.now() - t;
+    var min = Math.floor(diff / 60000);
+    if(min < 1) return '방금 전';
+    if(min < 60) return min + '분 전';
+    var hr = Math.floor(min / 60);
+    if(hr < 24) return hr + '시간 전';
+    var day = Math.floor(hr / 24);
+    if(day === 1) return '어제';
+    if(day < 7) return day + '일 전';
+    return new Date(iso).toISOString().slice(0,10);
+  }
+
+  async function uploadMedia(file){
+    if(!sb || !file) return '';
+    try{
+      var ext = (file.name && file.name.indexOf('.') > -1) ? file.name.split('.').pop() : 'dat';
+      var path = 'u-' + Date.now() + '-' + Math.random().toString(36).slice(2,8) + '.' + ext;
+      var up = await sb.storage.from('media').upload(path, file);
+      if(up.error){ console.error('media upload error', up.error); return ''; }
+      var pub = sb.storage.from('media').getPublicUrl(path);
+      return (pub && pub.data && pub.data.publicUrl) ? pub.data.publicUrl : '';
+    }catch(e){ return ''; }
+  }
+
+  async function fetchEntries(){
+    if(!sb) return null;
+    try{
+      var res = await sb.from('challenge_entries').select('*').order('created_at', {ascending:false}).limit(50);
+      if(res.error || !res.data) return null;
+      return res.data.map(function(r){
+        return {
+          id:r.id, name:r.name, age:r.age || '', note:r.note || '', media_url:r.media_url || '',
+          votes:r.votes || 0, mine: state.myEntries.indexOf(r.id) > -1, liked: state.myVotes.indexOf(r.id) > -1,
+          createdAt: new Date(r.created_at).getTime()
+        };
+      });
+    }catch(e){ return null; }
+  }
+
+  async function fetchPosts(){
+    if(!sb) return null;
+    try{
+      var res = await sb.from('community_posts').select('*').order('created_at', {ascending:false}).limit(50);
+      if(res.error || !res.data) return null;
+      return res.data.map(function(r){
+        return {
+          id:r.id, author:r.author, time: timeAgo(r.created_at), bg:'var(--chip-b)',
+          text:r.text, media_url:r.media_url || '', img: !!r.media_url,
+          likes:r.likes || 0, liked: state.myLikes.indexOf(r.id) > -1, comments:r.comments || 0,
+          stage: r.stage || null, age_value: (r.age_value === 0 || r.age_value) ? r.age_value : null,
+          mine: state.myPosts.indexOf(r.id) > -1, createdAt: new Date(r.created_at).getTime()
+        };
+      });
+    }catch(e){ return null; }
+  }
+
+  async function fetchAppliedCounts(){
+    if(!sb) return null;
+    try{
+      var out = {};
+      for(var i=0;i<TRIALS.length;i++){
+        var key = TRIALS[i].key;
+        var res = await sb.from('benefit_applications').select('id', {count:'exact', head:true}).eq('trial_key', key);
+        out[key] = res.count || 0;
+      }
+      return out;
+    }catch(e){ return null; }
+  }
+
+  function refreshRemote(){
+    if(!sb) return;
+    Promise.all([fetchEntries(), fetchPosts(), fetchAppliedCounts()]).then(function(r){
+      var entries = r[0], posts = r[1], counts = r[2];
+      if(entries) state.entries = entries;
+      if(posts) state.posts = posts;
+      if(counts) state.appliedCount = Object.assign({}, state.appliedCount, counts);
+      save();
+      renderAll((location.hash || '').replace('#',''));
+    });
+  }
+
+  function buildNav(active){
+    return NAV.map(function(n){
+      var isActive = n.id === active;
+      return '<button data-goto="' + n.id + '" class="' + (isActive ? 'active' : '') + '"' + (isActive ? ' aria-current="page"' : '') + '>' +
+        '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + n.icon + '</svg>' +
+        '<span>' + n.label + '</span></button>';
+    }).join('');
+  }
+
+  // ---------- ONBOARDING ----------
+  function renderOnboarding(){
+    document.getElementById('due-block').hidden = state.kidType !== 'pregnant';
+    document.getElementById('birth-block').hidden = state.kidType !== 'parenting';
+
+    document.querySelectorAll('[data-type-pick]').forEach(function(btn){
+      var on = btn.getAttribute('data-type-pick') === state.kidType;
+      btn.style.border = on ? '2px solid var(--accent)' : '1px solid var(--border)';
+      btn.style.background = on ? 'var(--accent-soft)' : 'var(--surface)';
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+
+    var nickInput = document.getElementById('nickname-input');
+    if(document.activeElement !== nickInput) nickInput.value = state.nickname;
+
+    var dueInput = document.getElementById('due-date');
+    if(document.activeElement !== dueInput) dueInput.value = state.dueDate;
+    var w = pregWeeks(state.dueDate);
+    document.getElementById('due-preview').textContent = w != null ? ('현재 임신 ' + w + '주차로 계산돼요') : '';
+
+    var birthInput = document.getElementById('birth-month');
+    if(document.activeElement !== birthInput) birthInput.value = state.birthMonth;
+    var m = ageMonths(state.birthMonth);
+    document.getElementById('birth-preview').textContent = m != null ? ('현재 ' + m + '개월로 계산돼요') : '';
+
+    var rg = document.getElementById('region-group');
+    rg.innerHTML = REGIONS.map(function(r){
+      var on = state.region === r;
+      return '<button type="button" class="chip' + (on ? ' on' : '') + '" data-region="' + r + '" aria-pressed="' + on + '">' + r + '</button>';
+    }).join('');
+
+    var ig = document.getElementById('interest-group');
+    ig.innerHTML = INTERESTS.map(function(t){
+      var on = state.interests.indexOf(t) > -1;
+      return '<button type="button" class="chip' + (on ? ' on' : '') + '" data-interest="' + t + '" aria-pressed="' + on + '">' + t + '</button>';
+    }).join('');
+
+    var valid = isProfileValid();
+    var startBtn = document.getElementById('start-btn');
+    startBtn.disabled = !valid;
+    document.getElementById('start-helper').textContent = valid ? '준비됐어요. 시작해볼까요?' : '단계 · 날짜 · 지역을 선택하면 시작할 수 있어요';
+  }
+
+  function setDateBounds(){
+    var due = document.getElementById('due-date');
+    var today = new Date();
+    var toStr = function(d){ return d.toISOString().slice(0,10); };
+    due.min = toStr(today);
+    var max = new Date(today.getTime() + 300*DAY);
+    due.max = toStr(max);
+
+    var birth = document.getElementById('birth-month');
+    var toMonthStr = function(d){ return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0'); };
+    birth.max = toMonthStr(today);
+    var minD = new Date(today.getFullYear(), today.getMonth()-36, 1);
+    birth.min = toMonthStr(minD);
+  }
+
+  // ---------- HOME ----------
+  var ARROW = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>';
+
+  function eligibleTrials(){
+    var list = TRIALS.filter(function(t){ return t.eligibility === 'both' || t.eligibility === state.kidType; });
+    return list.length ? list : TRIALS;
+  }
+
+  function renderHome(){
+    document.getElementById('home-name').textContent = (state.nickname ? state.nickname + '님' : '다다맘님');
+    document.getElementById('home-chip').textContent = profileSummary();
+
+    var hero = document.getElementById('home-hero');
+    if(state.kidType === 'pregnant'){
+      var w = pregWeeks(state.dueDate);
+      hero.innerHTML = '<a href="#benefit" class="hero">' +
+        '<span class="hero-eyebrow">지금 신청 가능한 체험단</span>' +
+        '<h2 class="display hero-title">출산 준비, 하나씩 챙겨봐요</h2>' +
+        '<p class="hero-sub">' + (w ? ('임신 ' + w + '주차에 필요한 준비물을 체험단으로 먼저 받아보세요') : '출산 준비물을 체험단으로 먼저 받아보세요') + '</p>' +
+        '<span class="hero-cta">체험단 보기 ' + ARROW + '</span></a>';
+    } else {
+      hero.innerHTML = '<a href="#challenge" class="hero">' +
+        '<span class="hero-eyebrow">진행 중인 챌린지</span>' +
+        '<h2 class="display hero-title">우리 아이 첫걸음 챌린지</h2>' +
+        '<p class="hero-sub">기억하고 싶은 걸음마 순간을 짧은 영상으로 남겨보세요</p>' +
+        '<span class="hero-cta">참여하기 ' + ARROW + '</span></a>';
+    }
+
+    var trials = eligibleTrials().slice(0,2);
+    document.getElementById('home-trials').innerHTML = trials.map(function(t){
+      return '<a href="#benefit" class="card col" style="flex:0 0 auto; width:168px; padding:16px; gap:10px; text-decoration:none; color:var(--text);">' +
+        '<div style="height:84px; border-radius:12px; background:' + t.bg + '; display:flex; align-items:center; justify-content:center; color:var(--text2); font-size:12px;" role="img" aria-label="' + escapeHtml(t.title) + ' 제품 사진">제품 사진</div>' +
+        '<span style="font-size:12px; color:var(--text2);">' + escapeHtml(t.brand) + '</span>' +
+        '<span style="font-size:14px; font-weight:700; line-height:1.4;">' + escapeHtml(t.title) + '</span>' +
+        '</a>';
+    }).join('');
+
+    var posts = state.posts.slice(0,2);
+    document.getElementById('home-posts').innerHTML = posts.map(function(p){
+      return '<a href="#community" class="card row" style="gap:12px; padding:14px; align-items:center; text-decoration:none; color:var(--text);">' +
+        '<div style="flex:0 0 auto; width:56px; height:56px; border-radius:12px; background:var(--border);" aria-hidden="true"></div>' +
+        '<div class="col" style="gap:4px;">' +
+        '<span style="font-size:13.5px; font-weight:700;">' + escapeHtml(p.text.length > 28 ? p.text.slice(0,28) + '…' : p.text) + '</span>' +
+        '<span style="font-size:12px; color:var(--text2);">' + escapeHtml(p.author) + ' · 좋아요 ' + p.likes + ' · 댓글 ' + p.comments + '</span>' +
+        '</div></a>';
+    }).join('');
+  }
+
+  // ---------- CHALLENGE ----------
+  function sortedEntries(){
+    var list = state.entries.slice();
+    if(state.sortMode === 'pop'){
+      list.sort(function(a,b){ return b.votes - a.votes; });
+    } else {
+      list.sort(function(a,b){ return b.createdAt - a.createdAt; });
+    }
+    return list;
+  }
+
+  function renderChallenge(){
+    document.querySelectorAll('#sort-group [data-sort]').forEach(function(btn){
+      var on = btn.getAttribute('data-sort') === state.sortMode;
+      btn.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+
+    var list = sortedEntries();
+    document.getElementById('entry-count').textContent = list.length;
+    document.getElementById('entries').innerHTML = list.map(function(e){
+      var thumb = e.media_url
+        ? '<img src="' + escapeHtml(e.media_url) + '" alt="" style="width:100%; height:100%; object-fit:cover; border-radius:12px;">'
+        : '<svg width="18" height="18" viewBox="0 0 24 24" fill="var(--text2)" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
+      return '<div class="card row" style="gap:12px; padding:14px; align-items:center;">' +
+        '<div style="flex:0 0 auto; width:64px; height:64px; border-radius:12px; background:var(--border); overflow:hidden; display:flex; align-items:center; justify-content:center;" role="img" aria-label="' + escapeHtml(e.name) + ' 참가 영상 썸네일">' +
+        thumb + '</div>' +
+        '<div class="col" style="flex:1; gap:4px; min-width:0;">' +
+        '<span style="font-size:14px; font-weight:700;">' + escapeHtml(e.name) + (e.mine ? ' <span class="badge-match">내 참가작</span>' : '') + '</span>' +
+        '<span style="font-size:12px; color:var(--text2);">' + escapeHtml(e.age) + (e.note ? ' · ' + escapeHtml(e.note) : '') + '</span>' +
+        '</div>' +
+        '<button data-vote="' + e.id + '" aria-pressed="' + e.liked + '" aria-label="응원하기, 현재 ' + e.votes + '표" style="flex:0 0 auto; background:none; border:none; display:flex; flex-direction:column; align-items:center; gap:2px; min-width:44px; min-height:44px; justify-content:center;">' +
+        '<svg width="20" height="20" viewBox="0 0 24 24" fill="' + (e.liked ? 'var(--accent)' : 'none') + '" stroke="var(--accent)" stroke-width="1.6" aria-hidden="true"><path d="M12 21s-7.5-4.6-10-9.3C0.4 8.4 2.4 5 6 5c2 0 3.4 1 4 2.3C10.6 6 12 5 14 5c3.6 0 5.6 3.4 4 6.7-2.5 4.7-10 9.3-10 9.3z"/></svg>' +
+        '<span style="font-size:11px; color:var(--text2);">' + e.votes + '</span></button></div>';
+    }).join('');
+  }
+
+  // ---------- BENEFIT ----------
+  function renderBenefit(){
+    document.querySelectorAll('#benefit-tabs [data-benefit-tab]').forEach(function(btn){
+      var on = btn.getAttribute('data-benefit-tab') === state.benefitTab;
+      btn.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+
+    var body = document.getElementById('benefit-body');
+    if(state.benefitTab === 'trial'){
+      body.innerHTML = TRIALS.map(function(t){
+        var done = state.applied[t.key];
+        var count = state.appliedCount[t.key];
+        var full = count >= t.total;
+        var pct = Math.round(count / t.total * 100);
+        var matches = t.eligibility === 'both' || t.eligibility === state.kidType;
+        var eligLabel = t.eligibility === 'both' ? '전체' : (t.eligibility === 'pregnant' ? '임산부' : '10~24개월');
+        var btnLabel = done ? '신청 완료' : (full ? '모집 마감' : '신청하기');
+        var btnDisabled = done || full;
+        return '<div class="card col" style="gap:10px; padding:16px;">' +
+          '<div class="row" style="gap:12px;">' +
+          '<div style="flex:0 0 auto; width:68px; height:68px; border-radius:12px; background:' + t.bg + ';" role="img" aria-label="' + escapeHtml(t.title) + ' 제품 사진"></div>' +
+          '<div class="col" style="gap:4px; flex:1; min-width:0;">' +
+          '<div class="row" style="align-items:center; gap:6px; flex-wrap:wrap;"><span style="font-size:11.5px; color:var(--text2);">' + escapeHtml(t.brand) + '</span><span class="badge-ad">광고</span>' + (matches ? '<span class="badge-match">내 단계에 맞아요</span>' : '') + '</div>' +
+          '<span style="font-size:14.5px; font-weight:700; line-height:1.4;">' + escapeHtml(t.title) + '</span>' +
+          '<span style="font-size:11.5px; color:var(--text2);">마감 ' + t.deadline + ' · 대상 ' + eligLabel + '</span></div></div>' +
+          '<div class="col" style="gap:6px;"><div style="height:6px; border-radius:999px; background:var(--track); overflow:hidden;">' +
+          '<div style="height:100%; width:' + pct + '%; background:var(--accent);"></div></div>' +
+          '<span style="font-size:11.5px; color:var(--text2);">' + count + ' / ' + t.total + '명 신청</span></div>' +
+          '<button data-open-apply="' + t.key + '" ' + (btnDisabled ? 'disabled' : '') + ' style="height:44px; border-radius:12px; border:none; font-size:14px; font-weight:700; background:' + (btnDisabled ? 'var(--pill-bg)' : 'var(--accent)') + '; color:' + (btnDisabled ? 'var(--text2)' : 'var(--accent-ink)') + ';">' + btnLabel + '</button>' +
+          '</div>';
+      }).join('');
+    } else {
+      body.innerHTML =
+        '<div class="card col" style="gap:10px; padding:16px;">' +
+        '<span class="eyebrow">런칭 이벤트</span>' +
+        '<span style="font-size:15px; font-weight:700; line-height:1.4;">Founding Parents 100 모집</span>' +
+        '<p style="font-size:12.5px; color:var(--text2); line-height:1.6;">지금 가입하면 창립회원 배지와 체험단 우선 참여권을 드려요.</p>' +
+        '<a href="#onboarding" class="btn-primary" style="height:44px; font-size:14px;">지금 신청하기</a></div>' +
+        '<div class="card col" style="gap:10px; padding:16px;">' +
+        '<span class="eyebrow">진행 중</span>' +
+        '<span style="font-size:15px; font-weight:700; line-height:1.4;">친구 초대하고 체험단 응모권 받기</span>' +
+        '<p style="font-size:12.5px; color:var(--text2); line-height:1.6;">초대 링크 기능은 준비 중이에요. 곧 만나볼 수 있어요.</p></div>';
+    }
+  }
+
+  // ---------- COMMUNITY ----------
+  function renderCommunity(){
+    document.querySelectorAll('#community-tabs [data-community-tab]').forEach(function(btn){
+      var on = btn.getAttribute('data-community-tab') === state.communityTab;
+      btn.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+
+    var body = document.getElementById('community-body');
+    if(state.communityTab === 'brag'){
+      var allPosts = state.posts.slice().sort(function(a,b){ return b.createdAt - a.createdAt; });
+      var myAgeValue = state.kidType === 'pregnant' ? pregWeeks(state.dueDate) : (state.kidType === 'parenting' ? ageMonths(state.birthMonth) : null);
+      var peerThreshold = state.kidType === 'pregnant' ? 4 : 2;
+      var posts = (state.peerOnly && myAgeValue != null)
+        ? allPosts.filter(function(p){ return p.stage === state.kidType && p.age_value != null && Math.abs(p.age_value - myAgeValue) <= peerThreshold; })
+        : allPosts;
+
+      var filterBar = '<div class="row" style="align-items:center; justify-content:space-between;">' +
+        '<div class="segmented round" role="tablist" aria-label="피드 필터">' +
+        '<button data-peer-toggle="all" role="tab" aria-selected="' + (!state.peerOnly) + '">전체</button>' +
+        '<button data-peer-toggle="peer" role="tab" aria-selected="' + (!!state.peerOnly) + '">또래 공감</button>' +
+        '</div>' + (state.peerOnly && myAgeValue != null ? '<span class="helper">' + escapeHtml(ageLabel()) + ' 또래</span>' : '') + '</div>';
+
+      var listHtml = posts.length ? posts.map(function(p){
+        var media = p.media_url
+          ? '<img src="' + escapeHtml(p.media_url) + '" alt="" style="width:100%; height:160px; object-fit:cover; border-radius:14px;">'
+          : (p.img ? '<div style="height:160px; border-radius:14px; background:' + p.bg + ';" role="img" aria-label="게시물 사진"></div>' : '');
+        return '<div class="card col" style="gap:12px; padding:16px;">' +
+          '<div class="row" style="align-items:center; gap:8px;"><div style="width:32px; height:32px; border-radius:999px; background:var(--border);" aria-hidden="true"></div>' +
+          '<span style="font-size:12.5px; font-weight:700;">' + escapeHtml(p.author) + '</span><span style="font-size:11px; color:var(--text2);">' + escapeHtml(p.time) + '</span></div>' +
+          media +
+          '<p style="font-size:13.5px; line-height:1.6;">' + escapeHtml(p.text) + '</p>' +
+          '<div class="row" style="align-items:center; gap:16px;">' +
+          '<button data-postlike="' + p.id + '" aria-pressed="' + p.liked + '" aria-label="좋아요, 현재 ' + p.likes + '개" style="display:flex; align-items:center; gap:5px; border:none; background:none; color:var(--text2); min-height:44px;">' +
+          '<svg width="17" height="17" viewBox="0 0 24 24" fill="' + (p.liked ? 'var(--accent)' : 'none') + '" stroke="var(--accent)" stroke-width="1.8" aria-hidden="true"><path d="M12 21s-7.5-4.6-10-9.3C0.4 8.4 2.4 5 6 5c2 0 3.4 1 4 2.3C10.6 6 12 5 14 5c3.6 0 5.6 3.4 4 6.7-2.5 4.7-10 9.3-10 9.3z"/></svg>' +
+          '<span style="font-size:12px;">' + p.likes + '</span></button>' +
+          '<span style="display:flex; align-items:center; gap:5px; color:var(--text2);">' +
+          '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.8" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-8.9 8.4 9 9 0 0 1-3.6-.7L3 20l1.3-3.9a8.2 8.2 0 0 1-1-4A8.4 8.4 0 0 1 12.1 3a8.3 8.3 0 0 1 8.9 8.5z"/></svg>' +
+          '<span style="font-size:12px;">' + p.comments + '</span></span></div></div>';
+      }).join('') : '<div class="card col" style="padding:18px; align-items:center; gap:6px;"><span style="font-size:13px; color:var(--text2);">아직 또래 글이 없어요</span><span class="helper">전체 보기로 다른 글도 둘러보세요</span></div>';
+
+      body.innerHTML = filterBar + listHtml;
+    } else {
+      body.innerHTML = QNAS.map(function(q){
+        return '<div class="card col" style="gap:8px; padding:16px;">' +
+          '<div class="row" style="align-items:center; gap:8px;"><span style="font-size:11px; font-weight:700; color:var(--accent2); background:var(--accent-soft); padding:3px 8px; border-radius:999px;">Q</span>' +
+          '<span style="font-size:12.5px; color:var(--text2);">' + escapeHtml(q.author) + '</span></div>' +
+          '<p style="font-size:13.5px; font-weight:700; line-height:1.5;">' + escapeHtml(q.q) + '</p>' +
+          '<p style="font-size:12.5px; color:var(--text2); line-height:1.6;">답변 ' + q.answers + '개 · 조회 ' + q.views + '</p></div>';
+      }).join('');
+    }
+  }
+
+  // ---------- MY ----------
+  function renderMy(){
+    document.getElementById('my-name').textContent = state.nickname ? state.nickname + '맘·아빠' : '다다맘 회원';
+    document.getElementById('my-sub').textContent = profileSummary();
+    document.getElementById('my-stat-challenge').textContent = state.entries.filter(function(e){ return e.mine; }).length;
+    var benefitCount = Object.keys(state.applied).filter(function(k){ return state.applied[k]; }).length;
+    document.getElementById('my-stat-benefit').textContent = benefitCount;
+    document.getElementById('my-benefit-badge').textContent = benefitCount;
+    document.getElementById('my-stat-post').textContent = state.posts.filter(function(p){ return p.mine; }).length;
+    renderCareLog();
+    renderTimeline();
+  }
+
+  // ---------- 오늘의 기록 (수유·수면) ----------
+  function hhmm(ts){
+    var d = new Date(ts);
+    var h = d.getHours(), m = d.getMinutes();
+    return (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+  }
+
+  function todayCareLog(){
+    var startOfDay = new Date(); startOfDay.setHours(0,0,0,0);
+    var cutoff = startOfDay.getTime();
+    return state.careLog.filter(function(e){ return e.ts >= cutoff; }).sort(function(a,b){ return a.ts - b.ts; });
+  }
+
+  function isSleeping(log){
+    for(var i = log.length - 1; i >= 0; i--){
+      if(log[i].type === 'sleep_start') return true;
+      if(log[i].type === 'sleep_end') return false;
+    }
+    return false;
+  }
+
+  function sleepMinutesToday(log){
+    var total = 0, start = null;
+    for(var i = 0; i < log.length; i++){
+      if(log[i].type === 'sleep_start') start = log[i].ts;
+      else if(log[i].type === 'sleep_end' && start != null){ total += (log[i].ts - start) / 60000; start = null; }
+    }
+    return total;
+  }
+
+  function renderCareLog(){
+    var card = document.getElementById('carelog-card');
+    if(!card) return;
+    if(state.kidType !== 'parenting'){ card.hidden = true; return; }
+    card.hidden = false;
+
+    document.getElementById('carelog-date').textContent = new Date().toLocaleDateString('ko-KR', {month:'long', day:'numeric'});
+
+    var log = todayCareLog();
+    var feeds = log.filter(function(e){ return e.type === 'feed'; });
+    document.getElementById('carelog-count-feed').textContent = feeds.length
+      ? (feeds.length + '회 · ' + hhmm(feeds[feeds.length - 1].ts))
+      : '기록 없음';
+
+    var sleeping = isSleeping(log);
+    document.getElementById('carelog-sleep-label').textContent = sleeping ? '기상하기' : '수면 시작';
+    if(sleeping){
+      var lastStart = log.filter(function(e){ return e.type === 'sleep_start'; }).slice(-1)[0];
+      document.getElementById('carelog-count-sleep').textContent = '재우는 중 · ' + hhmm(lastStart.ts) + '~';
+    } else {
+      var totalMin = Math.round(sleepMinutesToday(log));
+      document.getElementById('carelog-count-sleep').textContent = totalMin > 0 ? (Math.round(totalMin / 6) / 10 + '시간') : '기록 없음';
+    }
+
+    var listEl = document.getElementById('carelog-list');
+    if(!log.length){
+      listEl.innerHTML = '<span class="helper">오늘 기록이 아직 없어요</span>';
+    } else {
+      listEl.innerHTML = log.slice().reverse().slice(0, 6).map(function(e){
+        var label = e.type === 'feed' ? '수유' : (e.type === 'sleep_start' ? '수면 시작' : '기상');
+        return '<div class="row" style="justify-content:space-between; font-size:12.5px; color:var(--text2);"><span>' + label + '</span><span>' + hhmm(e.ts) + '</span></div>';
+      }).join('');
+    }
+  }
+
+  // ---------- 성장 타임라인 ----------
+  function timelineItems(){
+    var items = [];
+    state.entries.filter(function(e){ return e.mine; }).forEach(function(e){
+      items.push({ ts:e.createdAt, text:e.note, media_url:e.media_url, kind:'챌린지' });
+    });
+    state.posts.filter(function(p){ return p.mine; }).forEach(function(p){
+      items.push({ ts:p.createdAt, text:p.text, media_url:p.media_url, kind:'게시물' });
+    });
+    items.sort(function(a,b){ return b.ts - a.ts; });
+    return items;
+  }
+
+  function renderTimeline(){
+    var el = document.getElementById('timeline-list');
+    if(!el) return;
+    var items = timelineItems();
+    if(!items.length){
+      el.innerHTML = '<div class="card col" style="padding:18px; align-items:center; gap:6px;">' +
+        '<span style="font-size:13px; color:var(--text2);">아직 기록이 없어요</span>' +
+        '<span class="helper">챌린지 참여나 커뮤니티 글을 남기면 여기 자동으로 쌓여요</span></div>';
+      return;
+    }
+    var grouped = {}, order = [];
+    items.forEach(function(it){
+      var label = ageLabelAt(it.ts) || '기록';
+      if(!grouped[label]){ grouped[label] = []; order.push(label); }
+      grouped[label].push(it);
+    });
+    el.innerHTML = order.map(function(label){
+      var rows = grouped[label].map(function(it){
+        var thumb = it.media_url
+          ? '<img src="' + escapeHtml(it.media_url) + '" alt="" style="width:44px; height:44px; border-radius:10px; object-fit:cover; flex:0 0 auto;">'
+          : '<div style="width:44px; height:44px; border-radius:10px; background:var(--border); flex:0 0 auto;"></div>';
+        return '<div class="row" style="gap:10px; align-items:center;">' + thumb +
+          '<div class="col" style="gap:2px; min-width:0; flex:1;"><span style="font-size:12.5px; line-height:1.5; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:block;">' + escapeHtml(it.text || '') + '</span>' +
+          '<span class="helper">' + it.kind + ' · ' + timeAgo(new Date(it.ts).toISOString()) + '</span></div></div>';
+      }).join('');
+      return '<div class="card col" style="gap:10px; padding:14px;"><span class="eyebrow">' + escapeHtml(label) + '</span>' + rows + '</div>';
+    }).join('');
+  }
+
+  function renderAll(active){
+    document.querySelectorAll('[data-nav]').forEach(function(el){ el.innerHTML = buildNav(active); });
+    renderOnboarding();
+    renderHome();
+    renderChallenge();
+    renderBenefit();
+    renderCommunity();
+    renderMy();
+  }
+
+  // ---------- ROUTING ----------
+  function showScreen(id){
+    document.querySelectorAll('.screen').forEach(function(s){ s.hidden = (s.id !== 'screen-' + id); });
+    var scrollers = document.querySelectorAll('#screen-' + id + ' .scroll');
+    scrollers.forEach(function(s){ s.scrollTop = 0; });
+  }
+
+  function route(){
+    var id = (location.hash || '').replace('#', '');
+    var valid = ['onboarding','home','challenge','benefit','community','my'];
+    if(valid.indexOf(id) === -1){
+      location.hash = '#' + (state.onboarded ? 'home' : 'onboarding');
+      return;
+    }
+    if(!state.onboarded && id !== 'onboarding'){
+      location.hash = '#onboarding';
+      return;
+    }
+    showScreen(id);
+    renderAll(id);
+    if(id === 'home' || id === 'challenge' || id === 'benefit' || id === 'community'){
+      refreshRemote();
+    }
+  }
+
+  // ---------- MODAL ----------
+  function openModal(html){
+    document.getElementById('modal-card').innerHTML = html;
+    document.getElementById('modal-backdrop').hidden = false;
+  }
+  function closeModal(){
+    document.getElementById('modal-backdrop').hidden = true;
+    document.getElementById('modal-card').innerHTML = '';
+  }
+
+  function challengeModalHtml(){
+    return '<div class="modal-head"><h3 class="display">우리 아이도 참여하기</h3><button class="modal-close" data-close-modal aria-label="닫기">✕</button></div>' +
+      '<p class="modal-desc">첫걸음을 아직 안 뗐어도 괜찮아요. 지금 순간을 짧은 메모로 먼저 남겨보세요.</p>' +
+      '<div class="field"><label for="entry-file">사진 또는 영상 (선택)</label><input type="file" id="entry-file" accept="image/*,video/*"></div>' +
+      '<div class="field"><label for="entry-note">짧은 소개 *</label><textarea id="entry-note" rows="3" placeholder="예: 오늘 처음으로 세 발짝 걸었어요!"></textarea></div>' +
+      '<label class="check-row"><input type="checkbox" id="entry-consent"> 보호자이며, 아이 사진·영상을 챌린지에 게시하는 것에 동의해요 *</label>' +
+      '<label class="check-row"><input type="checkbox" id="entry-consent2"> 참여 브랜드가 콘텐츠를 광고에 활용하는 것에 동의해요 (선택)</label>' +
+      '<button class="btn-primary" id="entry-submit" style="width:100%;" disabled>제출하기</button>';
+  }
+
+  function composeModalHtml(){
+    return '<div class="modal-head"><h3 class="display">이야기 남기기</h3><button class="modal-close" data-close-modal aria-label="닫기">✕</button></div>' +
+      '<div class="field"><label for="post-photo">사진 (선택)</label><input type="file" id="post-photo" accept="image/*"></div>' +
+      '<div class="field"><label for="post-text">무슨 이야기를 나누고 싶으세요? *</label><textarea id="post-text" rows="4" placeholder="오늘 있었던 일을 편하게 적어보세요"></textarea></div>' +
+      '<label class="check-row"><input type="checkbox" id="post-consent"> 아이 사진이 포함된다면 공개범위를 확인했어요 *</label>' +
+      '<button class="btn-primary" id="post-submit" style="width:100%;" disabled>등록하기</button>';
+  }
+
+  function applyModalHtml(trial){
+    return '<div class="modal-head"><h3 class="display">' + escapeHtml(trial.title) + '</h3><button class="modal-close" data-close-modal aria-label="닫기">✕</button></div>' +
+      '<p class="modal-desc">' + escapeHtml(trial.brand) + ' · 마감 ' + trial.deadline + ' · 광고(협찬) 제품이에요.</p>' +
+      '<label class="check-row"><input type="checkbox" id="apply-consent"> 배송을 위해 연락처와 주소를 제공하는 것에 동의해요 *</label>' +
+      '<label class="check-row"><input type="checkbox" id="apply-consent2"> 브랜드가 제 후기를 광고에 활용하는 것에 동의해요 (선택)</label>' +
+      '<button class="btn-primary" id="apply-submit" data-apply-key="' + trial.key + '" style="width:100%;" disabled>신청 완료하기</button>';
+  }
+
+  function updateEntrySubmit(){
+    var note = document.getElementById('entry-note');
+    var consent = document.getElementById('entry-consent');
+    var btn = document.getElementById('entry-submit');
+    if(!btn) return;
+    btn.disabled = !(note && note.value.trim().length > 0 && consent && consent.checked);
+  }
+  function updatePostSubmit(){
+    var text = document.getElementById('post-text');
+    var consent = document.getElementById('post-consent');
+    var btn = document.getElementById('post-submit');
+    if(!btn) return;
+    btn.disabled = !(text && text.value.trim().length > 0 && consent && consent.checked);
+  }
+
+  function showToast(msg){
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(function(){ t.classList.remove('show'); }, 2200);
+  }
+
+  // ---------- EVENTS ----------
+  document.addEventListener('click', function(e){
+    var goto = e.target.closest('[data-goto]');
+    if(goto){ location.hash = '#' + goto.getAttribute('data-goto'); return; }
+
+    var typePick = e.target.closest('[data-type-pick]');
+    if(typePick){ state.kidType = typePick.getAttribute('data-type-pick'); save(); renderOnboarding(); return; }
+
+    var region = e.target.closest('[data-region]');
+    if(region){ state.region = region.getAttribute('data-region'); save(); renderOnboarding(); return; }
+
+    var interest = e.target.closest('[data-interest]');
+    if(interest){
+      var t = interest.getAttribute('data-interest');
+      var idx = state.interests.indexOf(t);
+      if(idx > -1) state.interests.splice(idx,1); else state.interests.push(t);
+      save(); renderOnboarding(); return;
+    }
+
+    if(e.target.closest('#start-btn')){
+      if(!isProfileValid()) return;
+      state.onboarded = true; save();
+      location.hash = '#home';
+      return;
+    }
+
+    var sort = e.target.closest('[data-sort]');
+    if(sort){ state.sortMode = sort.getAttribute('data-sort'); save(); renderChallenge(); return; }
+
+    var vote = e.target.closest('[data-vote]');
+    if(vote){
+      var vid = vote.getAttribute('data-vote');
+      var entry = state.entries.filter(function(x){ return x.id === vid; })[0];
+      if(entry){
+        entry.liked = !entry.liked;
+        entry.votes += entry.liked ? 1 : -1;
+        var vi = state.myVotes.indexOf(vid);
+        if(entry.liked){ if(vi === -1) state.myVotes.push(vid); }
+        else if(vi > -1){ state.myVotes.splice(vi, 1); }
+        save(); renderChallenge();
+        if(sb){ sb.from('challenge_entries').update({votes: entry.votes}).eq('id', vid).then(function(){}); }
+      }
+      return;
+    }
+
+    var btab = e.target.closest('[data-benefit-tab]');
+    if(btab){ state.benefitTab = btab.getAttribute('data-benefit-tab'); save(); renderBenefit(); return; }
+
+    var ctab = e.target.closest('[data-community-tab]');
+    if(ctab){ state.communityTab = ctab.getAttribute('data-community-tab'); save(); renderCommunity(); return; }
+
+    var postlike = e.target.closest('[data-postlike]');
+    if(postlike){
+      var pid = postlike.getAttribute('data-postlike');
+      var post = state.posts.filter(function(x){ return x.id === pid; })[0];
+      if(post){
+        post.liked = !post.liked;
+        post.likes += post.liked ? 1 : -1;
+        var li = state.myLikes.indexOf(pid);
+        if(post.liked){ if(li === -1) state.myLikes.push(pid); }
+        else if(li > -1){ state.myLikes.splice(li, 1); }
+        save(); renderCommunity();
+        if(sb){ sb.from('community_posts').update({likes: post.likes}).eq('id', pid).then(function(){}); }
+      }
+      return;
+    }
+
+    var careBtn = e.target.closest('[data-care-log]');
+    if(careBtn){
+      var ctype = careBtn.getAttribute('data-care-log');
+      if(ctype === 'feed'){
+        state.careLog.push({ id:'c' + Date.now(), type:'feed', ts:Date.now() });
+      } else if(ctype === 'sleep'){
+        state.careLog.push({ id:'c' + Date.now(), type: isSleeping(todayCareLog()) ? 'sleep_end' : 'sleep_start', ts:Date.now() });
+      }
+      save(); renderCareLog();
+      return;
+    }
+    var careUndo = e.target.closest('[data-care-undo]');
+    if(careUndo){
+      if(state.careLog.length){ state.careLog.pop(); save(); renderCareLog(); }
+      return;
+    }
+    var peerToggle = e.target.closest('[data-peer-toggle]');
+    if(peerToggle){
+      state.peerOnly = peerToggle.getAttribute('data-peer-toggle') === 'peer';
+      save(); renderCommunity();
+      return;
+    }
+
+    var toastBtn = e.target.closest('[data-toast]');
+    if(toastBtn){ showToast(toastBtn.getAttribute('data-toast')); return; }
+
+    if(e.target.closest('[data-open-challenge-modal]')){
+      openModal(challengeModalHtml());
+      return;
+    }
+    if(e.target.closest('[data-open-compose]')){
+      openModal(composeModalHtml());
+      return;
+    }
+    var openApply = e.target.closest('[data-open-apply]');
+    if(openApply){
+      var key = openApply.getAttribute('data-open-apply');
+      var trial = TRIALS.filter(function(x){ return x.key === key; })[0];
+      if(trial) openModal(applyModalHtml(trial));
+      return;
+    }
+    if(e.target.closest('[data-close-modal]') || e.target.id === 'modal-backdrop'){
+      closeModal();
+      return;
+    }
+
+    if(e.target.closest('#entry-submit')){
+      handleEntrySubmit();
+      return;
+    }
+    if(e.target.closest('#post-submit')){
+      handlePostSubmit();
+      return;
+    }
+    var applySubmit = e.target.closest('#apply-submit');
+    if(applySubmit){
+      handleApplySubmit(applySubmit.getAttribute('data-apply-key'));
+      return;
+    }
+  });
+
+  async function handleEntrySubmit(){
+    var btn = document.getElementById('entry-submit');
+    var noteEl = document.getElementById('entry-note');
+    var fileEl = document.getElementById('entry-file');
+    var noteVal = noteEl.value.trim();
+    var file = (fileEl.files && fileEl.files[0]) ? fileEl.files[0] : null;
+    if(btn){ btn.disabled = true; btn.textContent = '등록 중...'; }
+    var mediaUrl = file ? await uploadMedia(file) : '';
+    var name = state.nickname || '우리 아이';
+    var age = ageLabel() || '참가자';
+    var newEntry = { id:'e' + Date.now(), name:name, age:age, note:noteVal, media_url:mediaUrl, votes:0, liked:false, mine:true, createdAt: Date.now() };
+    if(sb){
+      var res = await sb.from('challenge_entries').insert({ name:name, age:age, note:noteVal, media_url:mediaUrl }).select().single();
+      if(res.error || !res.data){
+        if(res.error) console.error('challenge_entries insert error', res.error);
+        showToast('등록 실패: ' + (res.error && res.error.message ? res.error.message : '다시 시도해주세요'));
+        if(btn){ btn.disabled = false; btn.textContent = '제출하기'; }
+        return;
+      }
+      newEntry.id = res.data.id;
+      newEntry.createdAt = new Date(res.data.created_at).getTime();
+      state.myEntries.push(res.data.id);
+    } else {
+      state.myEntries.push(newEntry.id);
+    }
+    state.entries.unshift(newEntry);
+    state.sortMode = 'new'; save();
+    closeModal(); renderChallenge();
+    showToast('참여가 등록됐어요');
+  }
+
+  async function handlePostSubmit(){
+    var btn = document.getElementById('post-submit');
+    var textEl = document.getElementById('post-text');
+    var photoEl = document.getElementById('post-photo');
+    var textVal = textEl.value.trim();
+    var file = (photoEl && photoEl.files && photoEl.files[0]) ? photoEl.files[0] : null;
+    if(btn){ btn.disabled = true; btn.textContent = '등록 중...'; }
+    var mediaUrl = file ? await uploadMedia(file) : '';
+    var author = state.nickname ? state.nickname + '맘·아빠' : '나';
+    var myStage = state.kidType;
+    var myAgeVal = myStage === 'pregnant' ? pregWeeks(state.dueDate) : (myStage === 'parenting' ? ageMonths(state.birthMonth) : null);
+    var newPost = { id:'p' + Date.now(), author:author, time:'방금 전', bg:'var(--chip-a)', text:textVal, media_url:mediaUrl, likes:0, liked:false, comments:0, stage:myStage, age_value:myAgeVal, mine:true, img: !!mediaUrl, createdAt: Date.now() };
+    if(sb){
+      var res = await sb.from('community_posts').insert({ author:author, text:textVal, media_url:mediaUrl, stage:myStage, age_value:myAgeVal }).select().single();
+      if(res.error || !res.data){
+        if(res.error) console.error('community_posts insert error', res.error);
+        showToast('등록 실패: ' + (res.error && res.error.message ? res.error.message : '다시 시도해주세요'));
+        if(btn){ btn.disabled = false; btn.textContent = '등록하기'; }
+        return;
+      }
+      newPost.id = res.data.id;
+      newPost.createdAt = new Date(res.data.created_at).getTime();
+      state.myPosts.push(res.data.id);
+    } else {
+      state.myPosts.push(newPost.id);
+    }
+    state.posts.unshift(newPost);
+    save();
+    closeModal(); renderCommunity(); renderHome();
+    showToast('등록됐어요');
+  }
+
+  async function handleApplySubmit(akey){
+    var atrial = TRIALS.filter(function(x){ return x.key === akey; })[0];
+    if(!atrial) return;
+    if((state.appliedCount[akey] || 0) >= atrial.total){
+      showToast('방금 모집이 마감됐어요');
+      closeModal(); renderBenefit();
+      return;
+    }
+    var btn = document.getElementById('apply-submit');
+    if(btn){ btn.disabled = true; btn.textContent = '접수 중...'; }
+    if(sb){
+      var res = await sb.from('benefit_applications').insert({ trial_key:akey, nickname: state.nickname || '', region: state.region || '' });
+      if(res.error){
+        console.error('benefit_applications insert error', res.error);
+        showToast('신청 실패: ' + (res.error && res.error.message ? res.error.message : '다시 시도해주세요'));
+        if(btn){ btn.disabled = false; btn.textContent = '신청 완료하기'; }
+        return;
+      }
+    }
+    state.applied[akey] = true;
+    state.appliedCount[akey] = (state.appliedCount[akey] || 0) + 1;
+    save();
+    closeModal(); renderBenefit(); renderMy();
+    showToast('신청이 접수됐어요');
+  }
+
+  document.addEventListener('input', function(e){
+    if(e.target.id === 'nickname-input'){ state.nickname = e.target.value; save(); }
+    if(e.target.id === 'due-date'){ state.dueDate = e.target.value; save(); renderOnboarding(); }
+    if(e.target.id === 'birth-month'){ state.birthMonth = e.target.value; save(); renderOnboarding(); }
+    if(e.target.id === 'entry-note'){ updateEntrySubmit(); }
+    if(e.target.id === 'post-text'){ updatePostSubmit(); }
+  });
+  document.addEventListener('change', function(e){
+    if(e.target.id === 'due-date'){ state.dueDate = e.target.value; save(); renderOnboarding(); }
+    if(e.target.id === 'birth-month'){ state.birthMonth = e.target.value; save(); renderOnboarding(); }
+    if(e.target.id === 'entry-consent'){ updateEntrySubmit(); }
+    if(e.target.id === 'post-consent'){ updatePostSubmit(); }
+    if(e.target.id === 'apply-consent'){
+      var btn = document.getElementById('apply-submit');
+      if(btn) btn.disabled = !e.target.checked;
+    }
+  });
+
+  window.addEventListener('hashchange', route);
+  setDateBounds();
+  route();
+})();
+</script>
