@@ -85,6 +85,22 @@
     height:44px; border-radius:16px; border:1px solid var(--border); background:var(--surface);
     color:var(--text2); font-size:13px; font-weight:700; text-decoration:none;
   }
+  .btn-kakao{
+    display:flex; align-items:center; justify-content:center; gap:8px; width:100%;
+    height:50px; border-radius:18px; background:#FEE500; color:#191919;
+    font-size:15px; font-weight:700; border:none; text-decoration:none; cursor:pointer;
+  }
+  .btn-kakao:disabled{ opacity:.5; cursor:not-allowed; }
+  .btn-google{
+    display:flex; align-items:center; justify-content:center; gap:8px; width:100%;
+    height:50px; border-radius:18px; background:#fff; color:#1f1f1f;
+    font-size:15px; font-weight:700; border:1px solid var(--border); text-decoration:none; cursor:pointer; margin-top:10px;
+  }
+  .btn-google:disabled{ opacity:.5; cursor:not-allowed; }
+  .auth-divider{
+    display:flex; align-items:center; gap:10px; margin:14px 0; color:var(--text2); font-size:12px;
+  }
+  .auth-divider::before, .auth-divider::after{ content:''; flex:1; height:1px; background:var(--border); }
   .chip{
     padding:11px 16px; border-radius:999px; border:1px solid var(--border); background:var(--surface);
     color:var(--text2); font-size:13.5px; min-height:44px;
@@ -177,6 +193,11 @@
         </button>
       </div>
 
+      <div class="col" style="gap:10px;">
+        <span style="font-size:13px; font-weight:700; color:var(--text2);">누구신가요? *</span>
+        <div class="row" style="flex-wrap:wrap; gap:8px;" id="role-group" role="group" aria-label="보호자 구분 선택"></div>
+      </div>
+
       <div class="field">
         <label for="nickname-input">아이 애칭 (선택)</label>
         <input type="text" id="nickname-input" maxlength="12" placeholder="예: 콩이, 서윤">
@@ -256,6 +277,14 @@
         <div class="row" style="gap:12px; overflow-x:auto; margin-inline:-20px; padding-inline:20px;" id="home-articles"></div>
       </div>
 
+      <div class="col" style="gap:12px;">
+        <div class="row" style="align-items:center; justify-content:space-between;">
+          <h2 class="display" style="font-size:17px;">이번 주 나들이·행사</h2>
+          <a href="#outing" class="link-quiet">전체보기</a>
+        </div>
+        <div class="row" style="gap:12px; overflow-x:auto; margin-inline:-20px; padding-inline:20px;" id="home-outings"></div>
+      </div>
+
       <div class="col" style="gap:12px; padding-bottom:8px;">
         <div class="row" style="align-items:center; justify-content:space-between;">
           <h2 class="display" style="font-size:17px;">커뮤니티 인기글</h2>
@@ -310,6 +339,22 @@
       </div>
     </div>
     <div class="scroll pad" id="benefit-body"></div>
+    <nav class="navbar" data-nav aria-label="주요 메뉴"></nav>
+  </section>
+
+  <!-- OUTING -->
+  <section class="screen" id="screen-outing">
+    <div class="pad" style="flex:0 0 auto; padding-block-start:28px;">
+      <h1 class="display" style="font-size:22px; margin-bottom:4px;">나들이</h1>
+      <p style="font-size:12.5px; color:var(--text2); margin-bottom:14px;">아이와 함께 가볼 만한 행사와 장소를 모아봤어요</p>
+      <div class="segmented" role="tablist" aria-label="나들이 종류" id="outing-tabs">
+        <button data-outing-tab="all" role="tab">전체</button>
+        <button data-outing-tab="event" role="tab">행사</button>
+        <button data-outing-tab="spot" role="tab">놀거리</button>
+      </div>
+      <div class="row" style="flex-wrap:wrap; gap:8px; margin-top:12px;" id="outing-region-group"></div>
+    </div>
+    <div class="scroll pad" id="outing-body"></div>
     <nav class="navbar" data-nav aria-label="주요 메뉴"></nav>
   </section>
 
@@ -435,6 +480,11 @@
           <span style="flex:1; font-size:14px; font-weight:700;">혜택함</span>
           <span id="my-benefit-badge" style="font-size:11.5px; font-weight:700; color:var(--accent2); background:var(--accent-soft); padding:2px 8px; border-radius:999px;">0</span>
         </a>
+        <button type="button" class="card row" data-share-app style="align-items:center; gap:14px; padding:16px; border:1px solid var(--border); text-align:left; width:100%;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.9" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.6l6.8-3.8M8.6 13.4l6.8 3.8"/></svg>
+          <span style="flex:1; font-size:14px; font-weight:700;">다다맘 앱 공유하기</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
         <button type="button" class="card row" data-toast="설정은 다음 업데이트에서 만나요" style="align-items:center; gap:14px; padding:16px; border:1px solid var(--border); text-align:left; width:100%;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.9" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.6 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.6 1z"/></svg>
           <span style="flex:1; font-size:14px; font-weight:700; color:var(--text2);">설정</span>
@@ -518,12 +568,126 @@
     }catch(e){ /* 인증을 지원하지 않는 클라이언트에서도 앱 초기화는 계속 진행 */ }
   }
 
+  var authView = 'password';
+  var authMode = 'login';
+
   function authModalHtml(){
-    return '<div class="modal-head"><h3 class="display">이메일로 로그인</h3><button class="modal-close" data-close-modal aria-label="닫기">✕</button></div>' +
-      '<p class="modal-desc">비밀번호 없이, 이메일로 받은 링크로 로그인해요.</p>' +
+    var head = '<div class="modal-head"><h3 class="display">로그인</h3><button class="modal-close" data-close-modal aria-label="닫기">✕</button></div>';
+    var social = '<p class="modal-desc">간편하게 로그인하고 다다맘의 모든 기능을 이용해보세요.</p>' +
+      '<button type="button" class="btn-kakao" id="kakao-signin-btn">' +
+        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3C6.477 3 2 6.463 2 10.742c0 2.708 1.79 5.09 4.49 6.462l-1.145 4.19a.4.4 0 0 0 .61.44l4.94-3.27c.35.03.7.05 1.05.05 5.523 0 10-3.463 10-7.872C22 6.463 17.523 3 12 3z" fill="#191919"/></svg>' +
+        '카카오로 로그인' +
+      '</button>' +
+      '<button type="button" class="btn-google" id="google-signin-btn">' +
+        '<svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">' +
+          '<path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.5 5.1 29.5 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.2-.1-2.4-.4-3.5z"/>' +
+          '<path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.5 5.1 29.5 3 24 3 16.3 3 9.6 7.3 6.3 14.7z"/>' +
+          '<path fill="#4CAF50" d="M24 45c5.3 0 10.1-2 13.7-5.4l-6.3-5.2C29.4 36 26.8 37 24 37c-5.3 0-9.7-3.3-11.3-8l-6.5 5C9.5 40.6 16.2 45 24 45z"/>' +
+          '<path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.1-4 5.4l6.3 5.2C40.7 36 44 30.8 44 24c0-1.2-.1-2.4-.4-3.5z"/>' +
+        '</svg>' +
+        '구글로 로그인' +
+      '</button>' +
+      '<div class="auth-divider">또는 이메일로</div>';
+
+    if(authView === 'magiclink'){
+      return head + social +
+        '<div class="field"><label for="auth-email">이메일</label><input type="email" id="auth-email" placeholder="you@example.com" autocomplete="email"></div>' +
+        '<button class="btn-primary" id="auth-submit" style="width:100%;" disabled>로그인 링크 받기</button>' +
+        '<button type="button" data-auth-view="password" class="link-quiet" style="background:none; border:none; margin-top:10px; padding:2px 0;">비밀번호로 로그인·회원가입</button>' +
+        '<span class="helper" id="auth-hint"></span>';
+    }
+
+    return head + social +
+      '<div class="segmented" role="tablist" aria-label="로그인 방식" id="auth-mode-tabs">' +
+        '<button data-auth-mode="login" role="tab" aria-selected="' + (authMode === 'login') + '">로그인</button>' +
+        '<button data-auth-mode="signup" role="tab" aria-selected="' + (authMode === 'signup') + '">회원가입</button>' +
+      '</div>' +
       '<div class="field"><label for="auth-email">이메일</label><input type="email" id="auth-email" placeholder="you@example.com" autocomplete="email"></div>' +
-      '<button class="btn-primary" id="auth-submit" style="width:100%;" disabled>로그인 링크 받기</button>' +
+      '<div class="field"><label for="auth-password">비밀번호</label><input type="password" id="auth-password" placeholder="6자 이상" autocomplete="' + (authMode === 'signup' ? 'new-password' : 'current-password') + '"></div>' +
+      '<button class="btn-primary" id="auth-password-submit" style="width:100%;" disabled>' + (authMode === 'signup' ? '회원가입하기' : '로그인하기') + '</button>' +
+      '<button type="button" data-auth-view="magiclink" class="link-quiet" style="background:none; border:none; margin-top:10px; padding:2px 0;">이메일 링크로 로그인하기</button>' +
       '<span class="helper" id="auth-hint"></span>';
+  }
+
+  async function handleKakaoSignIn(){
+    var hint = document.getElementById('auth-hint');
+    if(!sb || !sb.auth || typeof sb.auth.signInWithOAuth !== 'function'){
+      if(hint) hint.textContent = '지금은 카카오 로그인을 사용할 수 없어요.';
+      return;
+    }
+    var btn = document.getElementById('kakao-signin-btn');
+    if(btn){ btn.disabled = true; }
+    try{
+      var res = await sb.auth.signInWithOAuth({ provider: 'kakao', options: { redirectTo: location.href.split('#')[0] } });
+      if(res && res.error){
+        if(hint) hint.textContent = '카카오 로그인 실패: ' + res.error.message;
+        if(btn){ btn.disabled = false; }
+      }
+      // 성공 시 카카오 인증 페이지로 이동하므로 이후 별도 처리는 필요 없음
+    }catch(e){
+      if(hint) hint.textContent = '카카오 로그인 중 오류가 발생했어요. 다시 시도해주세요.';
+      if(btn){ btn.disabled = false; }
+    }
+  }
+
+  async function handleGoogleSignIn(){
+    var hint = document.getElementById('auth-hint');
+    if(!sb || !sb.auth || typeof sb.auth.signInWithOAuth !== 'function'){
+      if(hint) hint.textContent = '지금은 구글 로그인을 사용할 수 없어요.';
+      return;
+    }
+    var btn = document.getElementById('google-signin-btn');
+    if(btn){ btn.disabled = true; }
+    try{
+      var res = await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.href.split('#')[0] } });
+      if(res && res.error){
+        if(hint) hint.textContent = '구글 로그인 실패: ' + res.error.message;
+        if(btn){ btn.disabled = false; }
+      }
+      // 성공 시 구글 인증 페이지로 이동하므로 이후 별도 처리는 필요 없음
+    }catch(e){
+      if(hint) hint.textContent = '구글 로그인 중 오류가 발생했어요. 다시 시도해주세요.';
+      if(btn){ btn.disabled = false; }
+    }
+  }
+
+  async function handlePasswordAuth(){
+    var emailEl = document.getElementById('auth-email');
+    var passEl = document.getElementById('auth-password');
+    var btn = document.getElementById('auth-password-submit');
+    var hint = document.getElementById('auth-hint');
+    var email = emailEl ? emailEl.value.trim() : '';
+    var password = passEl ? passEl.value : '';
+    if(!sb || !sb.auth || typeof sb.auth.signInWithPassword !== 'function' || typeof sb.auth.signUp !== 'function'){
+      if(hint) hint.textContent = '지금은 로그인 기능을 사용할 수 없어요.';
+      return;
+    }
+    if(!email || password.length < 6) return;
+    var isSignup = authMode === 'signup';
+    if(btn){ btn.disabled = true; btn.textContent = isSignup ? '가입하는 중...' : '로그인하는 중...'; }
+    try{
+      var res = isSignup
+        ? await sb.auth.signUp({ email: email, password: password, options: { emailRedirectTo: location.href.split('#')[0] } })
+        : await sb.auth.signInWithPassword({ email: email, password: password });
+      if(res.error){
+        if(hint) hint.textContent = (isSignup ? '회원가입 실패: ' : '로그인 실패: ') + res.error.message;
+        if(btn){ btn.disabled = false; btn.textContent = isSignup ? '회원가입하기' : '로그인하기'; }
+        return;
+      }
+      if(isSignup){
+        if(res.data && res.data.session){
+          closeModal();
+        } else {
+          if(hint) hint.textContent = email + '(으)로 인증 메일을 보냈어요. 메일함을 확인하고 인증을 완료해주세요.';
+          if(btn){ btn.textContent = '인증 메일 전송 완료'; }
+        }
+      } else {
+        closeModal();
+      }
+    }catch(e){
+      if(hint) hint.textContent = '처리 중 오류가 발생했어요. 다시 시도해주세요.';
+      if(btn){ btn.disabled = false; btn.textContent = isSignup ? '회원가입하기' : '로그인하기'; }
+    }
   }
 
   async function handleAuthSubmit(){
@@ -644,6 +808,7 @@
     {id:'home', label:'홈', icon:'<path d="M3 11l9-7 9 7"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/>'},
     {id:'challenge', label:'챌린지', icon:'<path d="M5 3v18"/><path d="M5 4h11l-2 4 2 4H5"/>'},
     {id:'benefit', label:'혜택', icon:'<rect x="3" y="8" width="18" height="13" rx="1.5"/><path d="M3 12h18"/><path d="M12 8v13"/>'},
+    {id:'outing', label:'나들이', icon:'<path d="M12 21s7-7.2 7-12a7 7 0 1 0-14 0c0 4.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/>'},
     {id:'community', label:'커뮤니티', icon:'<path d="M21 11.5a8.4 8.4 0 0 1-8.9 8.4 9 9 0 0 1-3.6-.7L3 20l1.3-3.9a8.2 8.2 0 0 1-1-4A8.4 8.4 0 0 1 12.1 3a8.3 8.3 0 0 1 8.9 8.5z"/>'},
     {id:'my', label:'MY', icon:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4.5 5-6 8-6s6.5 1.5 8 6"/>'}
   ];
@@ -679,18 +844,32 @@
     {author:'18개월맘', q:'밤중수유 언제 끊으셨나요?', answers:6, views:128}
   ];
 
+  var OUTINGS = [
+    {id:'o1', category:'event', region:'서울', title:'가을 단풍 나들이 축제', place:'서울대공원', when:'10/3 ~ 10/12', ageFit:'전체', emoji:'\ud83c\udf41'},
+    {id:'o2', category:'event', region:'인천', title:'인천 어린이 과학축제', place:'인천어린이과학관', when:'10/10 ~ 10/11', ageFit:'5세 이상', emoji:'\ud83d\udd2c'},
+    {id:'o3', category:'event', region:'경기', title:'주말 농촌 체험 마켓', place:'경기 지역 농촌테마파크', when:'매주 토·일', ageFit:'전체', emoji:'\ud83c\udf3e'},
+    {id:'o4', category:'spot', region:'서울', title:'비 오는 날 실내 키즈카페', place:'동네 키즈카페', when:'상시', ageFit:'전체', emoji:'\ud83e\uddf8'},
+    {id:'o5', category:'spot', region:'인천', title:'주말 자연 놀이터', place:'인천 지역 어린이공원', when:'상시', ageFit:'전체', emoji:'\ud83c\udf33'},
+    {id:'o6', category:'spot', region:'경기', title:'우리 동네 도서관 유아 프로그램', place:'지역 공공도서관', when:'매주 화·목', ageFit:'0~5세', emoji:'\ud83d\udcda'},
+    {id:'o7', category:'spot', region:'기타', title:'실내 놀이터 &amp; 문화센터', place:'지역 대형마트 문화센터', when:'매주 수·금', ageFit:'0~3세', emoji:'\ud83c\udfa0'}
+  ];
+  // TODO: 위 행사·장소 정보는 예시(placeholder)입니다. 실제 지역별 최신 행사 일정과 장소로 교체해주세요.
+
   function defaultState(){
     var now = Date.now();
     return {
       onboarded:false,
       nickname:'',
       kidType:null,
+      parentRole:null,
       dueDate:'',
       birthMonth:'',
       region:null,
       interests:[],
       benefitTab:'trial',
       communityTab:'brag',
+      outingTab:'all',
+      outingRegion:null,
       sortMode:'new',
       applied:{a:false, b:false, c:false},
       appliedCount:{a:0, b:0, c:0},
@@ -789,8 +968,15 @@
     return parts.join(' · ');
   }
 
+  function roleLabel(){
+    if(state.parentRole === 'mom') return '맘';
+    if(state.parentRole === 'dad') return '아빠';
+    if(state.parentRole === 'guardian') return '보호자';
+    return '맘·아빠';
+  }
+
   function isProfileValid(){
-    if(!state.kidType || !state.region) return false;
+    if(!state.kidType || !state.region || !state.parentRole) return false;
     if(state.kidType === 'pregnant' && !state.dueDate) return false;
     if(state.kidType === 'parenting' && !state.birthMonth) return false;
     return true;
@@ -956,6 +1142,13 @@
     var m = ageMonths(state.birthMonth);
     document.getElementById('birth-preview').textContent = m != null ? ('현재 ' + m + '개월로 계산돼요') : '';
 
+    var rog = document.getElementById('role-group');
+    var ROLE_OPTIONS = [['mom','엄마'], ['dad','아빠'], ['guardian','보호자']];
+    rog.innerHTML = ROLE_OPTIONS.map(function(pair){
+      var on = state.parentRole === pair[0];
+      return '<button type="button" class="chip' + (on ? ' on' : '') + '" data-role-pick="' + pair[0] + '" aria-pressed="' + on + '">' + pair[1] + '</button>';
+    }).join('');
+
     var rg = document.getElementById('region-group');
     rg.innerHTML = REGIONS.map(function(r){
       var on = state.region === r;
@@ -971,7 +1164,7 @@
     var valid = isProfileValid();
     var startBtn = document.getElementById('start-btn');
     startBtn.disabled = !valid;
-    document.getElementById('start-helper').textContent = valid ? '준비됐어요. 시작해볼까요?' : '단계 · 날짜 · 지역을 선택하면 시작할 수 있어요';
+    document.getElementById('start-helper').textContent = valid ? '준비됐어요. 시작해볼까요?' : '단계 · 보호자 구분 · 날짜 · 지역을 선택하면 시작할 수 있어요';
   }
 
   function setDateBounds(){
@@ -1203,6 +1396,7 @@
 
     renderHomeInfo();
     renderHomeArticles();
+    renderHomeOutings();
   }
 
   function renderHomeInfo(){
@@ -1223,6 +1417,19 @@
         '<span style="font-size:22px;" aria-hidden="true">' + a.emoji + '</span>' +
         '<span style="font-size:13.5px; font-weight:700; line-height:1.4;">' + escapeHtml(a.title) + '</span>' +
         '<span style="font-size:11.5px; color:var(--text2);">' + escapeHtml(a.summary) + '</span></button>';
+    }).join('');
+  }
+
+  function renderHomeOutings(){
+    var el = document.getElementById('home-outings');
+    if(!el) return;
+    var regional = OUTINGS.filter(function(o){ return !state.region || o.region === state.region; });
+    var list = (regional.length ? regional : OUTINGS).slice(0,3);
+    el.innerHTML = list.map(function(o){
+      return '<a href="#outing" class="card col" style="flex:0 0 auto; width:168px; padding:16px; gap:8px; text-decoration:none; color:var(--text);">' +
+        '<span style="font-size:22px;" aria-hidden="true">' + o.emoji + '</span>' +
+        '<span style="font-size:13.5px; font-weight:700; line-height:1.4;">' + escapeHtml(o.title) + '</span>' +
+        '<span style="font-size:11.5px; color:var(--text2);">' + escapeHtml(o.place) + ' · ' + escapeHtml(o.when) + '</span></a>';
     }).join('');
   }
 
@@ -1335,6 +1542,48 @@
     }
   }
 
+  // ---------- OUTING ----------
+  function renderOuting(){
+    document.querySelectorAll('#outing-tabs [data-outing-tab]').forEach(function(btn){
+      var on = btn.getAttribute('data-outing-tab') === state.outingTab;
+      btn.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+
+    var rg = document.getElementById('outing-region-group');
+    if(rg){
+      var chips = ['전체'].concat(REGIONS);
+      rg.innerHTML = chips.map(function(r){
+        var on = (r === '전체' && !state.outingRegion) || r === state.outingRegion;
+        return '<button type="button" class="chip' + (on ? ' on' : '') + '" data-outing-region="' + r + '" aria-pressed="' + on + '">' + escapeHtml(r) + '</button>';
+      }).join('');
+    }
+
+    var list = OUTINGS.filter(function(o){
+      var tabMatch = state.outingTab === 'all' || o.category === state.outingTab;
+      var regionMatch = !state.outingRegion || state.outingRegion === '전체' || o.region === state.outingRegion;
+      return tabMatch && regionMatch;
+    });
+
+    var body = document.getElementById('outing-body');
+    if(!body) return;
+    if(list.length === 0){
+      body.innerHTML = '<div class="card col" style="padding:18px; align-items:center; gap:6px;"><span class="helper">조건에 맞는 나들이 정보가 아직 없어요</span></div>';
+      return;
+    }
+    body.innerHTML = list.map(function(o){
+      return '<div class="card col" style="gap:8px; padding:16px;">' +
+        '<div class="row" style="align-items:center; gap:8px; flex-wrap:wrap;">' +
+        '<span style="font-size:20px;" aria-hidden="true">' + o.emoji + '</span>' +
+        '<span class="eyebrow">' + (o.category === 'event' ? '행사' : '놀거리') + '</span>' +
+        '<span style="font-size:11.5px; color:var(--text2);">' + escapeHtml(o.region) + '</span>' +
+        '</div>' +
+        '<span style="font-size:14.5px; font-weight:700; line-height:1.4;">' + escapeHtml(o.title) + '</span>' +
+        '<span style="font-size:12.5px; color:var(--text2);">' + escapeHtml(o.place) + ' · ' + escapeHtml(o.when) + '</span>' +
+        '<span style="font-size:11.5px; color:var(--text2);">추천 연령 ' + escapeHtml(o.ageFit) + '</span>' +
+        '</div>';
+    }).join('');
+  }
+
   // ---------- COMMUNITY ----------
   function renderCommunity(){
     document.querySelectorAll('#community-tabs [data-community-tab]').forEach(function(btn){
@@ -1376,7 +1625,10 @@
           '<span style="font-size:12px;">' + p.likes + '</span></button>' +
           '<button data-open-comments="' + p.id + '" aria-label="댓글 보기, 현재 ' + p.comments + '개" style="display:flex; align-items:center; gap:5px; border:none; background:none; color:var(--text2); min-height:44px;">' +
           '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.8" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-8.9 8.4 9 9 0 0 1-3.6-.7L3 20l1.3-3.9a8.2 8.2 0 0 1-1-4A8.4 8.4 0 0 1 12.1 3a8.3 8.3 0 0 1 8.9 8.5z"/></svg>' +
-          '<span style="font-size:12px;">' + p.comments + '</span></button></div></div>';
+          '<span style="font-size:12px;">' + p.comments + '</span></button>' +
+          '<button data-share-post="' + p.id + '" aria-label="공유하기" style="display:flex; align-items:center; gap:5px; border:none; background:none; color:var(--text2); min-height:44px; margin-left:auto;">' +
+          '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.8" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.6l6.8-3.8M8.6 13.4l6.8 3.8"/></svg>' +
+          '<span style="font-size:12px;">공유</span></button></div></div>';
       }).join('') : '<div class="card col" style="padding:18px; align-items:center; gap:6px;"><span style="font-size:13px; color:var(--text2);">' + (state.viewMineOnly === 'posts' ? '아직 작성한 글이 없어요' : '아직 또래 글이 없어요') + '</span><span class="helper">전체 보기로 다른 글도 둘러보세요</span></div>';
 
       body.innerHTML = filterBar + listHtml;
@@ -1393,7 +1645,7 @@
 
   // ---------- MY ----------
   function renderMy(){
-    document.getElementById('my-name').textContent = state.nickname ? state.nickname + '맘·아빠' : '다다맘 회원';
+    document.getElementById('my-name').textContent = state.nickname ? state.nickname + roleLabel() : '다다맘 회원';
     document.getElementById('my-sub').textContent = profileSummary();
     document.getElementById('my-stat-challenge').textContent = state.entries.filter(function(e){ return e.mine; }).length;
     var benefitCount = Object.keys(state.applied).filter(function(k){ return state.applied[k]; }).length;
@@ -1909,6 +2161,7 @@
     renderHome();
     renderChallenge();
     renderBenefit();
+    renderOuting();
     renderCommunity();
     renderMy();
   }
@@ -1922,7 +2175,7 @@
 
   function route(){
     var id = (location.hash || '').replace('#', '');
-    var valid = ['onboarding','home','challenge','benefit','community','my','admin'];
+    var valid = ['onboarding','home','challenge','benefit','community','outing','my','admin'];
     if(valid.indexOf(id) === -1){
       location.hash = '#' + (state.onboarded ? 'home' : 'onboarding');
       return;
@@ -1960,6 +2213,77 @@
       closeModal();
     }
   });
+
+  // ---------- 공유하기 ----------
+  var shareTarget = null;
+
+  function shareUrlFor(){ return location.href.split('#')[0]; }
+
+  function openShareModal(payload){
+    shareTarget = payload;
+    openModal(shareModalHtml());
+  }
+
+  function shareModalHtml(){
+    return '<div class="modal-head"><h3 class="display">공유하기</h3><button class="modal-close" data-close-modal aria-label="닫기">✕</button></div>' +
+      '<p class="modal-desc">다다맘의 이야기를 다른 곳에도 공유해보세요.</p>' +
+      '<div class="row" style="flex-wrap:wrap; gap:10px;">' +
+      '<button type="button" data-share-platform="kakao" class="chip" style="flex:1 1 40%;">💬 카카오톡</button>' +
+      '<button type="button" data-share-platform="fb" class="chip" style="flex:1 1 40%;">📘 페이스북</button>' +
+      '<button type="button" data-share-platform="tw" class="chip" style="flex:1 1 40%;">✖️ 트위터/X</button>' +
+      '<button type="button" data-share-platform="ig" class="chip" style="flex:1 1 40%;">📷 인스타그램</button>' +
+      '</div>' +
+      '<button type="button" class="btn-primary" data-share-native style="width:100%; margin-top:14px;">다른 앱으로 공유</button>' +
+      '<button type="button" class="btn-ghost" data-share-copy style="width:100%; margin-top:10px;">🔗 링크 복사</button>' +
+      '<span class="helper" id="share-hint"></span>';
+  }
+
+  function doShareNative(payload){
+    if(navigator.share){
+      try{
+        navigator.share({ title: payload.title, text: payload.text, url: payload.url }).catch(function(){});
+        return true;
+      }catch(e){ return false; }
+    }
+    return false;
+  }
+
+  function doShareCopy(payload){
+    var full = payload.text + ' ' + payload.url;
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(full).then(function(){
+        showToast('링크를 복사했어요');
+      }).catch(function(){
+        var hint = document.getElementById('share-hint');
+        if(hint) hint.textContent = '복사에 실패했어요. 직접 선택해 복사해주세요.';
+      });
+    } else {
+      var hint = document.getElementById('share-hint');
+      if(hint) hint.textContent = '이 브라우저에서는 복사가 지원되지 않아요.';
+    }
+  }
+
+  function doSharePlatform(platform, payload){
+    var url = payload.url, text = payload.text;
+    if(platform === 'fb'){
+      window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url), '_blank', 'noopener,width=600,height=600');
+      return;
+    }
+    if(platform === 'tw'){
+      window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url), '_blank', 'noopener,width=600,height=600');
+      return;
+    }
+    // 카카오톡·인스타그램은 전용 웹 공유 링크가 없어, 기기의 공유 시트를 먼저 시도하고
+    // 지원하지 않는 환경(예: 데스크톱 브라우저)에서는 링크를 복사해 직접 붙여넣도록 안내해요.
+    if(doShareNative(payload)) return;
+    doShareCopy(payload);
+    var hint = document.getElementById('share-hint');
+    if(hint){
+      hint.textContent = platform === 'kakao'
+        ? '링크를 복사했어요. 카카오톡 대화방에 붙여넣어 공유해보세요.'
+        : '링크를 복사했어요. 인스타그램 스토리나 DM에 붙여넣어 공유해보세요.';
+    }
+  }
 
   function challengeModalHtml(){
     return '<div class="modal-head"><h3 class="display">우리 아이도 참여하기</h3><button class="modal-close" data-close-modal aria-label="닫기">✕</button></div>' +
@@ -2059,6 +2383,9 @@
     var typePick = e.target.closest('[data-type-pick]');
     if(typePick){ state.kidType = typePick.getAttribute('data-type-pick'); save(); renderOnboarding(); return; }
 
+    var rolePick = e.target.closest('[data-role-pick]');
+    if(rolePick){ state.parentRole = rolePick.getAttribute('data-role-pick'); save(); renderOnboarding(); return; }
+
     var region = e.target.closest('[data-region]');
     if(region){ state.region = region.getAttribute('data-region'); save(); renderOnboarding(); return; }
 
@@ -2106,6 +2433,12 @@
 
     var btab = e.target.closest('[data-benefit-tab]');
     if(btab){ state.benefitTab = btab.getAttribute('data-benefit-tab'); save(); renderBenefit(); return; }
+
+    var otab = e.target.closest('[data-outing-tab]');
+    if(otab){ state.outingTab = otab.getAttribute('data-outing-tab'); save(); renderOuting(); return; }
+
+    var oregion = e.target.closest('[data-outing-region]');
+    if(oregion){ state.outingRegion = oregion.getAttribute('data-outing-region'); save(); renderOuting(); return; }
 
     var ctab = e.target.closest('[data-community-tab]');
     if(ctab){ state.communityTab = ctab.getAttribute('data-community-tab'); save(); renderCommunity(); return; }
@@ -2179,6 +2512,41 @@
     }
     if(e.target.closest('[data-open-growth-modal]')){
       openModal(growthModalHtml());
+      return;
+    }
+
+    var sharePostBtn = e.target.closest('[data-share-post]');
+    if(sharePostBtn){
+      var spid = sharePostBtn.getAttribute('data-share-post');
+      var spost = state.posts.filter(function(x){ return x.id === spid; })[0];
+      if(spost){
+        var excerpt = spost.text.length > 60 ? spost.text.slice(0,60) + '…' : spost.text;
+        openShareModal({ title:'다다맘', text: excerpt + ' - 다다맘에서 더 보기', url: shareUrlFor() });
+      }
+      return;
+    }
+
+    var shareAppBtn = e.target.closest('[data-share-app]');
+    if(shareAppBtn){
+      openShareModal({ title:'다다맘', text:'우리 아이 성장을 함께 기록하는 육아 커뮤니티, 다다맘을 소개할게요!', url: shareUrlFor() });
+      return;
+    }
+
+    var shareNativeBtn = e.target.closest('[data-share-native]');
+    if(shareNativeBtn){
+      if(shareTarget && !doShareNative(shareTarget)){ doShareCopy(shareTarget); }
+      return;
+    }
+
+    var shareCopyBtn = e.target.closest('[data-share-copy]');
+    if(shareCopyBtn){
+      if(shareTarget) doShareCopy(shareTarget);
+      return;
+    }
+
+    var sharePlatformBtn = e.target.closest('[data-share-platform]');
+    if(sharePlatformBtn){
+      if(shareTarget) doSharePlatform(sharePlatformBtn.getAttribute('data-share-platform'), shareTarget);
       return;
     }
 
@@ -2308,7 +2676,26 @@
       openModal(authModalHtml());
       return;
     }
+    if(e.target.closest('#kakao-signin-btn')){ handleKakaoSignIn(); return; }
+    if(e.target.closest('#google-signin-btn')){ handleGoogleSignIn(); return; }
     if(e.target.closest('#auth-submit')){ handleAuthSubmit(); return; }
+    if(e.target.closest('#auth-password-submit')){ handlePasswordAuth(); return; }
+
+    var authModeTab = e.target.closest('[data-auth-mode]');
+    if(authModeTab){
+      authMode = authModeTab.getAttribute('data-auth-mode');
+      var authModalCard = document.getElementById('modal-card');
+      if(authModalCard) authModalCard.innerHTML = authModalHtml();
+      return;
+    }
+
+    var authViewToggle = e.target.closest('[data-auth-view]');
+    if(authViewToggle){
+      authView = authViewToggle.getAttribute('data-auth-view');
+      var authModalCard2 = document.getElementById('modal-card');
+      if(authModalCard2) authModalCard2.innerHTML = authModalHtml();
+      return;
+    }
 
     var adminApprove = e.target.closest('[data-admin-approve]');
     if(adminApprove){ handleAdminModerate(adminApprove.getAttribute('data-admin-approve'), 'approved'); return; }
@@ -2358,7 +2745,7 @@
     var file = (photoEl && photoEl.files && photoEl.files[0]) ? photoEl.files[0] : null;
     if(btn){ btn.disabled = true; btn.textContent = '등록 중...'; }
     var mediaUrl = file ? await uploadMedia(file) : '';
-    var author = state.nickname ? state.nickname + '맘·아빠' : '나';
+    var author = state.nickname ? state.nickname + roleLabel() : '나';
     var myStage = state.kidType;
     var myAgeVal = myStage === 'pregnant' ? pregWeeks(state.dueDate) : (myStage === 'parenting' ? ageMonths(state.birthMonth) : null);
     var visBtn = document.querySelector('#post-visibility-group [data-post-visibility][aria-selected="true"]');
@@ -2497,7 +2884,7 @@
       return;
     }
     if(btn) btn.disabled = true;
-    var author = state.nickname ? state.nickname + '맘·아빠' : '나';
+    var author = state.nickname ? state.nickname + roleLabel() : '나';
     var post = state.posts.filter(function(x){ return x.id === postId; })[0];
     var res = await sb.from('post_comments').insert({ post_id: postId, author: author, content: val }).select().single();
     if(res.error || !res.data){
@@ -2647,6 +3034,16 @@
     if(e.target.id === 'auth-email'){
       var abtn = document.getElementById('auth-submit');
       if(abtn) abtn.disabled = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.target.value.trim());
+    }
+    if(e.target.id === 'auth-email' || e.target.id === 'auth-password'){
+      var pbtn = document.getElementById('auth-password-submit');
+      if(pbtn){
+        var pEmailEl = document.getElementById('auth-email');
+        var pPassEl = document.getElementById('auth-password');
+        var pEmailOk = pEmailEl && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(pEmailEl.value.trim());
+        var pPassOk = pPassEl && pPassEl.value.length >= 6;
+        pbtn.disabled = !(pEmailOk && pPassOk);
+      }
     }
   });
   document.addEventListener('change', function(e){
