@@ -9,6 +9,7 @@
     --bg:#FFFBF5; --surface:#FFFFFF; --border:#F0E4D6;
     --text:#2B2118; --text2:#6E5F50;
     --accent:#FF7A59; --accent-ink:#FFFFFF; --accent-soft:#FFF3EE;
+    --accent-strong:#C94318;
     --accent2:#8A6512; --accent2-soft:#FFF3D6;
     --chip-a:#FFF3D6; --chip-a-ink:#8A6512;
     --chip-b:#FFE8DE; --chip-b-ink:#B84B2E;
@@ -23,6 +24,7 @@
     --bg:#1C1712; --surface:#25201A; --border:#3A2F24;
     --text:#F5EDE3; --text2:#C2B3A2;
     --accent:#FF8B6B; --accent-ink:#241812; --accent-soft:#3A2A20;
+    --accent-strong:#FF8B6B;
     --accent2:#E0B355; --accent2-soft:#3A2E17;
     --chip-a:#3A2E17; --chip-a-ink:#E7C067;
     --chip-b:#3A2620; --chip-b-ink:#F0937A;
@@ -76,7 +78,7 @@
   .pill{ border-radius:999px; }
   .btn-primary{
     display:flex; align-items:center; justify-content:center; gap:6px;
-    height:50px; border-radius:18px; background:var(--accent); color:var(--accent-ink);
+    height:50px; border-radius:18px; background:var(--accent-strong); color:var(--accent-ink);
     font-size:15px; font-weight:700; border:none; text-decoration:none;
   }
   .btn-primary:disabled{ opacity:.5; cursor:not-allowed; }
@@ -115,7 +117,26 @@
   .link-quiet{ font-size:12.5px; color:var(--text2); text-decoration:none; }
   .pad{ padding-inline:20px; }
 
-  .hero{ display:block; padding:22px; border-radius:24px; background:var(--accent); color:var(--accent-ink); text-decoration:none; }
+  .biz-footer{ margin-top:26px; padding:18px 4px 6px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:10px; }
+  .biz-footer-links{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; font-size:12.5px; }
+  .biz-footer-links a{ color:var(--text2); text-decoration:none; }
+  .biz-footer-links a:hover, .biz-footer-links a:focus-visible{ color:var(--text); text-decoration:underline; }
+  .biz-footer-links span{ color:var(--border); }
+  .biz-footer-info{ display:flex; flex-wrap:wrap; gap:4px 10px; font-size:11.5px; color:var(--text2); line-height:1.6; }
+  .biz-footer-copy{ font-size:11px; color:var(--text2); opacity:.8; }
+  .legal{ font-size:13.5px; line-height:1.75; color:var(--text); }
+  .legal h2{ font-size:15px; font-weight:800; margin:22px 0 8px; }
+  .legal h2:first-of-type{ margin-top:8px; }
+  .legal p{ margin:0 0 10px; }
+  .legal ul{ margin:0 0 10px; padding-left:18px; }
+  .legal li{ margin:0 0 5px; }
+  .legal table{ width:100%; border-collapse:collapse; margin:0 0 12px; font-size:12.5px; }
+  .legal th, .legal td{ border:1px solid var(--border); padding:8px 10px; text-align:left; vertical-align:top; }
+  .legal th{ background:var(--accent-soft); font-weight:700; }
+  .legal .note{ background:var(--accent-soft); border-radius:14px; padding:12px 14px; font-size:12.5px; color:var(--text2); margin:0 0 12px; }
+
+
+  .hero{ display:block; padding:22px; border-radius:24px; background:var(--accent-strong); color:var(--accent-ink); text-decoration:none; }
   .hero-eyebrow{ display:inline-flex; font-size:12px; font-weight:700; background:rgba(0,0,0,0.16); padding:4px 10px; border-radius:999px; }
   .hero-title{ font-size:22px; line-height:1.35; margin:12px 0 6px; }
   .hero-sub{ font-size:13px; line-height:1.6; opacity:0.95; margin:0 0 16px; }
@@ -491,6 +512,7 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
         </button>
       </div>
+      <div id="my-footer"></div>
     </div>
     <nav class="navbar" data-nav aria-label="주요 메뉴"></nav>
   </section>
@@ -503,6 +525,27 @@
       <div class="col" style="gap:14px; margin-top:14px;" id="admin-body"></div>
     </div>
   </section>
+
+  <section class="screen" id="screen-policy">
+    <div class="scroll pad">
+      <button type="button" class="link-quiet" data-legal-back style="background:none; border:none; padding:2px 0; font-size:12.5px;">← 돌아가기</button>
+      <h1 class="display" style="font-size:20px; margin:8px 0 4px;">개인정보처리방침</h1>
+      <span class="helper">시행일: 2026년 9월 28일</span>
+      <div class="legal" style="margin-top:16px;" id="policy-body"></div>
+      <div id="policy-footer"></div>
+    </div>
+  </section>
+
+  <section class="screen" id="screen-terms">
+    <div class="scroll pad">
+      <button type="button" class="link-quiet" data-legal-back style="background:none; border:none; padding:2px 0; font-size:12.5px;">← 돌아가기</button>
+      <h1 class="display" style="font-size:20px; margin:8px 0 4px;">서비스 이용약관</h1>
+      <span class="helper">시행일: 2026년 9월 28일</span>
+      <div class="legal" style="margin-top:16px;" id="terms-body"></div>
+      <div id="terms-footer"></div>
+    </div>
+  </section>
+
 
 </div>
 
@@ -1525,7 +1568,7 @@
           '<div class="col" style="gap:6px;"><div style="height:6px; border-radius:999px; background:var(--track); overflow:hidden;">' +
           '<div style="height:100%; width:' + pct + '%; background:var(--accent);"></div></div>' +
           '<span style="font-size:11.5px; color:var(--text2);">' + count + ' / ' + t.total + '명 신청</span></div>' +
-          '<button data-open-apply="' + t.key + '" ' + (btnDisabled ? 'disabled' : '') + ' style="height:44px; border-radius:16px; border:none; font-size:14px; font-weight:700; background:' + (btnDisabled ? 'var(--pill-bg)' : 'var(--accent)') + '; color:' + (btnDisabled ? 'var(--text2)' : 'var(--accent-ink)') + ';">' + btnLabel + '</button>' +
+          '<button data-open-apply="' + t.key + '" ' + (btnDisabled ? 'disabled' : '') + ' style="height:44px; border-radius:16px; border:none; font-size:14px; font-weight:700; background:' + (btnDisabled ? 'var(--pill-bg)' : 'var(--accent-strong)') + '; color:' + (btnDisabled ? 'var(--text2)' : 'var(--accent-ink)') + ';">' + btnLabel + '</button>' +
           '</div>';
       }).join('');
     } else {
@@ -1645,6 +1688,8 @@
 
   // ---------- MY ----------
   function renderMy(){
+    var _mf = document.getElementById('my-footer');
+    if(_mf){ _mf.innerHTML = bizFooterHtml(); }
     document.getElementById('my-name').textContent = state.nickname ? state.nickname + roleLabel() : '다다맘 회원';
     document.getElementById('my-sub').textContent = profileSummary();
     document.getElementById('my-stat-challenge').textContent = state.entries.filter(function(e){ return e.mine; }).length;
@@ -2166,6 +2211,203 @@
     renderMy();
   }
 
+
+  // ---------- 사업자 정보 (법적 표기 · 한 곳에서 관리) ----------
+  var BIZ = {
+    service: '다다맘',
+    company: '다다란',
+    ceo: '윤대인',
+    bizNo: '435-05-02816',
+    mailOrderNo: '제2024-인천남동구-0274호',
+    address: '인천광역시 남동구 구월동 1306-15 3F',
+    email: 'ryundaen@gmail.com',
+    tel: '010-4888-9498',
+    privacyOfficer: '윤대인',
+    effectiveDate: '2026년 9월 28일'
+  };
+
+  function bizFooterHtml(){
+    return '<footer class="biz-footer">' +
+      '<div class="biz-footer-links">' +
+        '<a href="#terms">이용약관</a><span aria-hidden="true">·</span>' +
+        '<a href="#policy"><strong>개인정보처리방침</strong></a>' +
+      '</div>' +
+      '<div class="biz-footer-info">' +
+        '<span>' + BIZ.company + '</span>' +
+        '<span>대표 ' + BIZ.ceo + '</span>' +
+        '<span>사업자등록번호 ' + BIZ.bizNo + '</span>' +
+        '<span>통신판매업신고 ' + BIZ.mailOrderNo + '</span>' +
+        '<span>' + BIZ.address + '</span>' +
+        '<span>문의 ' + BIZ.email + '</span>' +
+        '<span>' + BIZ.tel + '</span>' +
+      '</div>' +
+      '<div class="biz-footer-copy">&copy; ' + new Date().getFullYear() + ' ' + BIZ.company + '. All rights reserved.</div>' +
+    '</footer>';
+  }
+
+
+  // ---------- 법적 문서 ----------
+  function policyHtml(){
+    return '' +
+    '<p>' + BIZ.company + '(이하 "회사")은(는) 「개인정보 보호법」 등 관련 법령을 준수하며, 이용자의 개인정보를 보호하기 위해 다음과 같은 처리방침을 두고 있습니다.</p>' +
+
+    '<h2>1. 수집하는 개인정보 항목 및 수집 방법</h2>' +
+    '<table><tr><th>구분</th><th>수집 항목</th><th>수집 시점</th></tr>' +
+    '<tr><td>소셜 로그인<br>(카카오·구글)</td><td>이메일 주소, 닉네임, 프로필 사진</td><td>소셜 계정으로 로그인할 때</td></tr>' +
+    '<tr><td>이메일 가입</td><td>이메일 주소, 비밀번호(암호화 저장)</td><td>이메일로 가입할 때</td></tr>' +
+    '<tr><td>프로필 설정</td><td>닉네임, 거주 지역, 아이의 생년월 또는 출산예정일, 보호자 구분(엄마·아빠·보호자)</td><td>온보딩 단계에서 직접 입력</td></tr>' +
+    '<tr><td>체험단 신청</td><td>연락처, 배송지 주소</td><td>체험단을 신청할 때</td></tr>' +
+    '<tr><td>콘텐츠 등록</td><td>게시글·댓글 내용, 첨부한 사진 및 영상</td><td>커뮤니티 글 또는 챌린지 참가작을 올릴 때</td></tr>' +
+    '<tr><td>자동 수집</td><td>서비스 이용 기록, 접속 로그</td><td>서비스 이용 과정에서 자동 생성</td></tr></table>' +
+    '<div class="note">육아 기록(수유·수면·기저귀 등), 성장앨범, 타임라인 등 개인 기록 기능의 데이터는 서버로 전송되지 않고 <strong>이용자의 기기 내부(브라우저 저장소)에만 저장</strong>됩니다. 회사는 해당 정보를 열람할 수 없습니다.</div>' +
+
+    '<h2>2. 개인정보의 수집 및 이용 목적</h2>' +
+    '<ul>' +
+    '<li>회원 식별 및 로그인, 회원 관리</li>' +
+    '<li>아이의 개월 수·임신 주수에 맞춘 정보 제공 등 맞춤형 서비스 제공</li>' +
+    '<li>커뮤니티·챌린지 등 이용자 참여형 서비스 운영 및 콘텐츠 검수</li>' +
+    '<li>체험단 선정 결과 안내 및 제품 배송</li>' +
+    '<li>문의 응대 및 공지사항 전달</li>' +
+    '</ul>' +
+
+    '<h2>3. 개인정보의 보유 및 이용 기간</h2>' +
+    '<p>원칙적으로 개인정보 수집·이용 목적이 달성되면 지체 없이 파기합니다. 다만 다음의 경우에는 명시한 기간 동안 보관합니다.</p>' +
+    '<table><tr><th>구분</th><th>보유 기간</th><th>근거</th></tr>' +
+    '<tr><td>회원 정보</td><td>회원 탈퇴 시까지</td><td>서비스 제공</td></tr>' +
+    '<tr><td>체험단 배송 정보<br>(연락처·주소)</td><td>배송 완료 후 6개월</td><td>배송 분쟁 대응</td></tr>' +
+    '<tr><td>계약 또는 청약철회 기록</td><td>5년</td><td>전자상거래법</td></tr>' +
+    '<tr><td>소비자 불만·분쟁처리 기록</td><td>3년</td><td>전자상거래법</td></tr>' +
+    '<tr><td>접속에 관한 기록</td><td>3개월</td><td>통신비밀보호법</td></tr></table>' +
+
+    '<h2>4. 개인정보의 제3자 제공</h2>' +
+    '<p>회사는 이용자의 개인정보를 제3자에게 제공하지 않습니다. 다만 다음의 경우는 예외로 합니다.</p>' +
+    '<ul>' +
+    '<li>이용자가 사전에 동의한 경우 (예: 체험단 참여 시 배송을 위해 해당 브랜드에 배송 정보를 전달하는 경우 — 이 경우 신청 단계에서 제공받는 자와 항목을 별도로 안내하고 동의를 받습니다)</li>' +
+    '<li>법령에 근거하거나 수사기관이 적법한 절차에 따라 요청한 경우</li>' +
+    '</ul>' +
+
+    '<h2>5. 개인정보 처리의 위탁</h2>' +
+    '<p>회사는 서비스 운영을 위해 아래와 같이 개인정보 처리 업무를 위탁하고 있습니다.</p>' +
+    '<table><tr><th>수탁자</th><th>위탁 업무</th></tr>' +
+    '<tr><td>Supabase, Inc.</td><td>회원 인증 처리, 데이터베이스 및 파일 저장소 운영</td></tr>' +
+    '<tr><td>GitHub, Inc.</td><td>서비스 웹페이지 호스팅</td></tr>' +
+    '<tr><td>카카오 · Google</td><td>소셜 로그인 인증 처리</td></tr></table>' +
+
+    '<h2>6. 이용자의 권리와 행사 방법</h2>' +
+    '<p>이용자는 언제든지 자신의 개인정보에 대해 열람, 정정, 삭제, 처리정지를 요구할 수 있습니다. 앱 내 MY 화면에서 직접 수정하거나, 아래 연락처로 요청하시면 지체 없이 조치합니다. 만 14세 미만 아동의 개인정보는 수집하지 않습니다.</p>' +
+
+    '<h2>7. 개인정보의 파기</h2>' +
+    '<p>보유 기간이 지나거나 처리 목적이 달성된 개인정보는 지체 없이 파기합니다. 전자적 파일은 복구할 수 없는 기술적 방법으로 삭제하고, 출력물은 분쇄하거나 소각합니다.</p>' +
+
+    '<h2>8. 개인정보의 안전성 확보 조치</h2>' +
+    '<ul>' +
+    '<li>비밀번호는 복호화가 불가능한 방식으로 암호화하여 저장합니다.</li>' +
+    '<li>모든 통신 구간에 HTTPS 암호화를 적용합니다.</li>' +
+    '<li>데이터베이스에 접근 권한 제어(RLS) 정책을 적용하여 본인 또는 권한 있는 관리자만 접근할 수 있도록 제한합니다.</li>' +
+    '<li>업로드된 사진에서 촬영 위치 등 메타데이터(EXIF)를 자동으로 제거합니다.</li>' +
+    '</ul>' +
+
+    '<h2>9. 쿠키 및 기기 저장소의 운영</h2>' +
+    '<p>서비스는 로그인 상태 유지와 개인 기록 저장을 위해 브라우저 저장소(localStorage 등)를 사용합니다. 이용자는 브라우저 설정에서 저장을 거부할 수 있으나, 이 경우 일부 기능 이용이 제한될 수 있습니다.</p>' +
+
+    '<h2>10. 개인정보 보호책임자</h2>' +
+    '<table><tr><th>구분</th><th>내용</th></tr>' +
+    '<tr><td>개인정보 보호책임자</td><td>' + BIZ.privacyOfficer + '</td></tr>' +
+    '<tr><td>문의 이메일</td><td>' + BIZ.email + '</td></tr>' +
+    '<tr><td>문의 전화</td><td>' + BIZ.tel + '</td></tr></table>' +
+
+    '<h2>11. 권익침해 구제 방법</h2>' +
+    '<p>개인정보 침해로 인한 상담 및 신고가 필요한 경우 아래 기관에 문의하실 수 있습니다.</p>' +
+    '<ul>' +
+    '<li>개인정보침해 신고센터 — privacy.kisa.or.kr / 국번없이 118</li>' +
+    '<li>개인정보 분쟁조정위원회 — kopico.go.kr / 1833-6972</li>' +
+    '<li>대검찰청 사이버수사과 — spo.go.kr / 1301</li>' +
+    '<li>경찰청 사이버수사국 — ecrm.police.go.kr / 182</li>' +
+    '</ul>' +
+
+    '<h2>12. 처리방침의 변경</h2>' +
+    '<p>이 개인정보처리방침은 ' + BIZ.effectiveDate + '부터 적용됩니다. 내용이 추가·삭제·수정될 경우 변경 사항의 시행 7일 전부터 서비스 내 공지를 통해 안내합니다.</p>';
+  }
+
+  function termsHtml(){
+    return '' +
+    '<h2>제1조 (목적)</h2>' +
+    '<p>이 약관은 ' + BIZ.company + '(이하 "회사")이(가) 제공하는 ' + BIZ.service + ' 서비스(이하 "서비스")의 이용 조건과 절차, 회사와 이용자의 권리·의무 및 책임사항을 규정하는 것을 목적으로 합니다.</p>' +
+
+    '<h2>제2조 (정의)</h2>' +
+    '<ul>' +
+    '<li>"서비스"란 회사가 제공하는 임신·육아 정보, 커뮤니티, 챌린지, 체험단, 육아 기록 등 일체의 기능을 말합니다.</li>' +
+    '<li>"회원"이란 이 약관에 동의하고 계정을 생성하여 서비스를 이용하는 자를 말합니다.</li>' +
+    '<li>"콘텐츠"란 회원이 서비스에 게시한 글, 댓글, 사진, 영상 등을 말합니다.</li>' +
+    '</ul>' +
+
+    '<h2>제3조 (약관의 게시와 개정)</h2>' +
+    '<p>회사는 이 약관을 서비스 내에 게시합니다. 회사는 관련 법령을 위배하지 않는 범위에서 약관을 개정할 수 있으며, 개정 시 적용일자와 개정 사유를 명시하여 적용일 7일 전부터 공지합니다. 회원에게 불리한 개정의 경우 30일 전부터 공지합니다.</p>' +
+
+    '<h2>제4조 (회원가입 및 계정)</h2>' +
+    '<p>회원가입은 이메일 또는 소셜 계정(카카오·구글)으로 할 수 있습니다. 회원은 계정 정보를 제3자에게 양도하거나 대여할 수 없으며, 계정 관리 소홀로 발생한 손해에 대한 책임은 회원 본인에게 있습니다. 회원은 언제든지 탈퇴를 요청할 수 있습니다.</p>' +
+
+    '<h2>제5조 (서비스의 제공 및 변경)</h2>' +
+    '<p>서비스는 연중무휴 24시간 제공을 원칙으로 합니다. 다만 시스템 점검, 설비 장애, 천재지변 등 부득이한 사유가 있는 경우 서비스의 전부 또는 일부를 일시 중단할 수 있으며, 이 경우 사전에 공지합니다(사전 공지가 불가능한 긴급한 경우는 사후에 공지합니다).</p>' +
+
+    '<h2>제6조 (회원의 의무 — 금지행위)</h2>' +
+    '<p>회원은 다음 행위를 하여서는 안 됩니다.</p>' +
+    '<ul>' +
+    '<li>타인의 개인정보를 도용하거나 허위 정보를 등록하는 행위</li>' +
+    '<li>타인을 비방·모욕하거나 명예를 훼손하는 행위</li>' +
+    '<li>음란물, 폭력적 표현 등 공서양속에 반하는 콘텐츠를 게시하는 행위</li>' +
+    '<li>타인의 저작권 등 지식재산권을 침해하는 행위</li>' +
+    '<li>영리 목적의 광고, 스팸성 게시물을 반복 등록하는 행위</li>' +
+    '<li>검증되지 않은 의학적 조언을 사실인 것처럼 유포하는 행위</li>' +
+    '<li>서비스의 정상적인 운영을 방해하는 일체의 행위</li>' +
+    '</ul>' +
+
+    '<h2>제7조 (콘텐츠의 관리)</h2>' +
+    '<p>회원이 등록한 콘텐츠는 운영정책에 따라 검수를 거친 후 공개될 수 있습니다. 회사는 제6조를 위반하거나 관련 법령에 저촉되는 콘텐츠에 대해 사전 통지 없이 비공개 처리 또는 삭제할 수 있습니다. 회원은 조치에 대해 이의를 제기할 수 있으며, 회사는 이를 검토하여 회신합니다.</p>' +
+
+    '<h2>제8조 (콘텐츠의 저작권)</h2>' +
+    '<p>회원이 등록한 콘텐츠의 저작권은 해당 회원에게 있습니다. 다만 회원은 회사가 서비스의 운영·전시·홍보 목적 범위 내에서 해당 콘텐츠를 무상으로 사용할 수 있도록 허락합니다. 회원이 콘텐츠를 삭제하거나 탈퇴하면 해당 사용 허락도 종료됩니다.</p>' +
+
+    '<h2>제9조 (챌린지 및 체험단 운영)</h2>' +
+    '<ul>' +
+    '<li>챌린지·체험단의 참여 자격, 모집 기간, 선정 방식, 제공 혜택은 각 캠페인 상세 페이지에 명시된 내용을 따릅니다.</li>' +
+    '<li>체험단 선정자는 배송을 위해 연락처와 주소를 제공하여야 하며, 허위 정보 제공 시 선정이 취소될 수 있습니다.</li>' +
+    '<li>부정한 방법으로 참여하거나 선정 후 정당한 사유 없이 약속한 후기를 작성하지 않는 경우, 향후 캠페인 참여가 제한될 수 있습니다.</li>' +
+    '</ul>' +
+
+    '<h2>제10조 (의료 정보에 관한 고지)</h2>' +
+    '<div class="note">서비스에서 제공하는 임신 주수별·월령별 정보, 예방접종 안내, 육아 관련 콘텐츠는 <strong>일반적인 참고 정보이며 의학적 진단이나 치료를 대체하지 않습니다.</strong> 아이 또는 산모의 건강에 관한 판단은 반드시 의사 등 전문가와 상담하시기 바랍니다. 회사는 이용자가 서비스의 정보에만 의존하여 내린 판단의 결과에 대해 책임지지 않습니다.</div>' +
+
+    '<h2>제11조 (이용 제한)</h2>' +
+    '<p>회사는 회원이 이 약관을 위반한 경우 경고, 일시 이용정지, 영구 이용정지 순으로 서비스 이용을 제한할 수 있습니다. 다만 위반의 정도가 중대한 경우 즉시 영구 이용정지를 할 수 있습니다.</p>' +
+
+    '<h2>제12조 (면책)</h2>' +
+    '<ul>' +
+    '<li>회사는 천재지변, 통신망 장애 등 불가항력으로 인한 서비스 중단에 대해 책임을 지지 않습니다.</li>' +
+    '<li>회사는 회원이 게시한 콘텐츠의 정확성이나 신뢰성을 보증하지 않으며, 회원 간 또는 회원과 제3자 간에 발생한 분쟁에 개입하지 않습니다.</li>' +
+    '<li>무료로 제공되는 서비스의 이용과 관련하여 발생한 손해에 대해서는 회사의 고의 또는 중대한 과실이 없는 한 책임을 지지 않습니다.</li>' +
+    '</ul>' +
+
+    '<h2>제13조 (분쟁의 해결)</h2>' +
+    '<p>이 약관은 대한민국 법령에 따라 해석되며, 서비스 이용과 관련하여 분쟁이 발생한 경우 회사와 회원은 원만한 해결을 위해 성실히 협의합니다. 협의가 이루어지지 않을 경우 민사소송법상 관할 법원에 소를 제기할 수 있습니다.</p>' +
+
+    '<p style="margin-top:20px; color:var(--text2); font-size:12.5px;">부칙 — 이 약관은 ' + BIZ.effectiveDate + '부터 시행합니다.</p>';
+  }
+
+  function renderLegal(id){
+    if(id === 'policy'){
+      var pb = document.getElementById('policy-body');
+      if(pb && !pb.innerHTML){ pb.innerHTML = policyHtml(); }
+      var pf = document.getElementById('policy-footer');
+      if(pf){ pf.innerHTML = bizFooterHtml(); }
+    } else {
+      var tb = document.getElementById('terms-body');
+      if(tb && !tb.innerHTML){ tb.innerHTML = termsHtml(); }
+      var tf = document.getElementById('terms-footer');
+      if(tf){ tf.innerHTML = bizFooterHtml(); }
+    }
+  }
+
   // ---------- ROUTING ----------
   function showScreen(id){
     document.querySelectorAll('.screen').forEach(function(s){ s.hidden = (s.id !== 'screen-' + id); });
@@ -2175,12 +2417,13 @@
 
   function route(){
     var id = (location.hash || '').replace('#', '');
-    var valid = ['onboarding','home','challenge','benefit','community','outing','my','admin'];
+    var valid = ['onboarding','home','challenge','benefit','community','outing','my','admin','policy','terms'];
+    var publicPages = ['policy','terms'];
     if(valid.indexOf(id) === -1){
       location.hash = '#' + (state.onboarded ? 'home' : 'onboarding');
       return;
     }
-    if(!state.onboarded && id !== 'onboarding'){
+    if(!state.onboarded && id !== 'onboarding' && publicPages.indexOf(id) === -1){
       location.hash = '#onboarding';
       return;
     }
@@ -2190,7 +2433,18 @@
       refreshRemote();
     }
     if(id === 'admin'){ renderAdmin(); }
+    if(id === 'policy' || id === 'terms'){ renderLegal(id); }
   }
+
+  // ---------- 법적 페이지 뒤로가기 ----------
+  document.addEventListener('click', function(e){
+    var back = e.target.closest && e.target.closest('[data-legal-back]');
+    if(back){
+      e.preventDefault();
+      if(history.length > 1){ history.back(); }
+      else { location.hash = state.onboarded ? '#my' : '#onboarding'; }
+    }
+  });
 
   // ---------- MODAL ----------
   var _modalLastFocus = null;
