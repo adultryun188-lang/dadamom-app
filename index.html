@@ -346,6 +346,12 @@
         <a href="#onboarding" class="btn-ghost">아이 정보 수정</a>
       </div>
 
+      <div class="card row" id="account-card" style="align-items:center; gap:12px; padding:14px 18px;">
+        <span style="flex:1; font-size:12.5px; color:var(--text2);" id="account-status">로그인하지 않았어요</span>
+        <button type="button" id="account-action-btn" data-open-auth-modal class="btn-ghost" style="height:36px; padding:0 14px; font-size:12.5px; flex:0 0 auto;">로그인</button>
+      </div>
+      <a href="#admin" id="admin-link" class="link-quiet" hidden style="background:none; border:none; padding:2px 0; font-size:12.5px;">콘텐츠 검수 콘솔</a>
+
       <div style="display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:10px;">
         <div class="card col" style="align-items:center; gap:4px; padding:14px 0;"><span class="display" id="my-stat-challenge" style="font-size:19px;">0</span><span style="font-size:11.5px; color:var(--text2);">참여 챌린지</span></div>
         <div class="card col" style="align-items:center; gap:4px; padding:14px 0;"><span class="display" id="my-stat-benefit" style="font-size:19px;">0</span><span style="font-size:11.5px; color:var(--text2);">신청 체험단</span></div>
@@ -408,7 +414,7 @@
         <div id="monthly-album-grid" style="display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:6px;"></div>
       </div>
 
-      <div class="card col" id="family-card" style="gap:12px; padding:18px;">
+      <div class="card col" id="family-card" style="gap:12px; padding:18px;" hidden>
         <h2 class="display" style="font-size:16px;">가족과 함께 기록하기</h2>
         <div class="col" id="family-body" style="gap:10px;"></div>
       </div>
@@ -439,6 +445,15 @@
     <nav class="navbar" data-nav aria-label="주요 메뉴"></nav>
   </section>
 
+  <section class="screen" id="screen-admin">
+    <div class="scroll pad">
+      <a href="#my" class="link-quiet" style="background:none; border:none; padding:2px 0; font-size:12.5px;">← MY로 돌아가기</a>
+      <h1 class="display" style="font-size:20px; margin:8px 0 4px;">콘텐츠 검수</h1>
+      <span class="helper">관리자 계정으로 로그인한 경우에만 접근할 수 있어요.</span>
+      <div class="col" style="gap:14px; margin-top:14px;" id="admin-body"></div>
+    </div>
+  </section>
+
 </div>
 
 <div class="modal-backdrop" id="modal-backdrop" hidden>
@@ -459,6 +474,154 @@
       sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     }
   }catch(e){ sb = null; }
+
+  // ---------- 인증(이메일 매직링크) ----------
+  var authUser = null;
+  var isAdminUser = false;
+
+  function renderAccount(){
+    var statusEl = document.getElementById('account-status');
+    var actionBtn = document.getElementById('account-action-btn');
+    var adminLink = document.getElementById('admin-link');
+    if(statusEl){ statusEl.textContent = authUser ? (authUser.email + '(으)로 로그인됨') : '로그인하지 않았어요'; }
+    if(actionBtn){ actionBtn.textContent = authUser ? '로그아웃' : '로그인'; }
+    if(adminLink){ adminLink.hidden = !isAdminUser; }
+  }
+
+  function refreshAdminStatus(){
+    if(!sb || typeof sb.rpc !== 'function' || !authUser){ isAdminUser = false; renderAccount(); return Promise.resolve(false); }
+    try{
+      return sb.rpc('is_admin').then(function(res){
+        isAdminUser = !!(res && !res.error && res.data);
+        renderAccount();
+        return isAdminUser;
+      }).catch(function(){ isAdminUser = false; renderAccount(); return false; });
+    }catch(e){ isAdminUser = false; renderAccount(); return Promise.resolve(false); }
+  }
+
+  if(sb && sb.auth && typeof sb.auth.getSession === 'function'){
+    try{
+      sb.auth.getSession().then(function(res){
+        var session = res && res.data && res.data.session;
+        authUser = (session && session.user) ? { email: session.user.email } : null;
+        renderAccount();
+        refreshAdminStatus();
+      }).catch(function(){});
+      if(typeof sb.auth.onAuthStateChange === 'function'){
+        sb.auth.onAuthStateChange(function(event, session){
+          authUser = (session && session.user) ? { email: session.user.email } : null;
+          renderAccount();
+          refreshAdminStatus();
+          if(event === 'SIGNED_IN'){ showToast('로그인됐어요'); }
+        });
+      }
+    }catch(e){ /* 인증을 지원하지 않는 클라이언트에서도 앱 초기화는 계속 진행 */ }
+  }
+
+  function authModalHtml(){
+    return '<div class="modal-head"><h3 class="display">이메일로 로그인</h3><button class="modal-close" data-close-modal aria-label="닫기">✕</button></div>' +
+      '<p class="modal-desc">비밀번호 없이, 이메일로 받은 링크로 로그인해요.</p>' +
+      '<div class="field"><label for="auth-email">이메일</label><input type="email" id="auth-email" placeholder="you@example.com" autocomplete="email"></div>' +
+      '<button class="btn-primary" id="auth-submit" style="width:100%;" disabled>로그인 링크 받기</button>' +
+      '<span class="helper" id="auth-hint"></span>';
+  }
+
+  async function handleAuthSubmit(){
+    var emailEl = document.getElementById('auth-email');
+    var btn = document.getElementById('auth-submit');
+    var hint = document.getElementById('auth-hint');
+    var email = emailEl ? emailEl.value.trim() : '';
+    if(!email || !sb || !sb.auth || typeof sb.auth.signInWithOtp !== 'function'){
+      if(hint) hint.textContent = '지금은 로그인 기능을 사용할 수 없어요.';
+      return;
+    }
+    if(btn){ btn.disabled = true; btn.textContent = '보내는 중...'; }
+    try{
+      var res = await sb.auth.signInWithOtp({ email: email, options: { emailRedirectTo: location.href.split('#')[0] } });
+      if(res.error){
+        if(hint) hint.textContent = '전송 실패: ' + res.error.message;
+        if(btn){ btn.disabled = false; btn.textContent = '로그인 링크 받기'; }
+        return;
+      }
+      if(hint) hint.textContent = email + '(으)로 로그인 링크를 보냈어요. 메일함을 확인해주세요.';
+      if(btn){ btn.textContent = '전송 완료'; }
+    }catch(e){
+      if(hint) hint.textContent = '전송 중 오류가 발생했어요. 다시 시도해주세요.';
+      if(btn){ btn.disabled = false; btn.textContent = '로그인 링크 받기'; }
+    }
+  }
+
+  async function handleSignOut(){
+    if(!sb || !sb.auth || typeof sb.auth.signOut !== 'function') return;
+    try{ await sb.auth.signOut(); }catch(e){}
+    authUser = null; isAdminUser = false;
+    renderAccount();
+    showToast('로그아웃 됐어요');
+  }
+
+  // ---------- 관리자: 콘텐츠 검수 콘솔 ----------
+  async function renderAdmin(){
+    var el = document.getElementById('admin-body');
+    if(!el) return;
+    if(!sb || !sb.auth || typeof sb.rpc !== 'function'){ el.innerHTML = '<p class="helper">온라인 상태에서만 사용할 수 있어요.</p>'; return; }
+    if(!authUser){
+      el.innerHTML = '<p class="helper">로그인이 필요해요.</p><button type="button" data-open-auth-modal class="btn-primary" style="height:44px; margin-top:10px;">로그인</button>';
+      return;
+    }
+    el.innerHTML = '<p class="helper">확인하는 중...</p>';
+    var admin = await refreshAdminStatus();
+    if(!admin){
+      el.innerHTML = '<p class="helper">관리자 권한이 없는 계정이에요. (' + escapeHtml(authUser.email) + ')</p>';
+      return;
+    }
+    var pendingEntries = [], pendingPosts = [];
+    try{
+      var er = await sb.from('challenge_entries').select('*').eq('status', 'pending').order('created_at', {ascending:false}).limit(50);
+      if(!er.error && er.data) pendingEntries = er.data;
+    }catch(e){}
+    try{
+      var pr = await sb.from('community_posts').select('*').eq('status', 'pending').order('created_at', {ascending:false}).limit(50);
+      if(!pr.error && pr.data) pendingPosts = pr.data;
+    }catch(e){}
+    if(!pendingEntries.length && !pendingPosts.length){
+      el.innerHTML = '<p class="helper">지금은 검수 대기 중인 콘텐츠가 없어요.</p>';
+      return;
+    }
+    var entryHtml = pendingEntries.map(function(r){
+      return '<div class="card col" style="gap:8px; padding:14px;">' +
+        '<span style="font-size:12px; color:var(--text2);">챌린지 참여 · ' + escapeHtml(r.name || '') + ' · ' + escapeHtml(r.age || '') + '</span>' +
+        (r.media_url ? mediaTag(r.media_url, 'width:100%; max-height:220px; object-fit:cover; border-radius:12px;') : '') +
+        '<p style="font-size:13px; line-height:1.5;">' + escapeHtml(r.note || '') + '</p>' +
+        '<div class="row" style="gap:8px;">' +
+        '<button type="button" class="btn-primary" style="flex:1; height:40px; font-size:13px;" data-admin-approve="challenge_entries:' + r.id + '">승인</button>' +
+        '<button type="button" class="btn-ghost" style="flex:1; height:40px; font-size:13px;" data-admin-reject="challenge_entries:' + r.id + '">반려</button>' +
+        '</div></div>';
+    }).join('');
+    var postHtml = pendingPosts.map(function(r){
+      return '<div class="card col" style="gap:8px; padding:14px;">' +
+        '<span style="font-size:12px; color:var(--text2);">커뮤니티 글 · ' + escapeHtml(r.author || '') + '</span>' +
+        (r.media_url ? mediaTag(r.media_url, 'width:100%; max-height:220px; object-fit:cover; border-radius:12px;') : '') +
+        '<p style="font-size:13px; line-height:1.5;">' + escapeHtml(r.text || '') + '</p>' +
+        '<div class="row" style="gap:8px;">' +
+        '<button type="button" class="btn-primary" style="flex:1; height:40px; font-size:13px;" data-admin-approve="community_posts:' + r.id + '">승인</button>' +
+        '<button type="button" class="btn-ghost" style="flex:1; height:40px; font-size:13px;" data-admin-reject="community_posts:' + r.id + '">반려</button>' +
+        '</div></div>';
+    }).join('');
+    el.innerHTML =
+      (pendingEntries.length ? '<h2 class="display" style="font-size:15px;">챌린지 참여 (' + pendingEntries.length + ')</h2>' + entryHtml : '') +
+      (pendingPosts.length ? '<h2 class="display" style="font-size:15px; margin-top:6px;">커뮤니티 글 (' + pendingPosts.length + ')</h2>' + postHtml : '');
+  }
+
+  async function handleAdminModerate(tableAndId, newStatus){
+    if(!sb) return;
+    var parts = tableAndId.split(':');
+    var table = parts[0], id = parts[1];
+    try{
+      await sb.from(table).update({ status: newStatus }).eq('id', id);
+    }catch(e){}
+    showToast(newStatus === 'approved' ? '승인했어요' : '반려했어요');
+    renderAdmin();
+  }
 
   function escapeHtml(s){
     return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
@@ -648,13 +811,44 @@
     return new Date(iso).toISOString().slice(0,10);
   }
 
+  function stripExifIfImage(file){
+    return new Promise(function(resolve){
+      if(!file || !/^image\//.test(file.type) || file.type === 'image/gif'){ resolve(file); return; }
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function(){
+        try{
+          var canvas = document.createElement('canvas');
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          var ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          canvas.toBlob(function(blob){
+            URL.revokeObjectURL(url);
+            if(!blob){ resolve(file); return; }
+            var newName = (file.name || 'photo').replace(/\.[^.]+$/, '') + '.jpg';
+            try{ resolve(new File([blob], newName, { type:'image/jpeg' })); }
+            catch(e2){ resolve(blob); }
+          }, 'image/jpeg', 0.9);
+        }catch(e){ URL.revokeObjectURL(url); resolve(file); }
+      };
+      img.onerror = function(){ URL.revokeObjectURL(url); resolve(file); };
+      img.src = url;
+    });
+  }
+
   async function uploadMedia(file){
     if(!sb || !file) return '';
     try{
+      file = await stripExifIfImage(file);
       var ext = (file.name && file.name.indexOf('.') > -1) ? file.name.split('.').pop() : 'dat';
       var path = 'u-' + Date.now() + '-' + Math.random().toString(36).slice(2,8) + '.' + ext;
       var up = await sb.storage.from('media').upload(path, file);
       if(up.error){ console.error('media upload error', up.error); return ''; }
+      try{
+        var signed = await sb.storage.from('media').createSignedUrl(path, 315360000);
+        if(signed && !signed.error && signed.data && signed.data.signedUrl) return signed.data.signedUrl;
+      }catch(e3){}
       var pub = sb.storage.from('media').getPublicUrl(path);
       return (pub && pub.data && pub.data.publicUrl) ? pub.data.publicUrl : '';
     }catch(e){ return ''; }
@@ -663,12 +857,13 @@
   async function fetchEntries(){
     if(!sb) return null;
     try{
-      var res = await sb.from('challenge_entries').select('*').order('created_at', {ascending:false}).limit(50);
+      var res = await sb.from('challenge_entries').select('*').eq('status', 'approved').order('created_at', {ascending:false}).limit(50);
       if(res.error || !res.data) return null;
       return res.data.map(function(r){
         return {
           id:r.id, name:r.name, age:r.age || '', note:r.note || '', media_url:r.media_url || '',
           votes:r.votes || 0, mine: state.myEntries.indexOf(r.id) > -1, liked: state.myVotes.indexOf(r.id) > -1,
+          status: r.status || 'approved',
           createdAt: new Date(r.created_at).getTime()
         };
       });
@@ -678,7 +873,7 @@
   async function fetchPosts(){
     if(!sb) return null;
     try{
-      var res = await sb.from('community_posts').select('*').order('created_at', {ascending:false}).limit(50);
+      var res = await sb.from('community_posts').select('*').eq('status', 'approved').order('created_at', {ascending:false}).limit(50);
       if(res.error || !res.data) return null;
       return res.data.map(function(r){
         return {
@@ -686,7 +881,7 @@
           text:r.text, media_url:r.media_url || '', img: !!r.media_url,
           likes:r.likes || 0, liked: state.myLikes.indexOf(r.id) > -1, comments:r.comments || 0,
           stage: r.stage || null, age_value: (r.age_value === 0 || r.age_value) ? r.age_value : null,
-          mine: state.myPosts.indexOf(r.id) > -1, createdAt: new Date(r.created_at).getTime()
+          mine: state.myPosts.indexOf(r.id) > -1, status: r.status || 'approved', createdAt: new Date(r.created_at).getTime()
         };
       });
     }catch(e){ return null; }
@@ -709,8 +904,18 @@
     if(!sb) return;
     Promise.all([fetchEntries(), fetchPosts(), fetchAppliedCounts()]).then(function(r){
       var entries = r[0], posts = r[1], counts = r[2];
-      if(entries) state.entries = entries;
-      if(posts) state.posts = posts;
+      if(entries){
+        var prevMineEntries = state.entries.filter(function(e){
+          return state.myEntries.indexOf(e.id) > -1 && !entries.some(function(x){ return x.id === e.id; });
+        });
+        state.entries = prevMineEntries.concat(entries);
+      }
+      if(posts){
+        var prevMinePosts = state.posts.filter(function(p){
+          return state.myPosts.indexOf(p.id) > -1 && !posts.some(function(x){ return x.id === p.id; });
+        });
+        state.posts = prevMinePosts.concat(posts);
+      }
       if(counts) state.appliedCount = Object.assign({}, state.appliedCount, counts);
       save();
       renderAll((location.hash || '').replace('#',''));
@@ -1067,7 +1272,7 @@
         '<div style="flex:0 0 auto; width:64px; height:64px; border-radius:14px; background:var(--border); overflow:hidden; display:flex; align-items:center; justify-content:center;" role="img" aria-label="' + escapeHtml(e.name) + ' 참가 영상 썸네일">' +
         thumb + '</div>' +
         '<div class="col" style="flex:1; gap:4px; min-width:0;">' +
-        '<span style="font-size:14px; font-weight:700;">' + escapeHtml(e.name) + (e.mine ? ' <span class="badge-match">내 참가작</span>' : '') + '</span>' +
+        '<span style="font-size:14px; font-weight:700;">' + escapeHtml(e.name) + (e.mine ? ' <span class="badge-match">내 참가작</span>' : '') + (e.mine && e.status === 'pending' ? ' <span class="badge-match">검수 중</span>' : '') + '</span>' +
         '<span style="font-size:12px; color:var(--text2);">' + escapeHtml(e.age) + (e.note ? ' · ' + escapeHtml(e.note) : '') + '</span>' +
         '</div>' +
         '<button data-vote="' + e.id + '" aria-pressed="' + e.liked + '" aria-label="응원하기, 현재 ' + e.votes + '표" style="flex:0 0 auto; background:none; border:none; display:flex; flex-direction:column; align-items:center; gap:2px; min-width:44px; min-height:44px; justify-content:center;">' +
@@ -1162,7 +1367,7 @@
           : (p.img ? '<div style="height:160px; border-radius:16px; background:' + p.bg + ';" role="img" aria-label="게시물 사진"></div>' : '');
         return '<div class="card col" style="gap:12px; padding:16px;">' +
           '<div class="row" style="align-items:center; gap:8px;"><div style="width:32px; height:32px; border-radius:999px; background:var(--border);" aria-hidden="true"></div>' +
-          '<span style="font-size:12.5px; font-weight:700;">' + escapeHtml(p.author) + '</span><span style="font-size:11px; color:var(--text2);">' + escapeHtml(p.time) + '</span></div>' +
+          '<span style="font-size:12.5px; font-weight:700;">' + escapeHtml(p.author) + '</span>' + (p.mine && p.status === 'pending' ? ' <span class="badge-match">검수 중</span>' : '') + '<span style="font-size:11px; color:var(--text2);">' + escapeHtml(p.time) + '</span></div>' +
           media +
           '<p style="font-size:13.5px; line-height:1.6;">' + escapeHtml(p.text) + '</p>' +
           '<div class="row" style="align-items:center; gap:16px;">' +
@@ -1717,7 +1922,7 @@
 
   function route(){
     var id = (location.hash || '').replace('#', '');
-    var valid = ['onboarding','home','challenge','benefit','community','my'];
+    var valid = ['onboarding','home','challenge','benefit','community','my','admin'];
     if(valid.indexOf(id) === -1){
       location.hash = '#' + (state.onboarded ? 'home' : 'onboarding');
       return;
@@ -1731,6 +1936,7 @@
     if(id === 'home' || id === 'challenge' || id === 'benefit' || id === 'community'){
       refreshRemote();
     }
+    if(id === 'admin'){ renderAdmin(); }
   }
 
   // ---------- MODAL ----------
@@ -1781,6 +1987,8 @@
   function applyModalHtml(trial){
     return '<div class="modal-head"><h3 class="display">' + escapeHtml(trial.title) + '</h3><button class="modal-close" data-close-modal aria-label="닫기">✕</button></div>' +
       '<p class="modal-desc">' + escapeHtml(trial.brand) + ' · 마감 ' + trial.deadline + ' · 광고(협찬) 제품이에요.</p>' +
+      '<div class="field"><label for="apply-contact">연락처 *</label><input type="tel" id="apply-contact" inputmode="tel" placeholder="010-0000-0000"></div>' +
+      '<div class="field"><label for="apply-address">배송지 주소 *</label><input type="text" id="apply-address" placeholder="배송받으실 주소를 입력해주세요"></div>' +
       '<label class="check-row"><input type="checkbox" id="apply-consent"> 배송을 위해 연락처와 주소를 제공하는 것에 동의해요 *</label>' +
       '<label class="check-row"><input type="checkbox" id="apply-consent2"> 브랜드가 제 후기를 광고에 활용하는 것에 동의해요 (선택)</label>' +
       '<button class="btn-primary" id="apply-submit" data-apply-key="' + trial.key + '" style="width:100%;" disabled>신청 완료하기</button>';
@@ -1883,7 +2091,15 @@
         if(entry.liked){ if(vi === -1) state.myVotes.push(vid); }
         else if(vi > -1){ state.myVotes.splice(vi, 1); }
         save(); renderChallenge();
-        if(sb){ sb.from('challenge_entries').update({votes: entry.votes}).eq('id', vid).then(function(){}); }
+        if(sb && typeof sb.rpc === 'function'){
+          try{
+            sb.rpc('increment_votes', { p_id: vid, delta: entry.liked ? 1 : -1 }).then(function(res){
+              if(res && !res.error && typeof res.data === 'number'){
+                entry.votes = res.data; save(); renderChallenge();
+              }
+            }).catch(function(){});
+          }catch(e){}
+        }
       }
       return;
     }
@@ -1905,7 +2121,15 @@
         if(post.liked){ if(li === -1) state.myLikes.push(pid); }
         else if(li > -1){ state.myLikes.splice(li, 1); }
         save(); renderCommunity();
-        if(sb){ sb.from('community_posts').update({likes: post.likes}).eq('id', pid).then(function(){}); }
+        if(sb && typeof sb.rpc === 'function'){
+          try{
+            sb.rpc('increment_likes', { p_id: pid, delta: post.liked ? 1 : -1 }).then(function(res){
+              if(res && !res.error && typeof res.data === 'number'){
+                post.likes = res.data; save(); renderCommunity();
+              }
+            }).catch(function(){});
+          }catch(e){}
+        }
       }
       return;
     }
@@ -2077,6 +2301,19 @@
       handleCommentSubmit(commentSubmit.getAttribute('data-comment-post'));
       return;
     }
+
+    var authOpen = e.target.closest('[data-open-auth-modal]');
+    if(authOpen){
+      if(authOpen.id === 'account-action-btn' && authUser){ handleSignOut(); return; }
+      openModal(authModalHtml());
+      return;
+    }
+    if(e.target.closest('#auth-submit')){ handleAuthSubmit(); return; }
+
+    var adminApprove = e.target.closest('[data-admin-approve]');
+    if(adminApprove){ handleAdminModerate(adminApprove.getAttribute('data-admin-approve'), 'approved'); return; }
+    var adminReject = e.target.closest('[data-admin-reject]');
+    if(adminReject){ handleAdminModerate(adminReject.getAttribute('data-admin-reject'), 'rejected'); return; }
   });
 
   async function handleEntrySubmit(){
@@ -2091,6 +2328,7 @@
     var age = ageLabel() || '참가자';
     var brandConsent2El = document.getElementById('entry-consent2');
     var newEntry = { id:'e' + Date.now(), name:name, age:age, note:noteVal, media_url:mediaUrl, votes:0, liked:false, mine:true, createdAt: Date.now(),
+      status: sb ? 'pending' : 'approved',
       consent: { photoConsent:true, brandUse: !!(brandConsent2El && brandConsent2El.checked), docVersion:'v1', consentedAt: new Date().toISOString() } };
     if(sb){
       var res = await sb.from('challenge_entries').insert({ name:name, age:age, note:noteVal, media_url:mediaUrl }).select().single();
@@ -2126,6 +2364,7 @@
     var visBtn = document.querySelector('#post-visibility-group [data-post-visibility][aria-selected="true"]');
     var visibility = visBtn ? visBtn.getAttribute('data-post-visibility') : 'public';
     var newPost = { id:'p' + Date.now(), author:author, time:'방금 전', bg:'var(--chip-a)', text:textVal, media_url:mediaUrl, likes:0, liked:false, comments:0, stage:myStage, age_value:myAgeVal, mine:true, img: !!mediaUrl, createdAt: Date.now(),
+      status: (sb && visibility !== 'private') ? 'pending' : 'approved',
       visibility: visibility, consent: { scope: visibility, docVersion:'v1', consentedAt: new Date().toISOString() } };
     if(sb && visibility !== 'private'){
       var res = await sb.from('community_posts').insert({ author:author, text:textVal, media_url:mediaUrl, stage:myStage, age_value:myAgeVal }).select().single();
@@ -2157,9 +2396,13 @@
       return;
     }
     var btn = document.getElementById('apply-submit');
+    var contactEl = document.getElementById('apply-contact');
+    var addressEl = document.getElementById('apply-address');
+    var contactVal = contactEl ? contactEl.value.trim() : '';
+    var addressVal = addressEl ? addressEl.value.trim() : '';
     if(btn){ btn.disabled = true; btn.textContent = '접수 중...'; }
     if(sb){
-      var res = await sb.from('benefit_applications').insert({ trial_key:akey, nickname: state.nickname || '', region: state.region || '' });
+      var res = await sb.from('benefit_applications').insert({ trial_key:akey, nickname: state.nickname || '', region: state.region || '', contact: contactVal, address: addressVal });
       if(res.error){
         console.error('benefit_applications insert error', res.error);
         showToast('신청 실패: ' + (res.error && res.error.message ? res.error.message : '다시 시도해주세요'));
@@ -2175,6 +2418,15 @@
   }
 
   // ---------- 성장기록 입력 ----------
+  function updateApplySubmit(){
+    var contact = document.getElementById('apply-contact');
+    var address = document.getElementById('apply-address');
+    var consent = document.getElementById('apply-consent');
+    var btn = document.getElementById('apply-submit');
+    if(!btn) return;
+    btn.disabled = !(contact && contact.value.trim() && address && address.value.trim() && consent && consent.checked);
+  }
+
   function updateGrowthSubmit(){
     var h = document.getElementById('growth-height');
     var w = document.getElementById('growth-weight');
@@ -2256,8 +2508,14 @@
     }
     if(post){
       post.comments = (post.comments || 0) + 1;
-      sb.from('community_posts').update({ comments: post.comments }).eq('id', postId).then(function(){});
       save();
+      if(sb && typeof sb.rpc === 'function'){
+        try{
+          sb.rpc('increment_comments', { p_id: postId }).then(function(res){
+            if(res && !res.error && typeof res.data === 'number'){ post.comments = res.data; save(); }
+          }).catch(function(){});
+        }catch(e){}
+      }
     }
     textEl.value = '';
     if(btn) btn.disabled = true;
@@ -2380,10 +2638,15 @@
     if(e.target.id === 'birth-month'){ state.birthMonth = e.target.value; save(); renderOnboarding(); }
     if(e.target.id === 'entry-note'){ updateEntrySubmit(); }
     if(e.target.id === 'post-text'){ updatePostSubmit(); }
+    if(e.target.id === 'apply-contact' || e.target.id === 'apply-address'){ updateApplySubmit(); }
     if(e.target.id === 'growth-height' || e.target.id === 'growth-weight'){ updateGrowthSubmit(); }
     if(e.target.id === 'comment-text'){
       var cbtn = document.getElementById('comment-submit');
       if(cbtn) cbtn.disabled = !e.target.value.trim();
+    }
+    if(e.target.id === 'auth-email'){
+      var abtn = document.getElementById('auth-submit');
+      if(abtn) abtn.disabled = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.target.value.trim());
     }
   });
   document.addEventListener('change', function(e){
@@ -2401,10 +2664,7 @@
     if(e.target.id === 'birth-month'){ state.birthMonth = e.target.value; save(); renderOnboarding(); }
     if(e.target.id === 'entry-consent'){ updateEntrySubmit(); }
     if(e.target.id === 'post-consent'){ updatePostSubmit(); }
-    if(e.target.id === 'apply-consent'){
-      var btn = document.getElementById('apply-submit');
-      if(btn) btn.disabled = !e.target.checked;
-    }
+    if(e.target.id === 'apply-consent'){ updateApplySubmit(); }
   });
 
   window.addEventListener('hashchange', route);
