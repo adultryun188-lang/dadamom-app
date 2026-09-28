@@ -618,7 +618,7 @@
     var btn = document.getElementById('kakao-signin-btn');
     if(btn){ btn.disabled = true; }
     try{
-      var res = await sb.auth.signInWithOAuth({ provider: 'kakao', options: { redirectTo: location.href.split('#')[0] } });
+      var res = await sb.auth.signInWithOAuth({ provider: 'kakao', options: { redirectTo: location.href.split('#')[0], scopes: 'profile_nickname profile_image' } });
       if(res && res.error){
         if(hint) hint.textContent = '카카오 로그인 실패: ' + res.error.message;
         if(btn){ btn.disabled = false; }
