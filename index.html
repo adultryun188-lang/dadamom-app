@@ -286,6 +286,7 @@
     </div>
     <div class="pad col" style="flex:0 0 auto; gap:8px; padding-block:16px calc(22px + env(safe-area-inset-bottom,0px)); border-top:1px solid var(--border); background:var(--bg);">
       <button id="start-btn" class="btn-primary" disabled>다다맘 시작하기</button>
+      <button type="button" id="browse-btn" class="link-quiet" style="background:none; border:none; padding:10px 0; font-size:13px;">먼저 둘러볼게요</button>
       <span class="helper" id="start-helper" style="text-align:center;">단계 · 날짜 · 지역을 선택하면 시작할 수 있어요</span>
     </div>
   </section>
@@ -322,7 +323,7 @@
       <div class="home-feedbar" id="home-feedbar" role="group" aria-label="피드 필터"></div>
       <div class="col" style="gap:12px; padding-bottom:8px;" id="home-feed"></div>
     </div>
-    <button id="home-fab" data-open-compose aria-label="새 글쓰기" style="position:absolute; right:20px; bottom:96px; width:52px; height:52px; border-radius:999px; background:var(--accent); border:none; box-shadow:0 8px 18px rgba(255,122,89,0.35); display:flex; align-items:center; justify-content:center;">
+    <button id="home-fab" data-open-compose aria-label="새 글쓰기" style="position:absolute; z-index:20; right:20px; bottom:96px; width:52px; height:52px; border-radius:999px; background:var(--accent); border:none; box-shadow:0 8px 18px rgba(255,122,89,0.35); display:flex; align-items:center; justify-content:center;">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent-ink)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
     </button>
     <nav class="navbar" data-nav aria-label="주요 메뉴"></nav>
@@ -401,7 +402,7 @@
       </div>
     </div>
     <div class="scroll pad" id="community-body" style="position:relative;"></div>
-    <button id="fab" data-open-compose aria-label="새 글쓰기" style="position:absolute; right:20px; bottom:96px; width:52px; height:52px; border-radius:999px; background:var(--accent); border:none; box-shadow:0 8px 18px rgba(255,122,89,0.35); display:flex; align-items:center; justify-content:center;">
+    <button id="fab" data-open-compose aria-label="새 글쓰기" style="position:absolute; z-index:20; right:20px; bottom:96px; width:52px; height:52px; border-radius:999px; background:var(--accent); border:none; box-shadow:0 8px 18px rgba(255,122,89,0.35); display:flex; align-items:center; justify-content:center;">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent-ink)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
     </button>
     <nav class="navbar" data-nav aria-label="주요 메뉴"></nav>
@@ -524,6 +525,7 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
         </button>
       </div>
+      <div id="my-profile-banner"></div>
       <div id="my-footer"></div>
     </div>
     <nav class="navbar" data-nav aria-label="주요 메뉴"></nav>
@@ -950,6 +952,7 @@
     var now = Date.now();
     return {
       onboarded:false,
+      browsing:false,   // 온보딩 없이 둘러보는 중
       nickname:'',
       kidType:null,
       parentRole:null,
@@ -1444,6 +1447,14 @@
   }
 
   function homeStatusHtml(){
+    if(!state.onboarded){
+      return '<a href="#onboarding" class="card col" style="gap:8px; padding:18px; text-decoration:none; color:var(--text);">' +
+        '<span style="font-size:11.5px; font-weight:800; color:var(--accent2);">둘러보는 중</span>' +
+        '<span class="display" style="font-size:17px;">아이 정보를 등록해보세요</span>' +
+        '<span style="font-size:13px; line-height:1.6; color:var(--text2);">주수·월령에 맞는 정보와 또래 부모 글을 볼 수 있어요. 글쓰기와 챌린지 참여도 여기서부터 시작돼요.</span>' +
+        '<span class="pill" style="margin-top:4px; width:fit-content; padding:8px 14px; background:var(--accent-soft); color:var(--accent2); font-size:12.5px; font-weight:800;">30초면 끝나요 ' + ARROW + '</span>' +
+      '</a>';
+    }
     var dd = ddayInfo();
     var info = weekMonthInfo();
     var left = dd
@@ -1878,6 +1889,13 @@
 
   // ---------- MY ----------
   function renderMy(){
+    var _pb = document.getElementById('my-profile-banner');
+    if(_pb){
+      _pb.innerHTML = state.onboarded ? '' :
+        '<a href="#onboarding" class="card col" style="gap:6px; padding:16px; text-decoration:none; color:var(--text);">' +
+        '<span style="font-size:13.5px; font-weight:800;">아이 정보를 등록해주세요</span>' +
+        '<span class="helper">등록해야 글쓰기·챌린지·체험단을 이용할 수 있어요</span></a>';
+    }
     var _mf = document.getElementById('my-footer');
     if(_mf){ _mf.innerHTML = bizFooterHtml(); }
     document.getElementById('my-name').textContent = state.nickname ? state.nickname + roleLabel() : '다다맘 회원';
@@ -2613,7 +2631,7 @@
       location.hash = '#' + (state.onboarded ? 'home' : 'onboarding');
       return;
     }
-    if(!state.onboarded && id !== 'onboarding' && publicPages.indexOf(id) === -1){
+    if(!state.onboarded && !state.browsing && id !== 'onboarding' && publicPages.indexOf(id) === -1){
       location.hash = '#onboarding';
       return;
     }
@@ -2688,6 +2706,26 @@
     if(authUser) return true;
     openModal(loginRequiredHtml(what));
     return false;
+  }
+
+  // 쓰기에는 아이 정보가 필요합니다 (대상 확인·또래 매칭에 쓰임)
+  function requireProfile(what){
+    if(state.onboarded) return true;
+    openModal(profileRequiredHtml(what));
+    return false;
+  }
+
+  function profileRequiredHtml(what){
+    return '<div class="col" style="gap:14px;">' +
+      '<div class="row" style="align-items:center; justify-content:space-between;">' +
+        '<h2 class="display" style="font-size:18px;">아이 정보가 필요해요</h2>' +
+        '<button type="button" data-close-modal aria-label="닫기" style="border:none; background:none; font-size:20px; color:var(--text2);">&times;</button>' +
+      '</div>' +
+      '<p style="font-size:13.5px; line-height:1.65; color:var(--text2); margin:0;">' +
+        escapeHtml(what) + '하려면 아이 정보를 먼저 등록해주세요. 같은 주수·월령 부모들과 연결하는 데 쓰여요. 30초면 됩니다.' +
+      '</p>' +
+      '<a href="#onboarding" data-close-modal class="btn-primary" style="display:flex; align-items:center; justify-content:center; text-decoration:none;">아이 정보 등록하기</a>' +
+      '</div>';
   }
 
   function loginRequiredHtml(what){
@@ -2908,9 +2946,14 @@
       save(); renderOnboarding(); return;
     }
 
+    if(e.target.closest('#browse-btn')){
+      state.browsing = true; save();
+      location.hash = '#home';
+      return;
+    }
     if(e.target.closest('#start-btn')){
       if(!isProfileValid()) return;
-      state.onboarded = true; save();
+      state.onboarded = true; state.browsing = false; save();
       location.hash = '#home';
       return;
     }
@@ -3130,11 +3173,13 @@
 
     if(e.target.closest('[data-open-challenge-modal]')){
       if(!requireLogin('챌린지에 참여')) return;
+      if(!requireProfile('챌린지에 참여')) return;
       openModal(challengeModalHtml());
       return;
     }
     if(e.target.closest('[data-open-compose]')){
       if(!requireLogin('글을 작성')) return;
+      if(!requireProfile('글을 작성')) return;
       openModal(composeModalHtml());
       return;
     }
@@ -3151,6 +3196,7 @@
     var openApply = e.target.closest('[data-open-apply]');
     if(openApply){
       if(!requireLogin('체험단을 신청')) return;
+      if(!requireProfile('체험단을 신청')) return;
       var key = openApply.getAttribute('data-open-apply');
       var trial = TRIALS.filter(function(x){ return x.key === key; })[0];
       if(trial) openModal(applyModalHtml(trial));
@@ -3181,6 +3227,7 @@
     var commentSubmit = e.target.closest('#comment-submit');
     if(commentSubmit){
       if(!requireLogin('댓글을 작성')) return;
+      if(!requireProfile('댓글을 작성')) return;
       handleCommentSubmit(commentSubmit.getAttribute('data-comment-post'));
       return;
     }
