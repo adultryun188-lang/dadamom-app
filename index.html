@@ -447,6 +447,7 @@
         <button type="button" id="account-action-btn" data-open-auth-modal class="btn-ghost" style="height:36px; padding:0 14px; font-size:12.5px; flex:0 0 auto;">로그인</button>
       </div>
       <a href="#admin" id="admin-link" class="link-quiet" hidden style="background:none; border:none; padding:2px 0; font-size:12.5px;">콘텐츠 검수 콘솔</a>
+      <button type="button" id="delete-account-link" hidden class="link-quiet" style="background:none; border:none; padding:2px 0; font-size:12.5px; color:var(--text2); text-align:left;">회원 탈퇴</button>
 
       <div style="display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:10px;">
         <div class="card col" style="align-items:center; gap:4px; padding:14px 0;"><span class="display" id="my-stat-challenge" style="font-size:19px;">0</span><span style="font-size:11.5px; color:var(--text2);">참여 챌린지</span></div>
@@ -496,7 +497,7 @@
   <section class="screen" id="screen-growth">
     <div class="pad" style="flex:0 0 auto; padding-block:18px 10px;">
       <h1 class="display" style="font-size:22px;">성장기록</h1>
-      <span class="helper">이 기록은 서버로 보내지 않고 이 기기에만 저장돼요.</span>
+      <span class="helper">돌봄기록·성장곡선·예방접종은 이 기기에만 저장돼요. 성장 앨범 사진만 본인 계정의 비공개 저장소에 보관됩니다.</span>
     </div>
     <div class="scroll pad" style="padding-top:4px;">
       <div id="growth-profile-banner"></div>
@@ -550,10 +551,14 @@
 
       <div class="card col" id="monthly-album-card" style="gap:12px; padding:18px;">
         <div class="row" style="align-items:center; justify-content:space-between;">
-          <h2 class="display" style="font-size:16px;">이달의 성장 앨범</h2>
-          <button type="button" data-open-monthly-card class="link-quiet" style="background:none; border:none; padding:2px 0;">카드 만들기</button>
+          <h2 class="display" style="font-size:16px;">성장 앨범</h2>
+          <button type="button" data-open-monthly-card class="link-quiet" style="background:none; border:none; padding:2px 0;">이달의 카드</button>
         </div>
-        <div id="monthly-album-grid" style="display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:6px;"></div>
+        <span class="helper">나만 볼 수 있는 앨범이에요. 올린 사진은 본인 계정에서만 열립니다.</span>
+        <button type="button" id="album-add-btn" class="btn-ghost" style="height:42px; font-size:13px;">사진 추가</button>
+        <input type="file" id="album-file" accept="image/*" multiple hidden>
+        <div class="col" id="album-body" style="gap:14px;"></div>
+        <div id="monthly-album-grid" hidden></div>
       </div>
     </div>
     <nav class="navbar" data-nav aria-label="주요 메뉴"></nav>
@@ -628,6 +633,8 @@
     if(statusEl){ statusEl.textContent = authUser ? (authUser.email + '(으)로 로그인됨') : '로그인하지 않았어요'; }
     if(actionBtn){ actionBtn.textContent = authUser ? '로그아웃' : '로그인'; }
     if(adminLink){ adminLink.hidden = !isAdminUser; }
+    var delLink = document.getElementById('delete-account-link');
+    if(delLink){ delLink.hidden = !authUser; }
   }
 
   function refreshAdminStatus(){
@@ -823,6 +830,54 @@
     renderAccount();
     switchStateForAccount();     // 게스트 상태로 되돌린다 (개인 기록은 계정 칸에 남아있음)
     showToast('로그아웃 됐어요');
+  }
+
+  // ---------- 회원 탈퇴 ----------
+  // 스토어 심사 요건이기도 하고, 이용자가 자기 정보를 스스로 지울 수 있어야 합니다.
+  function deleteAccountModalHtml(){
+    return '<div class="modal-head"><h3 class="display">회원 탈퇴</h3>' +
+        '<button class="modal-close" data-close-modal aria-label="닫기">\u2715</button></div>' +
+      '<p class="modal-desc">탈퇴하면 아래 정보가 <strong>모두 삭제되고 되돌릴 수 없습니다.</strong></p>' +
+      '<ul style="margin:0 0 14px 18px; padding:0; font-size:13px; line-height:1.9; color:var(--text);">' +
+        '<li>계정과 로그인 정보</li>' +
+        '<li>아이 정보 (단계·예정일·생년월·지역·관심분야)</li>' +
+        '<li>작성한 커뮤니티 글과 댓글</li>' +
+        '<li>미션 인증 기록과 체험단 신청 내역</li>' +
+        '<li>업로드한 사진·영상</li>' +
+        '<li>이 기기에 저장된 돌봄기록·성장기록</li>' +
+      '</ul>' +
+      '<div class="field"><label for="delete-confirm-input">계속하려면 <strong>탈퇴</strong> 를 입력해주세요</label>' +
+        '<input type="text" id="delete-confirm-input" autocomplete="off" placeholder="탈퇴"></div>' +
+      '<button type="button" class="btn-primary" id="delete-account-submit" style="height:46px; margin-top:12px;" disabled>영구 삭제하기</button>' +
+      '<button type="button" data-close-modal class="link-quiet" style="background:none; border:none; margin-top:10px; padding:6px 0;">그만두기</button>' +
+      '<span class="helper" id="delete-account-hint" style="margin-top:6px; display:block;"></span>';
+  }
+
+  async function handleDeleteAccount(){
+    if(!sb || !authUser) return;
+    var btn = document.getElementById('delete-account-submit');
+    var hint = document.getElementById('delete-account-hint');
+    if(btn){ btn.disabled = true; btn.textContent = '삭제하는 중...'; }
+    var res;
+    try{ res = await sb.rpc('delete_my_account'); }
+    catch(e){ res = { error: e }; }
+    if(res && res.error){
+      if(btn){ btn.disabled = false; btn.textContent = '영구 삭제하기'; }
+      if(hint){ hint.textContent = '삭제하지 못했어요: ' + (res.error.message || '잠시 후 다시 시도해주세요'); }
+      return;
+    }
+    // 서버에서 계정이 사라졌으니 이 기기에 남은 흔적도 지운다
+    var accKey = 'dadamom_v2::' + authUser.id;
+    try{ localStorage.removeItem(accKey); }catch(e){}
+    try{ await sb.auth.signOut(); }catch(e){}
+    authUser = null; isAdminUser = false;
+    closeModal();
+    renderAccount();
+    state = defaultState();
+    location.hash = '#onboarding';
+    renderAll('onboarding');
+    route();
+    showToast('탈퇴가 완료됐어요');
   }
 
   // ---------- 관리자: 콘텐츠 검수 콘솔 ----------
@@ -1378,11 +1433,18 @@
       var img = new Image();
       img.onload = function(){
         try{
+          // 긴 변 1920px 로 줄인다 (용량·업로드 시간 절감, 화질 체감 차이 거의 없음)
+          var MAXD = 1920;
+          var w = img.naturalWidth, h = img.naturalHeight;
+          if(Math.max(w, h) > MAXD){
+            var k = MAXD / Math.max(w, h);
+            w = Math.round(w * k); h = Math.round(h * k);
+          }
           var canvas = document.createElement('canvas');
-          canvas.width = img.naturalWidth;
-          canvas.height = img.naturalHeight;
+          canvas.width = w;
+          canvas.height = h;
           var ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0);
+          ctx.drawImage(img, 0, 0, w, h);
           canvas.toBlob(function(blob){
             URL.revokeObjectURL(url);
             if(!blob){ resolve(file); return; }
@@ -2566,15 +2628,169 @@
       '<div class="col" style="gap:2px; max-height:50vh; overflow-y:auto;">' + rows + '</div>';
   }
 
-  // ---------- 이달의 성장 앨범 ----------
+  // ---------- 성장 앨범 (비공개, 계정에 귀속) ----------
+  var albumPhotos = [];       // {id, path, caption, taken_on, url}
+  var albumLoaded = false;
+  var albumFetching = null;
+
+  function fetchAlbum(){
+    if(albumFetching) return albumFetching;
+    albumFetching = doFetchAlbum().then(function(){ albumFetching = null; });
+    return albumFetching;
+  }
+
+  async function doFetchAlbum(){
+    albumPhotos = [];
+    if(!sb || !authUser){ albumLoaded = true; return; }
+    try{
+      var res = await sb.from('album_photos').select('*')
+        .order('taken_on', {ascending:false}).order('created_at', {ascending:false}).limit(300);
+      if(!res.error && Array.isArray(res.data) && res.data.length){
+        var paths = res.data.map(function(r){ return r.path; });
+        var urls = {};
+        try{
+          var sg = await sb.storage.from('album').createSignedUrls(paths, 3600);
+          if(sg && !sg.error && Array.isArray(sg.data)){
+            sg.data.forEach(function(d){ if(d && d.path && d.signedUrl) urls[d.path] = d.signedUrl; });
+          }
+        }catch(e2){}
+        albumPhotos = res.data.map(function(r){
+          return { id:r.id, path:r.path, caption:r.caption || '', taken_on:r.taken_on, url:urls[r.path] || '' };
+        });
+      }
+    }catch(e){}
+    albumLoaded = true;
+  }
+
+  function monthKey(iso){ return String(iso || '').slice(0,7); }
+  function monthLabel(key){
+    var p = String(key).split('-');
+    if(p.length < 2) return key;
+    return p[0] + '년 ' + (+p[1]) + '월';
+  }
+
+  async function handleAlbumFiles(files){
+    if(!sb || !authUser){ showToast('로그인이 필요해요'); return; }
+    var list = Array.prototype.slice.call(files || []).slice(0, 10);
+    if(!list.length) return;
+    var btn = document.getElementById('album-add-btn');
+    var ok = 0, fail = 0;
+    for(var i = 0; i < list.length; i++){
+      if(btn){ btn.disabled = true; btn.textContent = '올리는 중... (' + (i+1) + '/' + list.length + ')'; }
+      try{
+        var f = await stripExifIfImage(list[i]);
+        var ext = (f.type === 'image/png') ? 'png' : (f.type === 'image/webp' ? 'webp' : 'jpg');
+        var path = authUser.id + '/' + Date.now() + '-' + Math.random().toString(36).slice(2,8) + '.' + ext;
+        var up = await sb.storage.from('album').upload(path, f, { contentType: f.type || 'image/jpeg' });
+        if(up.error){ fail++; continue; }
+        var ins = await sb.from('album_photos').insert({ path: path, taken_on: todayISO() });
+        if(ins.error){ fail++; continue; }
+        ok++;
+      }catch(e){ fail++; }
+    }
+    if(btn){ btn.disabled = false; btn.textContent = '사진 추가'; }
+    albumLoaded = false; albumFetching = null;
+    await fetchAlbum();
+    renderAlbum();
+    showToast(fail ? (ok + '장 추가, ' + fail + '장 실패') : (ok + '장 추가했어요'));
+  }
+
+  function albumPhotoModalHtml(p){
+    return '<div class="modal-head"><h3 class="display">' + escapeHtml(String(p.taken_on || '').slice(0,10)) + '</h3>' +
+        '<button class="modal-close" data-close-modal aria-label="닫기">\u2715</button></div>' +
+      (p.url ? '<img src="' + escapeHtml(p.url) + '" alt="성장 앨범 사진" style="width:100%; border-radius:16px; max-height:46vh; object-fit:contain; background:var(--bg);">' : '') +
+      '<div class="field" style="margin-top:12px;"><label for="album-caption">한 줄 메모</label>' +
+        '<input type="text" id="album-caption" maxlength="80" value="' + escapeHtml(p.caption || '') + '" placeholder="예: 처음 뒤집은 날"></div>' +
+      '<button type="button" class="btn-primary" data-album-save="' + escapeHtml(p.id) + '" style="height:44px; margin-top:12px;">메모 저장</button>' +
+      '<button type="button" class="link-quiet" data-album-delete="' + escapeHtml(p.id) + '" style="background:none; border:none; margin-top:10px; padding:8px 0; color:var(--text2);">이 사진 삭제</button>';
+  }
+
+  async function handleAlbumCaptionSave(id){
+    var el = document.getElementById('album-caption');
+    if(!sb || !el) return;
+    var res = await sb.from('album_photos').update({ caption: el.value.trim() || null }).eq('id', id);
+    if(res.error){ showToast('저장하지 못했어요'); return; }
+    albumPhotos.forEach(function(p){ if(p.id === id) p.caption = el.value.trim(); });
+    closeModal(); renderAlbum(); showToast('메모를 저장했어요');
+  }
+
+  async function handleAlbumDelete(id){
+    if(!sb) return;
+    var p = albumPhotos.filter(function(x){ return x.id === id; })[0];
+    if(!p) return;
+    try{ await sb.storage.from('album').remove([p.path]); }catch(e){}
+    var res = await sb.from('album_photos').delete().eq('id', id);
+    if(res.error){ showToast('삭제하지 못했어요'); return; }
+    albumPhotos = albumPhotos.filter(function(x){ return x.id !== id; });
+    closeModal(); renderAlbum(); showToast('삭제했어요');
+  }
+
+  function renderAlbum(){
+    var body = document.getElementById('album-body');
+    var addBtn = document.getElementById('album-add-btn');
+    if(!body) return;
+    if(addBtn){ addBtn.hidden = !(sb && authUser); }
+
+    if(sb && !authUser){
+      body.innerHTML = '<span class="helper">로그인하면 아이 사진을 나만 볼 수 있는 앨범에 모을 수 있어요.</span>';
+      return;
+    }
+    if(!albumLoaded){
+      body.innerHTML = '<span class="helper">앨범을 불러오는 중...</span>';
+      fetchAlbum().then(function(){ renderAlbum(); });
+      return;
+    }
+    if(!albumPhotos.length){
+      body.innerHTML = '<div class="col" style="gap:4px; align-items:center; padding:14px 0;">' +
+        '<span style="font-size:13px; font-weight:700;">아직 사진이 없어요</span>' +
+        '<span class="helper">위 &ldquo;사진 추가&rdquo;로 첫 사진을 올려보세요</span></div>';
+      return;
+    }
+
+    // 월별로 묶는다
+    var groups = [], index = {};
+    albumPhotos.forEach(function(p){
+      var k = monthKey(p.taken_on);
+      if(!(k in index)){ index[k] = groups.length; groups.push({ key:k, items:[] }); }
+      groups[index[k]].items.push(p);
+    });
+
+    body.innerHTML = groups.map(function(g){
+      return '<div class="col" style="gap:8px;">' +
+        '<div class="row" style="align-items:baseline; gap:8px;">' +
+          '<span style="font-size:13px; font-weight:800;">' + escapeHtml(monthLabel(g.key)) + '</span>' +
+          '<span class="helper">' + g.items.length + '장</span>' +
+        '</div>' +
+        '<div style="display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:6px;">' +
+        g.items.map(function(p){
+          return '<button type="button" data-album-open="' + escapeHtml(p.id) + '" ' +
+            'style="position:relative; padding:0; border:none; background:var(--border); border-radius:12px; overflow:hidden; aspect-ratio:1; cursor:pointer;">' +
+            (p.url ? '<img src="' + escapeHtml(p.url) + '" alt="' + escapeHtml(p.caption || '성장 앨범 사진') + '" ' +
+                     'style="width:100%; height:100%; object-fit:cover; display:block;" loading="lazy">' : '') +
+            (p.caption ? '<span style="position:absolute; left:0; right:0; bottom:0; padding:4px 6px; font-size:10px; color:#fff; ' +
+                         'background:linear-gradient(transparent, rgba(0,0,0,0.55)); text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' +
+                         escapeHtml(p.caption) + '</span>' : '') +
+            '</button>';
+        }).join('') +
+        '</div></div>';
+    }).join('');
+  }
+
+  // ---------- 이달의 성장 앨범 (공유 카드용) ----------
   function monthlyPhotoItems(){
     var now = new Date();
     var y = now.getFullYear(), m = now.getMonth();
-    return timelineItems().filter(function(it){
+    var thisMonth = y + '-' + String(m+1).padStart(2,'0');
+    // 앨범에 직접 올린 사진을 먼저, 부족하면 챌린지·게시물 사진으로 채운다
+    var fromAlbum = albumPhotos
+      .filter(function(p){ return monthKey(p.taken_on) === thisMonth && p.url; })
+      .map(function(p){ return { ts: new Date(p.taken_on).getTime(), media_url: p.url, text: p.caption, kind:'앨범' }; });
+    var fromFeed = timelineItems().filter(function(it){
       if(!it.media_url) return false;
       var d = new Date(it.ts);
       return d.getFullYear() === y && d.getMonth() === m;
     });
+    return fromAlbum.concat(fromFeed);
   }
 
   function renderMonthlyAlbum(){
@@ -2839,7 +3055,8 @@
     '<tr><td>체험단 신청</td><td>연락처, 배송지 주소</td><td>체험단을 신청할 때</td></tr>' +
     '<tr><td>콘텐츠 등록</td><td>게시글·댓글 내용, 첨부한 사진 및 영상</td><td>커뮤니티 글 또는 챌린지 참가작을 올릴 때</td></tr>' +
     '<tr><td>자동 수집</td><td>서비스 이용 기록, 접속 로그</td><td>서비스 이용 과정에서 자동 생성</td></tr></table>' +
-    '<div class="note">육아 기록(수유·수면·기저귀 등), 성장앨범, 타임라인 등 개인 기록 기능의 데이터는 서버로 전송되지 않고 <strong>이용자의 기기 내부(브라우저 저장소)에만 저장</strong>됩니다. 회사는 해당 정보를 열람할 수 없습니다.</div>' +
+    '<div class="note">육아 기록(수유·수면·기저귀 등), 성장곡선, 예방접종, 타임라인 등 개인 기록 기능의 데이터는 서버로 전송되지 않고 <strong>이용자의 기기 내부(브라우저 저장소)에만 저장</strong>됩니다. 회사는 해당 정보를 열람할 수 없습니다.</div>' +
+    '<div class="note"><strong>성장 앨범</strong>에 올린 사진은 예외적으로 서버(비공개 저장소)에 보관됩니다. 기기를 바꿔도 사진이 유지되도록 하기 위한 것이며, <strong>본인 계정으로만 열람할 수 있도록 접근이 제한</strong>됩니다. 공개 링크가 생성되지 않고, 다른 이용자는 물론 검색엔진에도 노출되지 않습니다. 회원 탈퇴 시 사진도 함께 삭제됩니다.</div>' +
 
     '<h2>2. 개인정보의 수집 및 이용 목적</h2>' +
     '<ul>' +
@@ -2875,6 +3092,16 @@
 
     '<h2>6. 이용자의 권리와 행사 방법</h2>' +
     '<p>이용자는 언제든지 자신의 개인정보에 대해 열람, 정정, 삭제, 처리정지를 요구할 수 있습니다. 앱 내 MY 화면에서 직접 수정하거나, 아래 연락처로 요청하시면 지체 없이 조치합니다. 만 14세 미만 아동의 개인정보는 수집하지 않습니다.</p>' +
+    '<h3>회원 탈퇴(계정 삭제)</h3>' +
+    '<p>MY 화면 &gt; 회원 탈퇴에서 이용자가 직접 계정을 삭제할 수 있습니다. 별도의 요청이나 승인 절차 없이 즉시 처리되며, 다음 정보가 함께 삭제됩니다.</p>' +
+    '<ul>' +
+    '<li>계정 및 로그인 정보</li>' +
+    '<li>아이 정보(단계, 출산예정일, 생년월, 지역, 관심분야)</li>' +
+    '<li>작성한 커뮤니티 글과 댓글</li>' +
+    '<li>미션 인증 기록 및 체험단 신청 내역</li>' +
+    '<li>업로드한 사진·영상</li>' +
+    '</ul>' +
+    '<p>삭제된 정보는 복구할 수 없습니다. 다만 위 3항의 표에 적힌 법령상 보존 의무가 있는 기록(전자상거래법에 따른 계약·청약철회 기록 등)은 해당 기간 동안 분리 보관한 뒤 파기합니다.</p>' +
 
     '<h2>7. 개인정보의 파기</h2>' +
     '<p>보유 기간이 지나거나 처리 목적이 달성된 개인정보는 지체 없이 파기합니다. 전자적 파일은 복구할 수 없는 기술적 방법으로 삭제하고, 출력물은 분쇄하거나 소각합니다.</p>' +
@@ -3001,6 +3228,7 @@
     renderVax();
     renderTimeline();
     renderMonthlyAlbum();
+    renderAlbum();
   }
 
   // ---------- ROUTING ----------
@@ -3040,7 +3268,7 @@
     if(id === 'home' || id === 'challenge' || id === 'benefit' || id === 'community'){
       refreshRemote();
     }
-    if(id === 'growth'){ renderGrowthScreen(); }
+    if(id === 'growth'){ renderGrowthScreen(); renderAlbum(); }
     if(id === 'outing' && !outingsLoaded){
       fetchOutings().then(function(){ if((location.hash||'') === '#outing') renderOuting(); });
     }
@@ -3134,6 +3362,7 @@
         }
       }
     }
+    albumPhotos = []; albumLoaded = false; albumFetching = null;   // 계정이 바뀌면 앨범도 다시 불러온다
     state = loadState();
     // 방금 로그인한 사람이 온보딩 화면에 서 있으면 홈으로 보낸다
     // (MY에서 프로필을 고치러 들어온 경우는 로그인 상태가 바뀌지 않으므로 해당 없음)
@@ -3746,6 +3975,29 @@
       return;
     }
 
+    if(e.target.closest('#album-add-btn')){
+      var fi = document.getElementById('album-file');
+      if(fi) fi.click();
+      return;
+    }
+    var albumOpen = e.target.closest('[data-album-open]');
+    if(albumOpen){
+      var ph = albumPhotos.filter(function(x){ return x.id === albumOpen.getAttribute('data-album-open'); })[0];
+      if(ph) openModal(albumPhotoModalHtml(ph));
+      return;
+    }
+    var albumSave = e.target.closest('[data-album-save]');
+    if(albumSave){ handleAlbumCaptionSave(albumSave.getAttribute('data-album-save')); return; }
+    var albumDel = e.target.closest('[data-album-delete]');
+    if(albumDel){ handleAlbumDelete(albumDel.getAttribute('data-album-delete')); return; }
+
+    if(e.target.closest('#delete-account-link')){
+      if(!authUser){ showToast('로그인 상태에서만 탈퇴할 수 있어요'); return; }
+      openModal(deleteAccountModalHtml());
+      return;
+    }
+    if(e.target.closest('#delete-account-submit')){ handleDeleteAccount(); return; }
+
     var articleBtn = e.target.closest('[data-open-article]');
     if(articleBtn){
       var artId = articleBtn.getAttribute('data-open-article');
@@ -4181,6 +4433,10 @@
     if(e.target.id === 'nickname-input'){ state.nickname = e.target.value; save(); }
     if(e.target.id === 'due-date'){ state.dueDate = e.target.value; save(); renderOnboarding(); }
     if(e.target.id === 'birth-month'){ state.birthMonth = e.target.value; save(); renderOnboarding(); }
+    if(e.target.id === 'delete-confirm-input'){
+      var db = document.getElementById('delete-account-submit');
+      if(db) db.disabled = (e.target.value.trim() !== '탈퇴');
+    }
     if(e.target.id === 'entry-note'){ updateEntrySubmit(); }
     if(e.target.id === 'post-text'){ updatePostSubmit(); }
     if(e.target.id === 'apply-contact' || e.target.id === 'apply-address'){ updateApplySubmit(); }
@@ -4205,6 +4461,11 @@
     }
   });
   document.addEventListener('change', function(e){
+    if(e.target.id === 'album-file'){
+      handleAlbumFiles(e.target.files);
+      e.target.value = '';
+      return;
+    }
     var vaxCheck = e.target.closest('[data-vax-check]');
     if(vaxCheck){
       var vid = vaxCheck.getAttribute('data-vax-check');
