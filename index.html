@@ -449,6 +449,11 @@
       <a href="#admin" id="admin-link" class="link-quiet" hidden style="background:none; border:none; padding:2px 0; font-size:12.5px;">콘텐츠 검수 콘솔</a>
       <button type="button" id="delete-account-link" hidden class="link-quiet" style="background:none; border:none; padding:2px 0; font-size:12.5px; color:var(--text2); text-align:left;">회원 탈퇴</button>
 
+      <div class="card col" id="block-card" hidden style="gap:10px; padding:16px;">
+        <h2 class="display" style="font-size:15px;">차단한 사용자</h2>
+        <div class="col" id="block-body" style="gap:8px;"></div>
+      </div>
+
       <div style="display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:10px;">
         <div class="card col" style="align-items:center; gap:4px; padding:14px 0;"><span class="display" id="my-stat-challenge" style="font-size:19px;">0</span><span style="font-size:11.5px; color:var(--text2);">참여 챌린지</span></div>
         <div class="card col" style="align-items:center; gap:4px; padding:14px 0;"><span class="display" id="my-stat-benefit" style="font-size:19px;">0</span><span style="font-size:11.5px; color:var(--text2);">신청 체험단</span></div>
@@ -832,6 +837,113 @@
     showToast('로그아웃 됐어요');
   }
 
+  // ---------- 신고 / 차단 ----------
+  var REPORT_REASONS = ['욕설·비방', '음란물·선정성', '광고·스팸', '허위정보', '개인정보 노출', '기타'];
+  var blockedIds = [];
+
+  async function fetchBlocks(){
+    blockedIds = [];
+    if(!sb || !authUser) return;
+    try{
+      var res = await sb.from('blocks').select('blocked_id');
+      if(!res.error && Array.isArray(res.data)) blockedIds = res.data.map(function(r){ return r.blocked_id; });
+    }catch(e){}
+  }
+
+  var reportTarget = null;   // {type, id, owner, label}
+
+  function reportModalHtml(t){
+    var canBlock = !!(t.owner && authUser && t.owner !== authUser.id);
+    return '<div class="modal-head"><h3 class="display">신고하기</h3>' +
+        '<button class="modal-close" data-close-modal aria-label="닫기">\u2715</button></div>' +
+      '<p class="modal-desc">' + escapeHtml(t.label || '') + '</p>' +
+      '<div class="col" style="gap:10px;">' +
+        '<span style="font-size:13px; font-weight:700; color:var(--text2);">신고 사유 *</span>' +
+        '<div class="row" style="flex-wrap:wrap; gap:8px;" id="report-reason-group">' +
+          REPORT_REASONS.map(function(r){
+            return '<button type="button" class="chip" data-report-reason="' + escapeHtml(r) + '" aria-pressed="false">' + escapeHtml(r) + '</button>';
+          }).join('') +
+        '</div>' +
+        '<div class="field"><label for="report-detail">자세한 내용 (선택)</label>' +
+          '<textarea id="report-detail" rows="3" maxlength="500" placeholder="어떤 점이 문제였는지 알려주시면 검토에 도움이 돼요"></textarea></div>' +
+      '</div>' +
+      '<button type="button" class="btn-primary" id="report-submit" style="height:46px; margin-top:12px;" disabled>신고 접수</button>' +
+      (canBlock
+        ? '<button type="button" class="btn-ghost" id="report-block" style="height:44px; margin-top:8px;">이 사용자 차단하기</button>' +
+          '<span class="helper" style="margin-top:6px; display:block;">차단하면 이 사용자의 글과 댓글이 더 이상 보이지 않아요. MY에서 해제할 수 있어요.</span>'
+        : '') +
+      '<span class="helper" id="report-hint" style="margin-top:6px; display:block;">접수된 신고는 운영자가 확인 후 조치합니다.</span>';
+  }
+
+  function openReport(type, id, owner, label){
+    if(!requireLogin('신고')) return;
+    reportTarget = { type:type, id:id, owner:owner || null, label:label || '' };
+    openModal(reportModalHtml(reportTarget));
+  }
+
+  async function handleReportSubmit(){
+    if(!sb || !reportTarget) return;
+    var picked = document.querySelector('#report-reason-group [aria-pressed="true"]');
+    if(!picked) return;
+    var detail = document.getElementById('report-detail');
+    var btn = document.getElementById('report-submit');
+    var hint = document.getElementById('report-hint');
+    if(btn){ btn.disabled = true; btn.textContent = '접수 중...'; }
+    var res = await sb.from('reports').insert({
+      target_type: reportTarget.type,
+      target_id: reportTarget.id,
+      target_owner: reportTarget.owner,
+      reason: picked.getAttribute('data-report-reason'),
+      detail: (detail && detail.value.trim()) || null
+    });
+    if(res.error){
+      if(btn){ btn.disabled = false; btn.textContent = '신고 접수'; }
+      var dup = /duplicate|unique/i.test(res.error.message || '');
+      if(hint){ hint.textContent = dup ? '이미 신고한 내용이에요. 운영자가 확인 중입니다.' : '접수하지 못했어요. 잠시 후 다시 시도해주세요.'; }
+      return;
+    }
+    closeModal();
+    showToast('신고를 접수했어요');
+  }
+
+  async function handleBlockUser(targetId){
+    if(!sb || !authUser || !targetId) return;
+    var res = await sb.from('blocks').insert({ blocked_id: targetId });
+    if(res.error && !/duplicate|unique/i.test(res.error.message || '')){
+      showToast('차단하지 못했어요');
+      return;
+    }
+    await fetchBlocks();
+    closeModal();
+    showToast('차단했어요. 이 사용자의 글이 보이지 않아요');
+    refreshRemote();
+    renderMy();
+  }
+
+  async function handleUnblockUser(targetId){
+    if(!sb || !authUser) return;
+    var res = await sb.from('blocks').delete().eq('blocked_id', targetId);
+    if(res.error){ showToast('해제하지 못했어요'); return; }
+    await fetchBlocks();
+    showToast('차단을 해제했어요');
+    refreshRemote();
+    renderMy();
+  }
+
+  function renderBlockList(){
+    var el = document.getElementById('block-card');
+    if(!el) return;
+    if(!authUser || !blockedIds.length){ el.hidden = true; return; }
+    el.hidden = false;
+    document.getElementById('block-body').innerHTML = blockedIds.map(function(id){
+      return '<div class="row" style="align-items:center; gap:10px;">' +
+        '<span style="flex:1; min-width:0; font-size:12.5px; color:var(--text2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' +
+          '차단한 사용자 · ' + escapeHtml(String(id).slice(0,8)) + '</span>' +
+        '<button type="button" class="btn-ghost" style="flex:0 0 auto; height:34px; padding:0 12px; font-size:12px;" data-unblock="' + escapeHtml(id) + '">해제</button>' +
+      '</div>';
+    }).join('');
+  }
+
   // ---------- 회원 탈퇴 ----------
   // 스토어 심사 요건이기도 하고, 이용자가 자기 정보를 스스로 지울 수 있어야 합니다.
   function deleteAccountModalHtml(){
@@ -897,6 +1009,7 @@
       return;
     }
     await fetchOutingsForAdmin();
+    await fetchReportsForAdmin();
     var pendingEntries = [], pendingPosts = [];
     try{
       var er = await sb.from('challenge_entries').select('*').eq('status', 'pending').order('created_at', {ascending:false}).limit(50);
@@ -947,12 +1060,56 @@
           }).join('')
         : '');
 
-    el.innerHTML = outingAdminHtml() + noticeAdmin +
+    el.innerHTML = reportAdminHtml() + outingAdminHtml() + noticeAdmin +
       '<h2 class="display" style="font-size:15px; margin-top:6px;">콘텐츠 검수</h2>' +
       ((!pendingEntries.length && !pendingPosts.length)
         ? '<p class="helper">지금은 검수 대기 중인 콘텐츠가 없어요.</p>' : '') +
       (pendingEntries.length ? '<h3 class="display" style="font-size:13.5px;">챌린지 참여 (' + pendingEntries.length + ')</h3>' + entryHtml : '') +
       (pendingPosts.length ? '<h3 class="display" style="font-size:13.5px;">커뮤니티 글 (' + pendingPosts.length + ')</h3>' + postHtml : '');
+  }
+
+  // ---------- 운영자: 신고 대기열 ----------
+  var adminReports = [];
+
+  async function fetchReportsForAdmin(){
+    adminReports = [];
+    if(!sb) return;
+    try{
+      var res = await sb.from('reports').select('*').eq('status','open')
+        .order('created_at', {ascending:false}).limit(100);
+      if(!res.error && Array.isArray(res.data)) adminReports = res.data;
+    }catch(e){}
+  }
+
+  function reportAdminHtml(){
+    var head = '<h2 class="display" style="font-size:15px;">신고 접수' +
+      (adminReports.length ? ' (' + adminReports.length + ')' : '') + '</h2>';
+    if(!adminReports.length){
+      return head + '<p class="helper">처리할 신고가 없어요.</p>';
+    }
+    var typeLabel = { post:'커뮤니티 글', comment:'댓글', entry:'미션 인증' };
+    return head + adminReports.map(function(r){
+      return '<div class="card col" style="gap:8px; padding:14px;">' +
+        '<div class="row" style="align-items:center; gap:8px; flex-wrap:wrap;">' +
+          '<span class="eyebrow">' + escapeHtml(typeLabel[r.target_type] || r.target_type) + '</span>' +
+          '<span style="font-size:12.5px; font-weight:700;">' + escapeHtml(r.reason || '') + '</span>' +
+          '<span class="helper">' + timeAgo(r.created_at) + '</span>' +
+        '</div>' +
+        (r.detail ? '<p style="font-size:13px; line-height:1.55;">' + escapeHtml(r.detail) + '</p>' : '') +
+        '<span class="helper" style="word-break:break-all;">대상 ID ' + escapeHtml(String(r.target_id || '')) + '</span>' +
+        '<div class="row" style="gap:8px;">' +
+          '<button type="button" class="btn-primary" style="flex:1; height:40px; font-size:13px;" data-report-resolve="' + r.id + '">조치 완료</button>' +
+          '<button type="button" class="btn-ghost" style="flex:1; height:40px; font-size:13px;" data-report-dismiss="' + r.id + '">반려</button>' +
+        '</div></div>';
+    }).join('');
+  }
+
+  async function handleReportModerate(id, status){
+    if(!sb) return;
+    var res = await sb.from('reports').update({ status: status }).eq('id', id);
+    if(res.error){ showToast('처리하지 못했어요'); return; }
+    showToast(status === 'resolved' ? '조치 완료로 표시했어요' : '반려했어요');
+    renderAdmin();
   }
 
   // ---------- 운영자: 나들이 등록 ----------
@@ -1499,7 +1656,7 @@
       if(res.error || !res.data) return null;
       return res.data.map(function(r){
         return {
-          id:r.id, author:r.author, time: timeAgo(r.created_at), bg:'var(--chip-b)',
+          id:r.id, author:r.author, owner_id:r.owner_id || null, time: timeAgo(r.created_at), bg:'var(--chip-b)',
           text:r.text, media_url:r.media_url || '', img: !!r.media_url,
           likes:r.likes || 0, liked: state.myLikes.indexOf(r.id) > -1, comments:r.comments || 0,
           stage: r.stage || null, age_value: (r.age_value === 0 || r.age_value) ? r.age_value : null,
@@ -1927,7 +2084,9 @@
       '<span style="font-size:12px;">' + p.comments + '</span></button>' +
       '<button data-share-post="' + p.id + '" aria-label="공유하기" style="display:flex; align-items:center; gap:5px; border:none; background:none; color:var(--text2); min-height:44px; margin-left:auto;">' +
       '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.8" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.6l6.8-3.8M8.6 13.4l6.8 3.8"/></svg>' +
-      '<span style="font-size:12px;">공유</span></button></div></div>';
+      '<span style="font-size:12px;">공유</span></button>' +
+      '<button data-report-post="' + p.id + '" data-report-owner="' + (p.owner_id || '') + '" aria-label="신고하기" style="display:flex; align-items:center; gap:4px; border:none; background:none; color:var(--text2); min-height:44px; font-size:11.5px;">신고</button>' +
+      '</div></div>';
   }
 
   function homeOutingCardHtml(){
@@ -2311,7 +2470,9 @@
           '<span style="font-size:12px;">' + p.comments + '</span></button>' +
           '<button data-share-post="' + p.id + '" aria-label="공유하기" style="display:flex; align-items:center; gap:5px; border:none; background:none; color:var(--text2); min-height:44px; margin-left:auto;">' +
           '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.8" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.6l6.8-3.8M8.6 13.4l6.8 3.8"/></svg>' +
-          '<span style="font-size:12px;">공유</span></button></div></div>';
+          '<span style="font-size:12px;">공유</span></button>' +
+          '<button data-report-post="' + p.id + '" data-report-owner="' + (p.owner_id || '') + '" aria-label="신고하기" style="display:flex; align-items:center; gap:4px; border:none; background:none; color:var(--text2); min-height:44px; font-size:11.5px;">신고</button>' +
+          '</div></div>';
       }).join('') : '<div class="card col" style="padding:18px; align-items:center; gap:6px;"><span style="font-size:13px; color:var(--text2);">' + (state.viewMineOnly === 'posts' ? '아직 작성한 글이 없어요' : '아직 또래 글이 없어요') + '</span><span class="helper">전체 보기로 다른 글도 둘러보세요</span></div>';
 
       body.innerHTML = guestBanner + filterBar + listHtml;
@@ -2345,6 +2506,7 @@
     document.getElementById('my-benefit-badge').textContent = benefitCount;
     document.getElementById('my-stat-post').textContent = state.posts.filter(function(p){ return p.mine; }).length;
     renderFamily();
+    renderBlockList();
   }
 
   // ---------- 오늘의 기록 (수유·수면) ----------
@@ -3317,6 +3479,11 @@
       renderAdmin();
       return;
     }
+    var rsv = e.target.closest('[data-report-resolve]');
+    if(rsv){ handleReportModerate(rsv.getAttribute('data-report-resolve'), 'resolved'); return; }
+    var rdm = e.target.closest('[data-report-dismiss]');
+    if(rdm){ handleReportModerate(rdm.getAttribute('data-report-dismiss'), 'dismissed'); return; }
+
     if(e.target.closest('#ot-submit')){ handleOutingSubmit(); return; }
     var otDel = e.target.closest('[data-outing-delete]');
     if(otDel){ handleOutingDelete(otDel.getAttribute('data-outing-delete')); return; }
@@ -3363,6 +3530,8 @@
       }
     }
     albumPhotos = []; albumLoaded = false; albumFetching = null;   // 계정이 바뀌면 앨범도 다시 불러온다
+    blockedIds = [];
+    if(authUser){ fetchBlocks().then(function(){ renderBlockList(); }); }
     state = loadState();
     // 방금 로그인한 사람이 온보딩 화면에 서 있으면 홈으로 보낸다
     // (MY에서 프로필을 고치러 들어온 경우는 로그인 상태가 바뀌지 않으므로 해당 없음)
@@ -3975,6 +4144,36 @@
       return;
     }
 
+    var repPost = e.target.closest('[data-report-post]');
+    if(repPost){
+      openReport('post', repPost.getAttribute('data-report-post'),
+                 repPost.getAttribute('data-report-owner'), '커뮤니티 글을 신고합니다');
+      return;
+    }
+    var repCmt = e.target.closest('[data-report-comment]');
+    if(repCmt){
+      openReport('comment', repCmt.getAttribute('data-report-comment'),
+                 repCmt.getAttribute('data-report-owner'), '댓글을 신고합니다');
+      return;
+    }
+    var repReason = e.target.closest('[data-report-reason]');
+    if(repReason){
+      document.querySelectorAll('#report-reason-group [data-report-reason]').forEach(function(b){
+        b.setAttribute('aria-pressed', b === repReason ? 'true' : 'false');
+        b.classList.toggle('on', b === repReason);
+      });
+      var rs = document.getElementById('report-submit');
+      if(rs) rs.disabled = false;
+      return;
+    }
+    if(e.target.closest('#report-submit')){ handleReportSubmit(); return; }
+    if(e.target.closest('#report-block')){
+      if(reportTarget && reportTarget.owner) handleBlockUser(reportTarget.owner);
+      return;
+    }
+    var unblock = e.target.closest('[data-unblock]');
+    if(unblock){ handleUnblockUser(unblock.getAttribute('data-unblock')); return; }
+
     if(e.target.closest('#album-add-btn')){
       var fi = document.getElementById('album-file');
       if(fi) fi.click();
@@ -4280,7 +4479,10 @@
         '<span style="font-size:12.5px; font-weight:700;">' + escapeHtml(c.author) + '</span>' +
         '<span class="helper">' + timeAgo(c.created_at) + '</span></div>' +
         '<p style="font-size:13px; line-height:1.5;">' + escapeHtml(c.content) + '</p>' +
-        '<div class="row" style="gap:5px;">' + reactHtml + '</div></div>';
+        '<div class="row" style="gap:5px; align-items:center;">' + reactHtml +
+          '<button type="button" data-report-comment="' + c.id + '" data-report-owner="' + (c.owner_id || '') + '" ' +
+          'style="margin-left:auto; border:none; background:none; color:var(--text2); font-size:11px; padding:4px 2px;">신고</button>' +
+        '</div></div>';
     }).join('');
   }
 
