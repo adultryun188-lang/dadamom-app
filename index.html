@@ -2,7 +2,7 @@
 <html lang="ko">
 <title>다다맘</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&display=swap">
 <style>
   :root{
     color-scheme: light;
@@ -42,7 +42,7 @@
     font-family:'Gowun Dodum','Apple SD Gothic Neo',sans-serif;
     -webkit-tap-highlight-color:transparent;
   }
-  .display{font-family:'Gowun Batang',serif;}
+  .display{font-family:'Jua','Gowun Dodum','Apple SD Gothic Neo',sans-serif; letter-spacing:-0.01em;}
   button{font-family:inherit; cursor:pointer;}
   a{color:inherit;}
   h1,h2,p{margin:0;}
@@ -116,6 +116,44 @@
   .col{ display:flex; flex-direction:column; }
   .link-quiet{ font-size:12.5px; color:var(--text2); text-decoration:none; }
   .pad{ padding-inline:20px; }
+
+  .home-sec{ display:flex; flex-direction:column; gap:12px; flex:0 0 auto; }
+  .home-sec-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .home-sec-title{ font-size:17px; font-weight:700; }
+  .hscroll{ display:flex; gap:12px; overflow-x:auto; margin-inline:-20px; padding-inline:20px; scrollbar-width:none; flex:0 0 auto; }
+  .hscroll::-webkit-scrollbar{ display:none; }
+
+  /* 미션 리스트 — 기존 카드 언어(흰 카드 + 소프트 보더) 유지 */
+  .mission-row{ display:flex; align-items:center; gap:13px; padding:15px 16px; text-decoration:none; color:var(--text); }
+  .mission-row + .mission-row{ border-top:1px solid var(--border); }
+  .mission-ico{ width:46px; height:46px; border-radius:16px; display:flex; align-items:center; justify-content:center;
+                font-size:22px; flex:0 0 auto; }
+  .mission-main{ display:flex; flex-direction:column; gap:3px; min-width:0; flex:1; }
+  .mission-title{ font-size:14px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .mission-go{ flex:0 0 auto; font-size:12px; font-weight:700; padding:7px 13px; border-radius:999px;
+               background:var(--accent-soft); color:var(--accent2); white-space:nowrap; }
+  .mission-go.off{ background:var(--pill-bg); color:var(--text2); }
+  .dday{ font-size:11px; font-weight:700; color:var(--accent2); background:var(--accent-soft);
+         padding:2px 8px; border-radius:999px; white-space:nowrap; flex:0 0 auto; }
+  .dday.off{ color:var(--text2); background:var(--pill-bg); }
+
+  .big-card{ flex:0 0 auto; width:246px; border-radius:20px; border:1px solid var(--border); background:var(--surface); overflow:hidden; text-decoration:none; color:var(--text); display:flex; flex-direction:column; }
+  .big-card .thumb{ height:104px; display:flex; align-items:flex-start; justify-content:space-between; padding:12px; }
+  .big-card .body{ padding:13px 14px 15px; display:flex; flex-direction:column; gap:5px; }
+  .pill-soft{ font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; background:rgba(255,255,255,.85); color:var(--text); }
+  .pill-off{ font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; background:var(--pill-bg); color:var(--text2); }
+
+  .home-feedbar{ position:sticky; top:0; z-index:5; background:var(--bg);
+                 margin-inline:-20px; padding:12px 20px 10px; margin-top:4px;
+                 display:flex; gap:7px; overflow-x:auto; scrollbar-width:none;
+                 flex:0 0 auto; align-items:center;
+                 box-shadow: 0 -28px 0 0 var(--bg); }
+  .home-feedbar::-webkit-scrollbar{ display:none; }
+  .chip-f{ flex:0 0 auto; border:1px solid var(--border); background:var(--surface); color:var(--text2);
+           font-size:12.5px; font-weight:700; padding:7px 13px; border-radius:999px; min-height:34px; }
+  .chip-f[aria-pressed="true"]{ background:var(--accent-soft); border-color:var(--accent); color:var(--accent2); }
+  .feed-end{ text-align:center; font-size:12px; color:var(--text2); padding:18px 0 4px; }
+
 
   .biz-footer{ margin-top:26px; padding:18px 4px 6px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:10px; }
   .biz-footer-links{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; font-size:12.5px; }
@@ -253,7 +291,7 @@
   </section>
 
   <!-- HOME -->
-  <section class="screen" id="screen-home">
+  <section class="screen" id="screen-home" style="position:relative;">
     <div class="scroll pad">
       <div class="row" style="align-items:center; justify-content:space-between;">
         <div class="col" style="gap:4px; min-width:0; flex:1;">
@@ -266,54 +304,27 @@
         </a>
       </div>
 
-      <div class="card" id="home-dday-card" hidden style="padding:18px; display:flex; align-items:center; justify-content:space-between;">
-        <div class="col" style="gap:2px;">
-          <span class="helper" id="home-dday-label"></span>
-          <span class="display" id="home-dday-value" style="font-size:26px; color:var(--accent);"></span>
+      <div id="home-status"></div>
+
+      <div class="home-sec">
+        <div class="home-sec-head">
+          <h2 class="home-sec-title display">오늘의 미션</h2>
+          <a href="#challenge" class="link-quiet">전체보기</a>
         </div>
-        <div style="font-size:30px;" aria-hidden="true" id="home-dday-emoji"></div>
+        <div class="card col" style="gap:0; padding:0; overflow:hidden;" id="home-missions"></div>
       </div>
 
-      <div id="home-hero"></div>
-
-      <div class="card col" id="home-info-card" hidden style="gap:6px; padding:18px;">
-        <span class="helper" id="home-info-label"></span>
-        <h2 class="display" id="home-info-headline" style="font-size:16px;"></h2>
-        <p id="home-info-tip" style="font-size:13px; color:var(--text2); line-height:1.6;"></p>
-        <span class="helper" style="opacity:0.75;">일반적인 정보이며 개인차가 있을 수 있어요. 정확한 평가는 소아과·산부인과 상담을 통해 확인해주세요.</span>
+      <div class="home-sec-head" style="margin-top:4px;">
+        <h2 class="home-sec-title display">또래 이야기</h2>
+        <a href="#community" class="link-quiet">커뮤니티 가기</a>
       </div>
 
-      <div class="col" style="gap:12px;">
-        <div class="row" style="align-items:center; justify-content:space-between;">
-          <h2 class="display" style="font-size:17px;">지금 신청 가능한 체험단</h2>
-          <a href="#benefit" class="link-quiet">전체보기</a>
-        </div>
-        <div class="row" style="gap:12px; overflow-x:auto; margin-inline:-20px; padding-inline:20px;" id="home-trials"></div>
-      </div>
-
-      <div class="col" style="gap:12px;">
-        <div class="row" style="align-items:center; justify-content:space-between;">
-          <h2 class="display" style="font-size:17px;">신생아 케어 가이드</h2>
-        </div>
-        <div class="row" style="gap:12px; overflow-x:auto; margin-inline:-20px; padding-inline:20px;" id="home-articles"></div>
-      </div>
-
-      <div class="col" style="gap:12px;">
-        <div class="row" style="align-items:center; justify-content:space-between;">
-          <h2 class="display" style="font-size:17px;">이번 주 나들이·행사</h2>
-          <a href="#outing" class="link-quiet">전체보기</a>
-        </div>
-        <div class="row" style="gap:12px; overflow-x:auto; margin-inline:-20px; padding-inline:20px;" id="home-outings"></div>
-      </div>
-
-      <div class="col" style="gap:12px; padding-bottom:8px;">
-        <div class="row" style="align-items:center; justify-content:space-between;">
-          <h2 class="display" style="font-size:17px;">커뮤니티 인기글</h2>
-          <a href="#community" class="link-quiet">커뮤니티 가기</a>
-        </div>
-        <div class="col" style="gap:12px;" id="home-posts"></div>
-      </div>
+      <div class="home-feedbar" id="home-feedbar" role="group" aria-label="피드 필터"></div>
+      <div class="col" style="gap:12px; padding-bottom:8px;" id="home-feed"></div>
     </div>
+    <button id="home-fab" data-open-compose aria-label="새 글쓰기" style="position:absolute; right:20px; bottom:96px; width:52px; height:52px; border-radius:999px; background:var(--accent); border:none; box-shadow:0 8px 18px rgba(255,122,89,0.35); display:flex; align-items:center; justify-content:center;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent-ink)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+    </button>
     <nav class="navbar" data-nav aria-label="주요 메뉴"></nav>
   </section>
 
@@ -911,6 +922,7 @@
       interests:[],
       benefitTab:'trial',
       communityTab:'brag',
+      homeFeed:'all',
       outingTab:'all',
       outingRegion:null,
       sortMode:'new',
@@ -1387,93 +1399,188 @@
     return null;
   }
 
+  // ---------- HOME (하이브리드: 상태 + 챌린지/체험단 강조 + 또래 피드) ----------
+  function myAgeValue(){
+    if(state.kidType === 'pregnant') return pregWeeks(state.dueDate);
+    if(state.kidType === 'parenting') return ageMonths(state.birthMonth);
+    return null;
+  }
+
+  function homeStatusHtml(){
+    var dd = ddayInfo();
+    var info = weekMonthInfo();
+    var left = dd
+      ? '<div class="col" style="gap:2px; min-width:0;">' +
+          '<span class="helper">' + escapeHtml(dd.label) + '</span>' +
+          '<span class="display" style="font-size:26px; color:var(--accent);">' + escapeHtml(dd.value) + '</span>' +
+        '</div>'
+      : '<div class="col" style="gap:2px;"><span class="helper">오늘도 반가워요</span>' +
+        '<span class="display" style="font-size:20px;">' + escapeHtml(ageLabel() || '다다맘') + '</span></div>';
+
+    var tip = info
+      ? '<div style="border-top:1px solid var(--border); padding-top:12px; display:flex; flex-direction:column; gap:4px;">' +
+          '<span class="helper">' + escapeHtml(info.label) + '</span>' +
+          '<span style="font-size:14px; font-weight:800; line-height:1.45;">' + escapeHtml(info.headline) + '</span>' +
+          '<p style="font-size:13px; line-height:1.6; color:var(--text2); margin:0;">' + escapeHtml(info.tip) + '</p>' +
+          '<span class="helper" style="opacity:.72;">일반적인 정보이며 개인차가 있어요. 정확한 평가는 전문의와 상담해주세요.</span>' +
+        '</div>'
+      : '';
+
+    return '<div class="card col" style="gap:12px; padding:18px;">' +
+      '<div class="row" style="align-items:center; justify-content:space-between; gap:10px;">' + left +
+      '<div style="font-size:30px;" aria-hidden="true">' + (dd ? dd.emoji : '🌿') + '</div></div>' +
+      tip + '</div>';
+  }
+
+  // 챌린지 + 체험단을 하나의 '미션' 목록으로 — 홈에서 바로 확인하고 시작
+  function homeMissionsHtml(){
+    var rows = [];
+
+    // 1) 챌린지
+    var dLeft = daysUntil(CHALLENGE_DEADLINE);
+    var cClosed = dLeft < 0;
+    var cIneligible = state.kidType === 'pregnant';
+    var cDday = cClosed ? '마감' : (dLeft === 0 ? 'D-DAY' : 'D-' + dLeft);
+    var cSub = cClosed ? '이번 챌린지는 마감됐어요'
+             : (cIneligible ? '육아 단계부터 참여할 수 있어요'
+                            : '10~24개월 · 지금 ' + state.entries.length + '명 참여 중');
+    rows.push(
+      '<a href="#challenge" class="mission-row">' +
+        '<div class="mission-ico" style="background:var(--chip-b);" aria-hidden="true">👣</div>' +
+        '<div class="mission-main">' +
+          '<div class="row" style="align-items:center; gap:6px;">' +
+            '<span class="mission-title">우리 아이 첫걸음 챌린지</span>' +
+            '<span class="dday' + (cClosed ? ' off' : '') + '">' + cDday + '</span>' +
+          '</div>' +
+          '<span class="helper">' + escapeHtml(cSub) + '</span>' +
+        '</div>' +
+        '<span class="mission-go' + (cClosed || cIneligible ? ' off' : '') + '">' +
+          (cClosed ? '결과' : (cIneligible ? '대상 아님' : '참여')) + '</span>' +
+      '</a>');
+
+    // 2) 체험단
+    var trials = TRIALS.filter(function(t){ return !trialExpired(t); });
+    if(!trials.length) trials = TRIALS.slice(0, 2);
+    trials.slice(0, 3).forEach(function(t){
+      var fit = (t.eligibility === 'both' || t.eligibility === state.kidType);
+      var d = parseMD(t.deadline);
+      var dl = d ? Math.ceil((d.getTime() - Date.now()) / 86400000) : null;
+      var closed = (dl != null && dl < 0);
+      var dday = (dl == null) ? '' : (closed ? '마감' : (dl === 0 ? 'D-DAY' : 'D-' + dl));
+      rows.push(
+        '<a href="#benefit" class="mission-row">' +
+          '<div class="mission-ico" style="background:' + t.bg + ';" aria-hidden="true">🎁</div>' +
+          '<div class="mission-main">' +
+            '<div class="row" style="align-items:center; gap:6px;">' +
+              '<span class="mission-title">' + escapeHtml(t.title) + '</span>' +
+              (dday ? '<span class="dday' + (closed ? ' off' : '') + '">' + dday + '</span>' : '') +
+            '</div>' +
+            '<span class="helper">' + escapeHtml(t.brand) + ' · ' + t.total + '명 모집' +
+              (fit ? '' : ' · 대상 아님') + '</span>' +
+          '</div>' +
+          '<span class="mission-go' + (closed || !fit ? ' off' : '') + '">' +
+            (closed ? '마감' : (fit ? '신청' : '대상 아님')) + '</span>' +
+        '</a>');
+    });
+
+    return rows.join('');
+  }
+
+  function homeFeedBarHtml(){
+    var av = myAgeValue();
+    var chips = [
+      { k:'all',   label:'전체' },
+      { k:'peer',  label:(av != null ? (ageLabel() + ' 또래') : '또래') },
+      { k:'photo', label:'사진 있는 글' },
+      { k:'mine',  label:'내 글' }
+    ];
+    return chips.map(function(c){
+      return '<button type="button" class="chip-f" data-home-feed="' + c.k + '" aria-pressed="' +
+        (state.homeFeed === c.k) + '">' + escapeHtml(c.label) + '</button>';
+    }).join('');
+  }
+
+  function feedCardHtml(p){
+    var media = p.media_url
+      ? mediaTag(p.media_url, 'width:100%; height:170px; object-fit:cover; border-radius:16px;')
+      : (p.img ? '<div style="height:170px; border-radius:16px; background:' + p.bg + ';" role="img" aria-label="게시물 사진"></div>' : '');
+    return '<div class="card col" style="gap:12px; padding:16px;">' +
+      '<div class="row" style="align-items:center; gap:8px;">' +
+        '<div style="width:32px; height:32px; border-radius:999px; background:var(--border);" aria-hidden="true"></div>' +
+        '<span style="font-size:12.5px; font-weight:700;">' + escapeHtml(p.author) + '</span>' +
+        (p.mine && p.status === 'pending' ? ' <span class="badge-match">검수 중</span>' : '') +
+        '<span style="font-size:11px; color:var(--text2);">' + escapeHtml(p.time) + '</span></div>' +
+      media +
+      '<p style="font-size:13.5px; line-height:1.6;">' + escapeHtml(p.text) + '</p>' +
+      '<div class="row" style="align-items:center; gap:16px;">' +
+      '<button data-postlike="' + p.id + '" aria-pressed="' + p.liked + '" aria-label="좋아요, 현재 ' + p.likes + '개" style="display:flex; align-items:center; gap:5px; border:none; background:none; color:var(--text2); min-height:44px;">' +
+      '<svg width="17" height="17" viewBox="0 0 24 24" fill="' + (p.liked ? 'var(--accent)' : 'none') + '" stroke="var(--accent)" stroke-width="1.8" aria-hidden="true"><path d="M12 21s-7.5-4.6-10-9.3C0.4 8.4 2.4 5 6 5c2 0 3.4 1 4 2.3C10.6 6 12 5 14 5c3.6 0 5.6 3.4 4 6.7-2.5 4.7-10 9.3-10 9.3z"/></svg>' +
+      '<span style="font-size:12px;">' + p.likes + '</span></button>' +
+      '<button data-open-comments="' + p.id + '" aria-label="댓글 보기, 현재 ' + p.comments + '개" style="display:flex; align-items:center; gap:5px; border:none; background:none; color:var(--text2); min-height:44px;">' +
+      '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.8" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-8.9 8.4 9 9 0 0 1-3.6-.7L3 20l1.3-3.9a8.2 8.2 0 0 1-1-4A8.4 8.4 0 0 1 12.1 3a8.3 8.3 0 0 1 8.9 8.5z"/></svg>' +
+      '<span style="font-size:12px;">' + p.comments + '</span></button>' +
+      '<button data-share-post="' + p.id + '" aria-label="공유하기" style="display:flex; align-items:center; gap:5px; border:none; background:none; color:var(--text2); min-height:44px; margin-left:auto;">' +
+      '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.8" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.6l6.8-3.8M8.6 13.4l6.8 3.8"/></svg>' +
+      '<span style="font-size:12px;">공유</span></button></div></div>';
+  }
+
+  function homeOutingCardHtml(){
+    var list = OUTINGS.filter(function(o){ return !state.region || o.region === state.region; });
+    if(!list.length) list = OUTINGS;
+    var o = list[0];
+    return '<a href="#outing" class="card row" style="align-items:center; gap:13px; padding:15px 16px; text-decoration:none; color:var(--text);">' +
+      '<div style="width:44px; height:44px; border-radius:14px; background:var(--chip-c); display:flex; align-items:center; justify-content:center; font-size:21px; flex:0 0 auto;" aria-hidden="true">' + o.emoji + '</div>' +
+      '<div class="col" style="gap:3px; min-width:0; flex:1;">' +
+        '<span style="font-size:11px; font-weight:800; color:var(--chip-c-ink);">이번 주 나들이</span>' +
+        '<span style="font-size:13.5px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' + escapeHtml(o.title) + '</span>' +
+        '<span class="helper">' + escapeHtml(o.region) + ' · ' + escapeHtml(o.when) + '</span>' +
+      '</div>' +
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></a>';
+  }
+
+  function homeFeedHtml(){
+    var posts = state.posts.slice().sort(function(a,b){ return b.createdAt - a.createdAt; });
+    var av = myAgeValue();
+    var threshold = state.kidType === 'pregnant' ? 4 : 2;
+
+    if(state.homeFeed === 'peer' && av != null){
+      posts = posts.filter(function(p){
+        return p.stage === state.kidType && p.age_value != null && Math.abs(p.age_value - av) <= threshold;
+      });
+    } else if(state.homeFeed === 'photo'){
+      posts = posts.filter(function(p){ return !!(p.media_url || p.img); });
+    } else if(state.homeFeed === 'mine'){
+      posts = posts.filter(function(p){ return !!p.mine; });
+    }
+
+    if(!posts.length){
+      var msg = state.homeFeed === 'mine' ? '아직 작성한 글이 없어요'
+              : state.homeFeed === 'peer' ? '아직 또래 글이 없어요'
+              : state.homeFeed === 'photo' ? '사진이 있는 글이 아직 없어요'
+              : '아직 올라온 글이 없어요';
+      return '<div class="card col" style="padding:22px; align-items:center; gap:7px;">' +
+        '<span style="font-size:13.5px; font-weight:700;">' + msg + '</span>' +
+        '<span class="helper">첫 글을 남겨보세요</span>' +
+        '<button type="button" data-open-compose class="pill" style="margin-top:6px; padding:9px 16px; background:var(--accent-soft); color:var(--accent2); border:none; font-size:12.5px; font-weight:700;">글쓰기</button>' +
+        '</div>';
+    }
+
+    var out = [];
+    posts.forEach(function(p, i){
+      out.push(feedCardHtml(p));
+      if(i === 1){ out.push(homeOutingCardHtml()); }   // 피드 중간에 나들이 카드 1개
+    });
+    out.push('<div class="feed-end">최신 글을 모두 확인했어요</div>');
+    return out.join('');
+  }
+
   function renderHome(){
     document.getElementById('home-name').textContent = (state.nickname ? state.nickname + '님' : '다다맘님');
     document.getElementById('home-chip').textContent = profileSummary();
-
-    var dd = ddayInfo();
-    var ddCard = document.getElementById('home-dday-card');
-    if(dd){
-      ddCard.hidden = false;
-      document.getElementById('home-dday-label').textContent = dd.label;
-      document.getElementById('home-dday-value').textContent = dd.value;
-      document.getElementById('home-dday-emoji').textContent = dd.emoji;
-    } else {
-      ddCard.hidden = true;
-    }
-
-    var hero = document.getElementById('home-hero');
-    if(state.kidType === 'pregnant'){
-      var w = pregWeeks(state.dueDate);
-      hero.innerHTML = '<a href="#benefit" class="hero">' +
-        '<span class="hero-eyebrow">지금 신청 가능한 체험단</span>' +
-        '<h2 class="display hero-title">출산 준비, 하나씩 챙겨봐요</h2>' +
-        '<p class="hero-sub">' + (w ? ('임신 ' + w + '주차에 필요한 준비물을 체험단으로 먼저 받아보세요') : '출산 준비물을 체험단으로 먼저 받아보세요') + '</p>' +
-        '<span class="hero-cta">체험단 보기 ' + ARROW + '</span></a>';
-    } else {
-      hero.innerHTML = '<a href="#challenge" class="hero">' +
-        '<span class="hero-eyebrow">진행 중인 챌린지</span>' +
-        '<h2 class="display hero-title">우리 아이 첫걸음 챌린지</h2>' +
-        '<p class="hero-sub">기억하고 싶은 걸음마 순간을 짧은 영상으로 남겨보세요</p>' +
-        '<span class="hero-cta">참여하기 ' + ARROW + '</span></a>';
-    }
-
-    var trials = eligibleTrials().slice(0,2);
-    document.getElementById('home-trials').innerHTML = trials.map(function(t){
-      return '<a href="#benefit" class="card col" style="flex:0 0 auto; width:168px; padding:16px; gap:10px; text-decoration:none; color:var(--text);">' +
-        '<div style="height:84px; border-radius:14px; background:' + t.bg + '; display:flex; align-items:center; justify-content:center; color:var(--text2); font-size:12px;" role="img" aria-label="' + escapeHtml(t.title) + ' 제품 사진">제품 사진</div>' +
-        '<span style="font-size:12px; color:var(--text2);">' + escapeHtml(t.brand) + '</span>' +
-        '<span style="font-size:14px; font-weight:700; line-height:1.4;">' + escapeHtml(t.title) + '</span>' +
-        '</a>';
-    }).join('');
-
-    var posts = state.posts.slice(0,2);
-    document.getElementById('home-posts').innerHTML = posts.map(function(p){
-      return '<a href="#community" class="card row" style="gap:12px; padding:14px; align-items:center; text-decoration:none; color:var(--text);">' +
-        '<div style="flex:0 0 auto; width:56px; height:56px; border-radius:14px; background:var(--border);" aria-hidden="true"></div>' +
-        '<div class="col" style="gap:4px;">' +
-        '<span style="font-size:13.5px; font-weight:700;">' + escapeHtml(p.text.length > 28 ? p.text.slice(0,28) + '…' : p.text) + '</span>' +
-        '<span style="font-size:12px; color:var(--text2);">' + escapeHtml(p.author) + ' · 좋아요 ' + p.likes + ' · 댓글 ' + p.comments + '</span>' +
-        '</div></a>';
-    }).join('');
-
-    renderHomeInfo();
-    renderHomeArticles();
-    renderHomeOutings();
-  }
-
-  function renderHomeInfo(){
-    var card = document.getElementById('home-info-card');
-    var info = weekMonthInfo();
-    if(!info){ card.hidden = true; return; }
-    card.hidden = false;
-    document.getElementById('home-info-label').textContent = info.label;
-    document.getElementById('home-info-headline').textContent = info.headline;
-    document.getElementById('home-info-tip').textContent = info.tip;
-  }
-
-  function renderHomeArticles(){
-    var el = document.getElementById('home-articles');
-    if(!el) return;
-    el.innerHTML = ARTICLES.map(function(a){
-      return '<button type="button" data-open-article="' + a.id + '" class="card col" style="flex:0 0 auto; width:176px; padding:16px; gap:8px; text-align:left; cursor:pointer;">' +
-        '<span style="font-size:22px;" aria-hidden="true">' + a.emoji + '</span>' +
-        '<span style="font-size:13.5px; font-weight:700; line-height:1.4;">' + escapeHtml(a.title) + '</span>' +
-        '<span style="font-size:11.5px; color:var(--text2);">' + escapeHtml(a.summary) + '</span></button>';
-    }).join('');
-  }
-
-  function renderHomeOutings(){
-    var el = document.getElementById('home-outings');
-    if(!el) return;
-    var regional = OUTINGS.filter(function(o){ return !state.region || o.region === state.region; });
-    var list = (regional.length ? regional : OUTINGS).slice(0,3);
-    el.innerHTML = list.map(function(o){
-      return '<a href="#outing" class="card col" style="flex:0 0 auto; width:168px; padding:16px; gap:8px; text-decoration:none; color:var(--text);">' +
-        '<span style="font-size:22px;" aria-hidden="true">' + o.emoji + '</span>' +
-        '<span style="font-size:13.5px; font-weight:700; line-height:1.4;">' + escapeHtml(o.title) + '</span>' +
-        '<span style="font-size:11.5px; color:var(--text2);">' + escapeHtml(o.place) + ' · ' + escapeHtml(o.when) + '</span></a>';
-    }).join('');
+    document.getElementById('home-status').innerHTML = homeStatusHtml();
+    document.getElementById('home-missions').innerHTML = homeMissionsHtml();
+    document.getElementById('home-feedbar').innerHTML = homeFeedBarHtml();
+    document.getElementById('home-feed').innerHTML = homeFeedHtml();
   }
 
   // ---------- CHALLENGE ----------
@@ -2435,6 +2542,17 @@
     if(id === 'admin'){ renderAdmin(); }
     if(id === 'policy' || id === 'terms'){ renderLegal(id); }
   }
+
+  // ---------- 홈 피드 필터 ----------
+  document.addEventListener('click', function(e){
+    var chip = e.target.closest && e.target.closest('[data-home-feed]');
+    if(chip){
+      state.homeFeed = chip.getAttribute('data-home-feed');
+      save();
+      document.getElementById('home-feedbar').innerHTML = homeFeedBarHtml();
+      document.getElementById('home-feed').innerHTML = homeFeedHtml();
+    }
+  });
 
   // ---------- 법적 페이지 뒤로가기 ----------
   document.addEventListener('click', function(e){
