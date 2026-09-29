@@ -69,7 +69,7 @@
   }
   .navbar button{
     background:none; border:none; display:flex; flex-direction:column; align-items:center; gap:4px;
-    color:var(--text2); font-size:11px; font-family:inherit; padding:6px 10px; min-width:56px;
+    color:var(--text2); font-size:10.5px; font-family:inherit; padding:6px 2px; flex:1 1 0; min-width:0;
   }
   .navbar button.active{ color:var(--accent); font-weight:700; }
   .navbar svg{ display:block; }
@@ -116,6 +116,17 @@
   .col{ display:flex; flex-direction:column; }
   .link-quiet{ font-size:12.5px; color:var(--text2); text-decoration:none; }
   .pad{ padding-inline:20px; }
+
+  .mission-banner{ display:flex; flex-direction:column; gap:5px; background:var(--accent-soft);
+                   border-radius:14px; padding:13px 15px; margin-bottom:12px; }
+  .mission-banner-dday{ font-size:11px; font-weight:800; color:#fff; background:var(--accent-strong);
+                        padding:2px 9px; border-radius:999px; }
+  .guide-box{ display:flex; flex-direction:column; gap:6px; border:1px dashed var(--border);
+              border-radius:14px; padding:13px 15px; margin-bottom:12px; }
+  .guide-title{ font-size:12.5px; font-weight:800; color:var(--text2); }
+  .guide-list{ margin:0; padding-left:16px; }
+  .guide-list li{ font-size:12.5px; line-height:1.65; color:var(--text2); }
+
 
   .home-sec{ display:flex; flex-direction:column; gap:12px; flex:0 0 auto; }
   .home-sec-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
@@ -437,6 +448,52 @@
         <div class="card col" style="align-items:center; gap:4px; padding:14px 0;"><span class="display" id="my-stat-post" style="font-size:19px;">0</span><span style="font-size:11.5px; color:var(--text2);">내 게시물</span></div>
       </div>
 
+
+      <div class="card col" id="family-card" style="gap:12px; padding:18px;" hidden>
+        <h2 class="display" style="font-size:16px;">가족과 함께 기록하기</h2>
+        <div class="col" id="family-body" style="gap:10px;"></div>
+      </div>
+
+      <div class="col" style="gap:10px;">
+        <a href="#community" data-my-link="posts" class="card row" style="align-items:center; gap:14px; padding:16px; text-decoration:none; color:var(--text);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.9" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 4v16M4 9h16"/></svg>
+          <span style="flex:1; font-size:14px; font-weight:700;">내 게시물</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+        </a>
+        <a href="#challenge" data-my-link="challenge" class="card row" style="align-items:center; gap:14px; padding:16px; text-decoration:none; color:var(--text);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.9" aria-hidden="true"><path d="M5 3v18"/><path d="M5 4h11l-2 4 2 4H5"/></svg>
+          <span style="flex:1; font-size:14px; font-weight:700;">참여이력</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+        </a>
+        <a href="#benefit" data-my-link="benefit" class="card row" style="align-items:center; gap:14px; padding:16px; text-decoration:none; color:var(--text);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.9" aria-hidden="true"><rect x="3" y="8" width="18" height="13" rx="1.5"/><path d="M3 12h18"/><path d="M12 8v13"/></svg>
+          <span style="flex:1; font-size:14px; font-weight:700;">혜택함</span>
+          <span id="my-benefit-badge" style="font-size:11.5px; font-weight:700; color:var(--accent2); background:var(--accent-soft); padding:2px 8px; border-radius:999px;">0</span>
+        </a>
+        <button type="button" class="card row" data-share-app style="align-items:center; gap:14px; padding:16px; border:1px solid var(--border); text-align:left; width:100%;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.9" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.6l6.8-3.8M8.6 13.4l6.8 3.8"/></svg>
+          <span style="flex:1; font-size:14px; font-weight:700;">다다맘 앱 공유하기</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+        <button type="button" class="card row" data-toast="설정은 다음 업데이트에서 만나요" style="align-items:center; gap:14px; padding:16px; border:1px solid var(--border); text-align:left; width:100%;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.9" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.6 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.6 1z"/></svg>
+          <span style="flex:1; font-size:14px; font-weight:700; color:var(--text2);">설정</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+      </div>
+      <div id="my-profile-banner"></div>
+      <div id="my-footer"></div>
+    </div>
+    <nav class="navbar" data-nav aria-label="주요 메뉴"></nav>
+  </section>
+
+  <section class="screen" id="screen-growth">
+    <div class="pad" style="flex:0 0 auto; padding-block:18px 10px;">
+      <h1 class="display" style="font-size:22px;">성장기록</h1>
+      <span class="helper">이 기록은 서버로 보내지 않고 이 기기에만 저장돼요.</span>
+    </div>
+    <div class="scroll pad" style="padding-top:4px;">
+      <div id="growth-profile-banner"></div>
       <div class="card col" id="carelog-card" style="gap:14px; padding:18px;">
         <div class="row" style="align-items:center; justify-content:space-between;">
           <h2 class="display" style="font-size:16px;">오늘의 기록</h2>
@@ -492,41 +549,6 @@
         </div>
         <div id="monthly-album-grid" style="display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:6px;"></div>
       </div>
-
-      <div class="card col" id="family-card" style="gap:12px; padding:18px;" hidden>
-        <h2 class="display" style="font-size:16px;">가족과 함께 기록하기</h2>
-        <div class="col" id="family-body" style="gap:10px;"></div>
-      </div>
-
-      <div class="col" style="gap:10px;">
-        <a href="#community" data-my-link="posts" class="card row" style="align-items:center; gap:14px; padding:16px; text-decoration:none; color:var(--text);">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.9" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 4v16M4 9h16"/></svg>
-          <span style="flex:1; font-size:14px; font-weight:700;">내 게시물</span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
-        </a>
-        <a href="#challenge" data-my-link="challenge" class="card row" style="align-items:center; gap:14px; padding:16px; text-decoration:none; color:var(--text);">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.9" aria-hidden="true"><path d="M5 3v18"/><path d="M5 4h11l-2 4 2 4H5"/></svg>
-          <span style="flex:1; font-size:14px; font-weight:700;">참여이력</span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
-        </a>
-        <a href="#benefit" data-my-link="benefit" class="card row" style="align-items:center; gap:14px; padding:16px; text-decoration:none; color:var(--text);">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.9" aria-hidden="true"><rect x="3" y="8" width="18" height="13" rx="1.5"/><path d="M3 12h18"/><path d="M12 8v13"/></svg>
-          <span style="flex:1; font-size:14px; font-weight:700;">혜택함</span>
-          <span id="my-benefit-badge" style="font-size:11.5px; font-weight:700; color:var(--accent2); background:var(--accent-soft); padding:2px 8px; border-radius:999px;">0</span>
-        </a>
-        <button type="button" class="card row" data-share-app style="align-items:center; gap:14px; padding:16px; border:1px solid var(--border); text-align:left; width:100%;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.9" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.6l6.8-3.8M8.6 13.4l6.8 3.8"/></svg>
-          <span style="flex:1; font-size:14px; font-weight:700;">다다맘 앱 공유하기</span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
-        </button>
-        <button type="button" class="card row" data-toast="설정은 다음 업데이트에서 만나요" style="align-items:center; gap:14px; padding:16px; border:1px solid var(--border); text-align:left; width:100%;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.9" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.6 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.6 1z"/></svg>
-          <span style="flex:1; font-size:14px; font-weight:700; color:var(--text2);">설정</span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
-        </button>
-      </div>
-      <div id="my-profile-banner"></div>
-      <div id="my-footer"></div>
     </div>
     <nav class="navbar" data-nav aria-label="주요 메뉴"></nav>
   </section>
@@ -571,7 +593,14 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (function(){
-  var STORAGE_KEY = 'dadamom_v2';
+  var LEGACY_STORAGE_KEY  = 'dadamom_v2';         // 계정 분리 이전에 쓰던 단일 키
+  var GUEST_STORAGE_KEY   = 'dadamom_v2::guest';
+  var PENDING_STORAGE_KEY = 'dadamom_v2::pending'; // 주인을 모르는 기존 데이터 보관함
+                                                   // (로그아웃 상태에선 보이지 않고, 첫 로그인 때 그 계정으로 귀속)
+  // 로그인한 계정의 데이터와 비로그인 데이터를 분리해 보관한다.
+  function storageKey(){
+    return (authUser && authUser.id) ? ('dadamom_v2::' + authUser.id) : GUEST_STORAGE_KEY;
+  }
   var DAY = 86400000;
   var SUPABASE_URL = 'https://hjqchbpxwviengdzvado.supabase.co';
   var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqcWNoYnB4d3ZpZW5nZHp2YWRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxMzE5NDYsImV4cCI6MjEwNTcwNzk0Nn0.eNnZoYwfKu0ACJeSxHRYnLtCeYBZjKleHLZ03rvPGZE';
@@ -612,13 +641,17 @@
         var session = res && res.data && res.data.session;
         authUser = (session && session.user) ? { email: session.user.email, id: session.user.id } : null;
         renderAccount();
+        if(authUser){ switchStateForAccount(); }
         refreshAdminStatus();
       }).catch(function(){});
       if(typeof sb.auth.onAuthStateChange === 'function'){
         sb.auth.onAuthStateChange(function(event, session){
+          var prevId = authUser ? authUser.id : null;
           authUser = (session && session.user) ? { email: session.user.email, id: session.user.id } : null;
+          var nextId = authUser ? authUser.id : null;
           renderAccount();
           refreshAdminStatus();
+          if(prevId !== nextId){ switchStateForAccount(); }
           if(event === 'SIGNED_IN'){ showToast('로그인됐어요'); }
         });
       }
@@ -777,6 +810,7 @@
     try{ await sb.auth.signOut(); }catch(e){}
     authUser = null; isAdminUser = false;
     renderAccount();
+    switchStateForAccount();     // 게스트 상태로 되돌린다 (개인 기록은 계정 칸에 남아있음)
     showToast('로그아웃 됐어요');
   }
 
@@ -902,6 +936,7 @@
     {id:'challenge', label:'챌린지', icon:'<path d="M5 3v18"/><path d="M5 4h11l-2 4 2 4H5"/>'},
     {id:'benefit', label:'혜택', icon:'<rect x="3" y="8" width="18" height="13" rx="1.5"/><path d="M3 12h18"/><path d="M12 8v13"/>'},
     {id:'outing', label:'나들이', icon:'<path d="M12 21s7-7.2 7-12a7 7 0 1 0-14 0c0 4.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/>'},
+    {id:'growth', label:'성장', icon:'<path d="M3 20h18"/><path d="M7 20v-6"/><path d="M12 20V8"/><path d="M17 20v-9"/>'},
     {id:'community', label:'커뮤니티', icon:'<path d="M21 11.5a8.4 8.4 0 0 1-8.9 8.4 9 9 0 0 1-3.6-.7L3 20l1.3-3.9a8.2 8.2 0 0 1-1-4A8.4 8.4 0 0 1 12.1 3a8.3 8.3 0 0 1 8.9 8.5z"/>'},
     {id:'my', label:'MY', icon:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4.5 5-6 8-6s6.5 1.5 8 6"/>'}
   ];
@@ -991,7 +1026,18 @@
   function loadState(){
     var d = defaultState();
     try{
-      var raw = localStorage.getItem(STORAGE_KEY);
+      var raw = localStorage.getItem(storageKey());
+      // 예전 단일 키 데이터는 주인을 알 수 없으므로 보관함으로 옮긴다.
+      // 로그아웃 상태에서는 개인 정보가 보이지 않아야 하므로 화면에는 쓰지 않는다.
+      var legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+      if(legacy){
+        try{
+          if(!localStorage.getItem(PENDING_STORAGE_KEY)){
+            localStorage.setItem(PENDING_STORAGE_KEY, legacy);
+          }
+          localStorage.removeItem(LEGACY_STORAGE_KEY);
+        }catch(e){}
+      }
       if(!raw) return d;
       var saved = JSON.parse(raw);
       return Object.assign({}, d, saved, {
@@ -1013,7 +1059,7 @@
   var state = loadState();
 
   function save(){
-    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+    try{ localStorage.setItem(storageKey(), JSON.stringify(state)); }catch(e){}
   }
 
   function pregWeeksAt(dueDateStr, ts){
@@ -1548,6 +1594,18 @@
     }).join('');
   }
 
+  // 저장된 '[질문] 내용' 형태를 배지 + 본문으로 분리해 표시
+  function postTextHtml(raw){
+    var t = raw || '';
+    var m = t.match(/^\[([^\]]{1,6})\]\s*/);
+    var badge = '';
+    if(m && POST_TOPICS.indexOf(m[1]) > -1){
+      badge = '<span style="font-size:11px; font-weight:800; color:var(--accent2); background:var(--accent-soft); padding:2px 8px; border-radius:999px; margin-right:6px;">' + escapeHtml(m[1]) + '</span>';
+      t = t.slice(m[0].length);
+    }
+    return '<p style="font-size:13.5px; line-height:1.6;">' + badge + escapeHtml(t) + '</p>';
+  }
+
   function feedCardHtml(p){
     var media = p.media_url
       ? mediaTag(p.media_url, 'width:100%; height:170px; object-fit:cover; border-radius:16px;')
@@ -1559,7 +1617,7 @@
         (p.mine && p.status === 'pending' ? ' <span class="badge-match">검수 중</span>' : '') +
         '<span style="font-size:11px; color:var(--text2);">' + escapeHtml(p.time) + '</span></div>' +
       media +
-      '<p style="font-size:13.5px; line-height:1.6;">' + escapeHtml(p.text) + '</p>' +
+      postTextHtml(p.text) +
       '<div class="row" style="align-items:center; gap:16px;">' +
       '<button data-postlike="' + p.id + '" aria-pressed="' + p.liked + '" aria-label="좋아요, 현재 ' + p.likes + '개" style="display:flex; align-items:center; gap:5px; border:none; background:none; color:var(--text2); min-height:44px;">' +
       '<svg width="17" height="17" viewBox="0 0 24 24" fill="' + (p.liked ? 'var(--accent)' : 'none') + '" stroke="var(--accent)" stroke-width="1.8" aria-hidden="true"><path d="M12 21s-7.5-4.6-10-9.3C0.4 8.4 2.4 5 6 5c2 0 3.4 1 4 2.3C10.6 6 12 5 14 5c3.6 0 5.6 3.4 4 6.7-2.5 4.7-10 9.3-10 9.3z"/></svg>' +
@@ -1862,7 +1920,7 @@
           '<div class="row" style="align-items:center; gap:8px;"><div style="width:32px; height:32px; border-radius:999px; background:var(--border);" aria-hidden="true"></div>' +
           '<span style="font-size:12.5px; font-weight:700;">' + escapeHtml(p.author) + '</span>' + (p.mine && p.status === 'pending' ? ' <span class="badge-match">검수 중</span>' : '') + '<span style="font-size:11px; color:var(--text2);">' + escapeHtml(p.time) + '</span></div>' +
           media +
-          '<p style="font-size:13.5px; line-height:1.6;">' + escapeHtml(p.text) + '</p>' +
+          postTextHtml(p.text) +
           '<div class="row" style="align-items:center; gap:16px;">' +
           '<button data-postlike="' + p.id + '" aria-pressed="' + p.liked + '" aria-label="좋아요, 현재 ' + p.likes + '개" style="display:flex; align-items:center; gap:5px; border:none; background:none; color:var(--text2); min-height:44px;">' +
           '<svg width="17" height="17" viewBox="0 0 24 24" fill="' + (p.liked ? 'var(--accent)' : 'none') + '" stroke="var(--accent)" stroke-width="1.8" aria-hidden="true"><path d="M12 21s-7.5-4.6-10-9.3C0.4 8.4 2.4 5 6 5c2 0 3.4 1 4 2.3C10.6 6 12 5 14 5c3.6 0 5.6 3.4 4 6.7-2.5 4.7-10 9.3-10 9.3z"/></svg>' +
@@ -1891,7 +1949,10 @@
   function renderMy(){
     var _pb = document.getElementById('my-profile-banner');
     if(_pb){
-      _pb.innerHTML = state.onboarded ? '' :
+      _pb.innerHTML = state.onboarded ? (authUser ? '' :
+        '<div class="card col" style="gap:6px; padding:14px 16px;">' +
+        '<span style="font-size:12.5px; font-weight:700;">로그인하지 않은 상태예요</span>' +
+        '<span class="helper">지금 입력한 정보는 이 기기에만 저장돼요. 로그인하면 계정에 안전하게 보관됩니다.</span></div>') :
         '<a href="#onboarding" class="card col" style="gap:6px; padding:16px; text-decoration:none; color:var(--text);">' +
         '<span style="font-size:13.5px; font-weight:800;">아이 정보를 등록해주세요</span>' +
         '<span class="helper">등록해야 글쓰기·챌린지·체험단을 이용할 수 있어요</span></a>';
@@ -1905,11 +1966,6 @@
     document.getElementById('my-stat-benefit').textContent = benefitCount;
     document.getElementById('my-benefit-badge').textContent = benefitCount;
     document.getElementById('my-stat-post').textContent = state.posts.filter(function(p){ return p.mine; }).length;
-    renderCareLog();
-    renderGrowth();
-    renderVax();
-    renderTimeline();
-    renderMonthlyAlbum();
     renderFamily();
   }
 
@@ -2616,6 +2672,21 @@
     }
   }
 
+  function renderGrowthScreen(){
+    var pb = document.getElementById('growth-profile-banner');
+    if(pb){
+      pb.innerHTML = state.onboarded ? '' :
+        '<a href="#onboarding" class="card col" style="gap:6px; padding:16px; margin-bottom:12px; text-decoration:none; color:var(--text);">' +
+        '<span style="font-size:13.5px; font-weight:800;">아이 정보를 등록해주세요</span>' +
+        '<span class="helper">생년월을 알아야 월령별 기록과 접종 일정을 보여드릴 수 있어요</span></a>';
+    }
+    renderCareLog();
+    renderGrowth();
+    renderVax();
+    renderTimeline();
+    renderMonthlyAlbum();
+  }
+
   // ---------- ROUTING ----------
   function showScreen(id){
     document.querySelectorAll('.screen').forEach(function(s){ s.hidden = (s.id !== 'screen-' + id); });
@@ -2625,7 +2696,7 @@
 
   function route(){
     var id = (location.hash || '').replace('#', '');
-    var valid = ['onboarding','home','challenge','benefit','community','outing','my','admin','policy','terms'];
+    var valid = ['onboarding','home','challenge','benefit','community','outing','growth','my','admin','policy','terms'];
     var publicPages = ['policy','terms'];
     if(valid.indexOf(id) === -1){
       location.hash = '#' + (state.onboarded ? 'home' : 'onboarding');
@@ -2640,6 +2711,7 @@
     if(id === 'home' || id === 'challenge' || id === 'benefit' || id === 'community'){
       refreshRemote();
     }
+    if(id === 'growth'){ renderGrowthScreen(); }
     if(id === 'admin'){ renderAdmin(); }
     if(id === 'policy' || id === 'terms'){ renderLegal(id); }
   }
@@ -2697,6 +2769,40 @@
       return;
     }
   });
+
+  // ---------- 계정 전환 시 로컬 상태 교체 ----------
+  // 로그인하면 그 계정의 데이터를, 로그아웃하면 게스트 데이터를 보여준다.
+  function switchStateForAccount(){
+    // 게스트로 프로필을 만든 뒤 로그인한 경우, 그 프로필을 계정으로 넘겨준다(이동).
+    if(authUser && authUser.id){
+      var accKey = 'dadamom_v2::' + authUser.id;
+      var hasAcc = !!localStorage.getItem(accKey);
+      if(!hasAcc){
+        // 1순위: 이 세션에서 게스트로 입력한 프로필,  2순위: 계정 분리 이전의 보관함
+        var srcKey = null;
+        var guestRaw = localStorage.getItem(GUEST_STORAGE_KEY);
+        try{
+          if(guestRaw && JSON.parse(guestRaw).onboarded) srcKey = GUEST_STORAGE_KEY;
+        }catch(e){}
+        if(!srcKey){
+          var pendRaw = localStorage.getItem(PENDING_STORAGE_KEY);
+          try{
+            if(pendRaw && JSON.parse(pendRaw).onboarded) srcKey = PENDING_STORAGE_KEY;
+          }catch(e){}
+        }
+        if(srcKey){
+          try{
+            localStorage.setItem(accKey, localStorage.getItem(srcKey));
+            localStorage.removeItem(srcKey);   // 로그아웃하면 다시 보이지 않도록 이동(복사 아님)
+          }catch(e){}
+        }
+      }
+    }
+    state = loadState();
+    if(location.hash === '#growth'){ renderGrowthScreen(); }
+    renderAll((location.hash || '').replace('#',''));
+    route();
+  }
 
   // ---------- 로그인 게이트 ----------
   // 서버에 쓰는 동작(글쓰기·챌린지 참여·체험단 신청)은 로그인이 필요합니다.
@@ -2835,26 +2941,51 @@
   }
 
   function challengeModalHtml(){
-    return '<div class="modal-head"><h3 class="display">우리 아이도 참여하기</h3><button class="modal-close" data-close-modal aria-label="닫기">✕</button></div>' +
-      '<p class="modal-desc">첫걸음을 아직 안 뗐어도 괜찮아요. 지금 순간을 짧은 메모로 먼저 남겨보세요.</p>' +
-      '<div class="field"><label for="entry-file">사진 또는 영상 (선택)</label><input type="file" id="entry-file" accept="image/*,video/*"></div>' +
-      '<div class="field"><label for="entry-note">짧은 소개 *</label><textarea id="entry-note" rows="3" placeholder="예: 오늘 처음으로 세 발짝 걸었어요!"></textarea></div>' +
+    var dLeft = daysUntil(CHALLENGE_DEADLINE);
+    var dday = dLeft < 0 ? '모집 마감' : (dLeft === 0 ? 'D-DAY' : 'D-' + dLeft);
+    return '<div class="modal-head"><h3 class="display">미션 인증</h3><button class="modal-close" data-close-modal aria-label="닫기">✕</button></div>' +
+      // 어떤 미션인지 먼저 보여준다 — 커뮤니티 글쓰기와 구분되는 핵심
+      '<div class="mission-banner">' +
+        '<div class="row" style="align-items:center; gap:7px;">' +
+          '<span class="mission-banner-dday">' + dday + '</span>' +
+          '<span style="font-size:13.5px; font-weight:800;">우리 아이 첫걸음 챌린지</span>' +
+        '</div>' +
+        '<span class="helper">지금까지 ' + state.entries.length + '명이 인증했어요 · 10~24개월 대상</span>' +
+      '</div>' +
+      '<div class="guide-box">' +
+        '<span class="guide-title">이렇게 남겨보세요</span>' +
+        '<ul class="guide-list">' +
+          '<li>걷는 모습이 담긴 사진이나 5~15초 영상</li>' +
+          '<li>완벽하지 않아도 괜찮아요. 시도하는 순간이면 충분해요</li>' +
+          '<li>아이 얼굴이 부담되면 뒷모습이나 발만 담아도 돼요</li>' +
+        '</ul>' +
+      '</div>' +
+      '<div class="field"><label for="entry-file">인증 사진 또는 영상 *</label><input type="file" id="entry-file" accept="image/*,video/*"><span class="helper" id="entry-file-hint">인증에는 사진이나 영상이 필요해요</span></div>' +
+      '<div class="field"><label for="entry-note">한 줄 기록 *</label><textarea id="entry-note" rows="3" placeholder="예: 오늘 처음으로 세 발짝 걸었어요!"></textarea></div>' +
       '<label class="check-row"><input type="checkbox" id="entry-consent"> 보호자이며, 아이 사진·영상을 챌린지에 게시하는 것에 동의해요 *</label>' +
       '<label class="check-row"><input type="checkbox" id="entry-consent2"> 참여 브랜드가 콘텐츠를 광고에 활용하는 것에 동의해요 (선택)</label>' +
-      '<button class="btn-primary" id="entry-submit" style="width:100%;" disabled>제출하기</button>';
+      '<button class="btn-primary" id="entry-submit" style="width:100%;" disabled>인증 제출하기</button>';
   }
+
+  var POST_TOPICS = ['질문', '자랑', '고민', '정보'];
 
   function composeModalHtml(){
     return '<div class="modal-head"><h3 class="display">이야기 남기기</h3><button class="modal-close" data-close-modal aria-label="닫기">✕</button></div>' +
+      '<div class="field"><label>말머리 *</label>' +
+        '<div class="row" style="flex-wrap:wrap; gap:7px;" id="post-topic-group" role="group" aria-label="말머리 선택">' +
+          POST_TOPICS.map(function(t){
+            return '<button type="button" class="chip-f" data-post-topic="' + t + '" aria-pressed="false">' + t + '</button>';
+          }).join('') +
+        '</div></div>' +
       '<div class="field"><label for="post-photo">사진 (선택)</label><input type="file" id="post-photo" accept="image/*"></div>' +
-      '<div class="field"><label for="post-text">무슨 이야기를 나누고 싶으세요? *</label><textarea id="post-text" rows="4" placeholder="오늘 있었던 일을 편하게 적어보세요"></textarea></div>' +
+      '<div class="field"><label for="post-text">무슨 이야기를 나누고 싶으세요? *</label><textarea id="post-text" rows="4" placeholder="같은 시기를 지나는 부모들에게 편하게 물어보거나 나눠보세요"></textarea></div>' +
       '<div class="field"><label>공개범위 *</label>' +
       '<div class="segmented round" role="tablist" aria-label="공개범위 선택" id="post-visibility-group" style="width:100%;">' +
       '<button type="button" data-post-visibility="public" role="tab" aria-selected="true" style="flex:1;">전체 공개</button>' +
       '<button type="button" data-post-visibility="private" role="tab" aria-selected="false" style="flex:1;">나만 보기</button>' +
       '</div><span class="helper" id="post-visibility-hint">커뮤니티의 모든 사람이 볼 수 있어요</span></div>' +
       '<label class="check-row"><input type="checkbox" id="post-consent"> 아이 사진이 포함된다면 위 공개범위를 확인했고, 선택한 범위로 게시하는 것에 동의해요 *</label>' +
-      '<button class="btn-primary" id="post-submit" style="width:100%;" disabled>등록하기</button>';
+      '<button class="btn-primary" id="post-submit" style="width:100%;" disabled>글 올리기</button>';
   }
 
   function applyModalHtml(trial){
@@ -2900,14 +3031,19 @@
     var consent = document.getElementById('entry-consent');
     var btn = document.getElementById('entry-submit');
     if(!btn) return;
-    btn.disabled = !(note && note.value.trim().length > 0 && consent && consent.checked);
+    var fileEl = document.getElementById('entry-file');
+    var hasFile = !!(fileEl && fileEl.files && fileEl.files.length);
+    var hint = document.getElementById('entry-file-hint');
+    if(hint){ hint.textContent = hasFile ? '인증 파일이 첨부됐어요' : '인증에는 사진이나 영상이 필요해요'; }
+    btn.disabled = !(hasFile && note && note.value.trim().length > 0 && consent && consent.checked);
   }
   function updatePostSubmit(){
     var text = document.getElementById('post-text');
     var consent = document.getElementById('post-consent');
     var btn = document.getElementById('post-submit');
     if(!btn) return;
-    btn.disabled = !(text && text.value.trim().length > 0 && consent && consent.checked);
+    var topic = document.querySelector('#post-topic-group [data-post-topic][aria-pressed="true"]');
+    btn.disabled = !(topic && text && text.value.trim().length > 0 && consent && consent.checked);
   }
 
   function showToast(msg){
@@ -2946,6 +3082,14 @@
       save(); renderOnboarding(); return;
     }
 
+    var topicBtn = e.target.closest('[data-post-topic]');
+    if(topicBtn){
+      document.querySelectorAll('#post-topic-group [data-post-topic]').forEach(function(b){
+        b.setAttribute('aria-pressed', b === topicBtn ? 'true' : 'false');
+      });
+      updatePostSubmit();
+      return;
+    }
     if(e.target.closest('#browse-btn')){
       state.browsing = true; save();
       location.hash = '#home';
@@ -3307,7 +3451,9 @@
     var btn = document.getElementById('post-submit');
     var textEl = document.getElementById('post-text');
     var photoEl = document.getElementById('post-photo');
-    var textVal = textEl.value.trim();
+    var topicEl = document.querySelector('#post-topic-group [data-post-topic][aria-pressed="true"]');
+    var topic = topicEl ? topicEl.getAttribute('data-post-topic') : '';
+    var textVal = (topic ? '[' + topic + '] ' : '') + textEl.value.trim();
     var file = (photoEl && photoEl.files && photoEl.files[0]) ? photoEl.files[0] : null;
     if(btn){ btn.disabled = true; btn.textContent = '등록 중...'; }
     var mediaUrl = file ? await uploadMedia(file) : '';
@@ -3630,6 +3776,7 @@
     if(e.target.id === 'due-date'){ state.dueDate = e.target.value; save(); renderOnboarding(); }
     if(e.target.id === 'birth-month'){ state.birthMonth = e.target.value; save(); renderOnboarding(); }
     if(e.target.id === 'entry-consent'){ updateEntrySubmit(); }
+    if(e.target.id === 'entry-file'){ updateEntrySubmit(); }
     if(e.target.id === 'post-consent'){ updatePostSubmit(); }
     if(e.target.id === 'apply-consent'){ updateApplySubmit(); }
   });
