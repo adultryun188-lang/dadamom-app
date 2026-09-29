@@ -841,6 +841,20 @@
     renderAdmin();
   }
 
+  // 서버 RETURNING 없이도 로컬/DB id 를 일치시키기 위해 클라이언트에서 uuid 생성
+  function newUuid(){
+    try{
+      if(window.crypto && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+      if(window.crypto && crypto.getRandomValues){
+        var b = crypto.getRandomValues(new Uint8Array(16));
+        b[6] = (b[6] & 0x0f) | 0x40; b[8] = (b[8] & 0x3f) | 0x80;
+        var h = Array.prototype.map.call(b, function(x){ return ('0'+x.toString(16)).slice(-2); }).join('');
+        return h.slice(0,8)+'-'+h.slice(8,12)+'-'+h.slice(12,16)+'-'+h.slice(16,20)+'-'+h.slice(20);
+      }
+    }catch(e){}
+    return null;
+  }
+
   function escapeHtml(s){
     return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
       return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
@@ -2256,7 +2270,7 @@
   async function handleFamilyCreate(){
     var code = randomFamilyCode();
     if(sb){
-      var res = await sb.from('families').insert({ code: code, data: familySnapshot() }).select().single();
+      var res = { error: { message: '가족공유는 재설계 중이라 잠시 중단됐어요' } }; // families 백엔드 차단 상태
       if(res.error){
         showToast('가족 코드 생성 실패: ' + (res.error.message || '다시 시도해주세요'));
         return;
@@ -3090,23 +3104,27 @@
       status: sb ? 'pending' : 'approved',
       consent: { photoConsent:true, brandUse: !!(brandConsent2El && brandConsent2El.checked), docVersion:'v1', consentedAt: new Date().toISOString() } };
     if(sb){
-      var res = await sb.from('challenge_entries').insert({ name:name, age:age, note:noteVal, media_url:mediaUrl }).select().single();
-      if(res.error || !res.data){
-        if(res.error) console.error('challenge_entries insert error', res.error);
-        showToast('등록 실패: ' + (res.error && res.error.message ? res.error.message : '다시 시도해주세요'));
+      // 검수 대기(pending) 행은 SELECT 정책상 본인도 읽을 수 없으므로 RETURNING 을 쓰지 않는다.
+      var rowId = newUuid();
+      var payload = { name:name, age:age, note:noteVal, media_url:mediaUrl };
+      if(rowId) payload.id = rowId;
+      var res = await sb.from('challenge_entries').insert(payload);
+      if(res.error){
+        console.error('challenge_entries insert error', res.error);
+        showToast('등록 실패: ' + (res.error.message || '다시 시도해주세요'));
         if(btn){ btn.disabled = false; btn.textContent = '제출하기'; }
         return;
       }
-      newEntry.id = res.data.id;
-      newEntry.createdAt = new Date(res.data.created_at).getTime();
-      state.myEntries.push(res.data.id);
+      if(rowId) newEntry.id = rowId;
+      newEntry.createdAt = Date.now();
+      state.myEntries.push(newEntry.id);
     } else {
       state.myEntries.push(newEntry.id);
     }
     state.entries.unshift(newEntry);
     state.sortMode = 'new'; save();
     closeModal(); renderChallenge();
-    showToast('참여가 등록됐어요');
+    showToast(sb ? '제출됐어요! 검수 후 공개됩니다' : '참여가 등록됐어요');
   }
 
   async function handlePostSubmit(){
@@ -3126,16 +3144,20 @@
       status: (sb && visibility !== 'private') ? 'pending' : 'approved',
       visibility: visibility, consent: { scope: visibility, docVersion:'v1', consentedAt: new Date().toISOString() } };
     if(sb && visibility !== 'private'){
-      var res = await sb.from('community_posts').insert({ author:author, text:textVal, media_url:mediaUrl, stage:myStage, age_value:myAgeVal }).select().single();
-      if(res.error || !res.data){
-        if(res.error) console.error('community_posts insert error', res.error);
-        showToast('등록 실패: ' + (res.error && res.error.message ? res.error.message : '다시 시도해주세요'));
+      // 검수 대기(pending) 행은 SELECT 정책상 본인도 읽을 수 없으므로 RETURNING 을 쓰지 않는다.
+      var rowId = newUuid();
+      var payload = { author:author, text:textVal, media_url:mediaUrl, stage:myStage, age_value:myAgeVal };
+      if(rowId) payload.id = rowId;
+      var res = await sb.from('community_posts').insert(payload);
+      if(res.error){
+        console.error('community_posts insert error', res.error);
+        showToast('등록 실패: ' + (res.error.message || '다시 시도해주세요'));
         if(btn){ btn.disabled = false; btn.textContent = '등록하기'; }
         return;
       }
-      newPost.id = res.data.id;
-      newPost.createdAt = new Date(res.data.created_at).getTime();
-      state.myPosts.push(res.data.id);
+      if(rowId) newPost.id = rowId;
+      newPost.createdAt = Date.now();
+      state.myPosts.push(newPost.id);
     } else {
       // '나만 보기'는 서버에 전송하지 않고 이 기기에만 저장합니다.
       state.myPosts.push(newPost.id);
@@ -3143,7 +3165,7 @@
     state.posts.unshift(newPost);
     save();
     closeModal(); renderCommunity(); renderHome();
-    showToast(visibility === 'private' ? '나만 보기로 저장했어요' : '등록됐어요');
+    showToast(visibility === 'private' ? '나만 보기로 저장했어요' : '등록됐어요! 검수 후 공개됩니다');
   }
 
   async function handleApplySubmit(akey){
