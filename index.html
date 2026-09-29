@@ -202,9 +202,15 @@
 
   .field{ display:flex; flex-direction:column; gap:6px; }
   .field label{ font-size:13px; font-weight:700; color:var(--text2); }
-  .field input[type="text"], .field input[type="date"], .field input[type="month"], .field textarea{
+  .field input[type="text"], .field input[type="date"], .field input[type="month"],
+  .field input[type="url"], .field input[type="number"], .field select, .field textarea{
     border:1px solid var(--border); border-radius:14px; padding:12px 14px; background:var(--surface); color:var(--text); width:100%;
+    font-family:inherit; font-size:14px;
   }
+  .field select{ appearance:none; -webkit-appearance:none; padding-right:34px;
+    background-image:linear-gradient(45deg,transparent 50%,var(--text2) 50%),linear-gradient(135deg,var(--text2) 50%,transparent 50%);
+    background-position:calc(100% - 18px) 55%, calc(100% - 13px) 55%;
+    background-size:5px 5px, 5px 5px; background-repeat:no-repeat; }
   .field textarea{ resize:vertical; min-height:72px; }
   .helper{ font-size:12px; color:var(--text2); }
   .check-row{ display:flex; align-items:flex-start; gap:10px; font-size:13px; color:var(--text2); line-height:1.5; padding:4px 0; }
@@ -297,7 +303,7 @@
     </div>
     <div class="pad col" style="flex:0 0 auto; gap:8px; padding-block:16px calc(22px + env(safe-area-inset-bottom,0px)); border-top:1px solid var(--border); background:var(--bg);">
       <button id="start-btn" class="btn-primary" disabled>다다맘 시작하기</button>
-      <button type="button" id="browse-btn" class="link-quiet" style="background:none; border:none; padding:10px 0; font-size:13px;">먼저 둘러볼게요</button>
+      <button type="button" id="browse-btn" class="link-quiet" style="background:none; border:none; padding:10px 0; font-size:13px;">로그인 없이 커뮤니티 둘러보기</button>
       <span class="helper" id="start-helper" style="text-align:center;">단계 · 날짜 · 지역을 선택하면 시작할 수 있어요</span>
     </div>
   </section>
@@ -635,15 +641,20 @@
     }catch(e){ isAdminUser = false; renderAccount(); return Promise.resolve(false); }
   }
 
+  var authResolved = !sb;   // 세션 복원이 끝나기 전에는 화면을 되돌리지 않는다
+  // 네트워크가 막혀 세션 확인이 돌아오지 않아도 앱이 멈추지 않게 한다
+  if(sb){ setTimeout(function(){ if(!authResolved){ authResolved = true; route(); } }, 6000); }
+
   if(sb && sb.auth && typeof sb.auth.getSession === 'function'){
     try{
       sb.auth.getSession().then(function(res){
         var session = res && res.data && res.data.session;
         authUser = (session && session.user) ? { email: session.user.email, id: session.user.id } : null;
+        authResolved = true;
         renderAccount();
-        if(authUser){ switchStateForAccount(); }
+        switchStateForAccount();
         refreshAdminStatus();
-      }).catch(function(){});
+      }).catch(function(){ authResolved = true; route(); });
       if(typeof sb.auth.onAuthStateChange === 'function'){
         sb.auth.onAuthStateChange(function(event, session){
           var prevId = authUser ? authUser.id : null;
@@ -830,6 +841,7 @@
       el.innerHTML = '<p class="helper">관리자 권한이 없는 계정이에요. (' + escapeHtml(authUser.email) + ')</p>';
       return;
     }
+    await fetchOutingsForAdmin();
     var pendingEntries = [], pendingPosts = [];
     try{
       var er = await sb.from('challenge_entries').select('*').eq('status', 'pending').order('created_at', {ascending:false}).limit(50);
@@ -839,10 +851,6 @@
       var pr = await sb.from('community_posts').select('*').eq('status', 'pending').order('created_at', {ascending:false}).limit(50);
       if(!pr.error && pr.data) pendingPosts = pr.data;
     }catch(e){}
-    if(!pendingEntries.length && !pendingPosts.length){
-      el.innerHTML = '<p class="helper">지금은 검수 대기 중인 콘텐츠가 없어요.</p>';
-      return;
-    }
     var entryHtml = pendingEntries.map(function(r){
       return '<div class="card col" style="gap:8px; padding:14px;">' +
         '<span style="font-size:12px; color:var(--text2);">챌린지 참여 · ' + escapeHtml(r.name || '') + ' · ' + escapeHtml(r.age || '') + '</span>' +
@@ -884,9 +892,134 @@
           }).join('')
         : '');
 
-    el.innerHTML = noticeAdmin +
-      (pendingEntries.length ? '<h2 class="display" style="font-size:15px; margin-top:6px;">챌린지 참여 (' + pendingEntries.length + ')</h2>' + entryHtml : '') +
-      (pendingPosts.length ? '<h2 class="display" style="font-size:15px; margin-top:6px;">커뮤니티 글 (' + pendingPosts.length + ')</h2>' + postHtml : '');
+    el.innerHTML = outingAdminHtml() + noticeAdmin +
+      '<h2 class="display" style="font-size:15px; margin-top:6px;">콘텐츠 검수</h2>' +
+      ((!pendingEntries.length && !pendingPosts.length)
+        ? '<p class="helper">지금은 검수 대기 중인 콘텐츠가 없어요.</p>' : '') +
+      (pendingEntries.length ? '<h3 class="display" style="font-size:13.5px;">챌린지 참여 (' + pendingEntries.length + ')</h3>' + entryHtml : '') +
+      (pendingPosts.length ? '<h3 class="display" style="font-size:13.5px;">커뮤니티 글 (' + pendingPosts.length + ')</h3>' + postHtml : '');
+  }
+
+  // ---------- 운영자: 나들이 등록 ----------
+  var adminOutings = [];
+
+  async function fetchOutingsForAdmin(){
+    adminOutings = [];
+    if(!sb) return;
+    try{
+      var res = await sb.from('outings').select('*')
+        .order('sort_order', {ascending:true}).order('created_at', {ascending:false}).limit(200);
+      if(!res.error && Array.isArray(res.data)) adminOutings = res.data;
+    }catch(e){}
+  }
+
+  function outingAdminHtml(){
+    var regionOpts = REGIONS.map(function(r){
+      return '<option value="' + escapeHtml(r) + '">' + escapeHtml(r) + '</option>';
+    }).join('');
+    var today = todayISO();
+    var form =
+      '<h2 class="display" style="font-size:15px;">나들이 정보 등록</h2>' +
+      '<div class="card col" style="gap:10px; padding:16px;">' +
+        '<div class="row" style="gap:8px;">' +
+          '<div class="field" style="flex:1; min-width:0;"><label for="ot-category">종류</label>' +
+            '<select id="ot-category"><option value="event">행사</option><option value="spot">놀거리</option></select></div>' +
+          '<div class="field" style="flex:1; min-width:0;"><label for="ot-region">지역</label>' +
+            '<select id="ot-region">' + regionOpts + '</select></div>' +
+        '</div>' +
+        '<div class="field"><label for="ot-title">이름 *</label>' +
+          '<input type="text" id="ot-title" maxlength="80" placeholder="예: 인천 어린이 과학축제"></div>' +
+        '<div class="field"><label for="ot-place">장소</label>' +
+          '<input type="text" id="ot-place" maxlength="80" placeholder="예: 인천어린이과학관"></div>' +
+        '<div class="field"><label for="ot-address">주소</label>' +
+          '<input type="text" id="ot-address" maxlength="160" placeholder="도로명 주소 (지도 링크로 연결돼요)"></div>' +
+        '<div class="row" style="gap:8px;">' +
+          '<div class="field" style="flex:1; min-width:0;"><label for="ot-starts">시작일</label>' +
+            '<input type="date" id="ot-starts"></div>' +
+          '<div class="field" style="flex:1; min-width:0;"><label for="ot-ends">종료일</label>' +
+            '<input type="date" id="ot-ends"></div>' +
+        '</div>' +
+        '<span class="helper">종료일을 비우면 상시 운영으로 표시되고, 날짜가 지나면 목록에서 자동으로 빠져요.</span>' +
+        '<div class="field"><label for="ot-hours">운영시간</label>' +
+          '<input type="text" id="ot-hours" maxlength="80" placeholder="예: 10:00~18:00 (월요일 휴관)"></div>' +
+        '<div class="field"><label for="ot-fee">요금</label>' +
+          '<input type="text" id="ot-fee" maxlength="80" placeholder="예: 무료 / 어린이 3,000원"></div>' +
+        '<div class="field"><label for="ot-age">대상 연령</label>' +
+          '<input type="text" id="ot-age" maxlength="40" placeholder="예: 0~5세, 전체"></div>' +
+        '<div class="field"><label for="ot-link">예약·안내 링크</label>' +
+          '<input type="url" id="ot-link" maxlength="300" placeholder="https://"></div>' +
+        '<div class="field"><label for="ot-desc">상세 설명</label>' +
+          '<textarea id="ot-desc" rows="3" placeholder="어떤 행사인지, 준비물이나 주차 안내 등"></textarea></div>' +
+        '<div class="row" style="gap:8px;">' +
+          '<div class="field" style="flex:1; min-width:0;"><label for="ot-source">출처</label>' +
+            '<input type="text" id="ot-source" maxlength="60" placeholder="예: 인천시청"></div>' +
+          '<div class="field" style="flex:1; min-width:0;"><label for="ot-checked">확인일</label>' +
+            '<input type="date" id="ot-checked" value="' + today + '"></div>' +
+        '</div>' +
+        '<div class="field"><label for="ot-emoji">아이콘</label>' +
+          '<input type="text" id="ot-emoji" maxlength="4" placeholder="📍" style="width:80px;"></div>' +
+        '<button type="button" class="btn-primary" id="ot-submit" style="height:44px;">나들이 등록</button>' +
+      '</div>';
+
+    var listHtml = adminOutings.length
+      ? '<h2 class="display" style="font-size:15px; margin-top:6px;">등록된 나들이 (' + adminOutings.length + ')</h2>' +
+        adminOutings.map(function(r){
+          var ended = r.ends_on && String(r.ends_on).slice(0,10) < todayISO();
+          return '<div class="card row" style="align-items:center; gap:10px; padding:13px 15px;">' +
+            '<span style="flex:1; min-width:0; font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;' +
+              (ended ? ' opacity:0.5;' : '') + '">' +
+              escapeHtml(r.region || '') + ' · ' + escapeHtml(r.title || '') + (ended ? ' (종료)' : '') + '</span>' +
+            '<button type="button" class="btn-ghost" style="flex:0 0 auto; height:34px; padding:0 12px; font-size:12px;" data-outing-delete="' + r.id + '">삭제</button>' +
+          '</div>';
+        }).join('')
+      : '';
+    return form + listHtml;
+  }
+
+  async function handleOutingSubmit(){
+    if(!sb) return;
+    function v(id){ var el = document.getElementById(id); return el ? el.value.trim() : ''; }
+    var title = v('ot-title');
+    if(!title){ showToast('이름을 입력해주세요'); return; }
+    var link = v('ot-link');
+    if(link && !/^https?:\/\//i.test(link)){ showToast('링크는 http:// 또는 https:// 로 시작해야 해요'); return; }
+    var starts = v('ot-starts'), ends = v('ot-ends');
+    if(starts && ends && ends < starts){ showToast('종료일이 시작일보다 빨라요'); return; }
+
+    var btn = document.getElementById('ot-submit');
+    if(btn){ btn.disabled = true; btn.textContent = '등록 중...'; }
+    var payload = {
+      category: v('ot-category') || 'event',
+      region: v('ot-region') || '전체',
+      title: title,
+      place: v('ot-place') || null,
+      address: v('ot-address') || null,
+      hours: v('ot-hours') || null,
+      fee: v('ot-fee') || null,
+      age_fit: v('ot-age') || null,
+      link_url: link || null,
+      description: v('ot-desc') || null,
+      source: v('ot-source') || null,
+      checked_on: v('ot-checked') || null,
+      starts_on: starts || null,
+      ends_on: ends || null,
+      emoji: v('ot-emoji') || '📍'
+    };
+    var res = await sb.from('outings').insert(payload);
+    if(btn){ btn.disabled = false; btn.textContent = '나들이 등록'; }
+    if(res.error){ showToast('등록 실패: ' + (res.error.message || '')); return; }
+    showToast('등록했어요');
+    outingsLoaded = false; remoteOutings = []; outingsFetching = null;
+    renderAdmin();
+  }
+
+  async function handleOutingDelete(id){
+    if(!sb) return;
+    var res = await sb.from('outings').delete().eq('id', id);
+    if(res.error){ showToast('삭제 실패: ' + (res.error.message || '')); return; }
+    showToast('삭제했어요');
+    outingsLoaded = false; remoteOutings = []; outingsFetching = null;
+    renderAdmin();
   }
 
   async function handleAdminModerate(tableAndId, newStatus){
@@ -981,7 +1114,90 @@
     {id:'o6', category:'spot', region:'경기', title:'우리 동네 도서관 유아 프로그램', place:'지역 공공도서관', when:'매주 화·목', ageFit:'0~5세', emoji:'\ud83d\udcda'},
     {id:'o7', category:'spot', region:'기타', title:'실내 놀이터 &amp; 문화센터', place:'지역 대형마트 문화센터', when:'매주 수·금', ageFit:'0~3세', emoji:'\ud83c\udfa0'}
   ];
-  // TODO: 위 행사·장소 정보는 예시(placeholder)입니다. 실제 지역별 최신 행사 일정과 장소로 교체해주세요.
+  // 위 목록은 운영자가 아직 아무것도 등록하지 않았을 때만 쓰는 예시입니다.
+
+  // ---------- 나들이: 원격 데이터 ----------
+  var remoteOutings = [];
+  var outingsLoaded = false;
+  var outingsFetching = null;   // 같은 요청이 여러 번 나가지 않도록
+
+  function todayISO(){
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+
+  function fetchOutings(){
+    if(outingsFetching) return outingsFetching;
+    outingsFetching = doFetchOutings().then(function(){ outingsFetching = null; });
+    return outingsFetching;
+  }
+
+  async function doFetchOutings(){
+    if(!sb){ outingsLoaded = true; return; }
+    try{
+      var t = todayISO();
+      // 종료일이 없거나(상시) 아직 지나지 않은 것만
+      var res = await sb.from('outings').select('*')
+        .or('ends_on.is.null,ends_on.gte.' + t)
+        .order('sort_order', {ascending:true})
+        .order('starts_on', {ascending:true, nullsFirst:false})
+        .limit(200);
+      if(!res.error && Array.isArray(res.data)){
+        remoteOutings = res.data.map(function(r){
+          return {
+            id: r.id, category: r.category || 'event', region: r.region || '전체',
+            title: r.title || '', place: r.place || '', address: r.address || '',
+            hours: r.hours || '', fee: r.fee || '', ageFit: r.age_fit || '',
+            linkUrl: r.link_url || '', source: r.source || '', checkedOn: r.checked_on || '',
+            startsOn: r.starts_on || '', endsOn: r.ends_on || '',
+            description: r.description || '', emoji: r.emoji || '📍',
+            remote: true
+          };
+        });
+      }
+    }catch(e){}
+    outingsLoaded = true;
+  }
+
+  // 기간 표시용
+  function outingWhen(o){
+    if(o.when) return o.when;                       // 예시 데이터
+    if(o.startsOn && o.endsOn){
+      if(o.startsOn === o.endsOn) return fmtDate(o.startsOn);
+      return fmtDate(o.startsOn) + ' ~ ' + fmtDate(o.endsOn);
+    }
+    if(o.endsOn) return fmtDate(o.endsOn) + '까지';
+    if(o.startsOn) return fmtDate(o.startsOn) + '부터';
+    return '상시';
+  }
+  function fmtDate(iso){
+    if(!iso) return '';
+    var p = String(iso).slice(0,10).split('-');
+    if(p.length < 3) return iso;
+    return (+p[1]) + '/' + (+p[2]);
+  }
+  // 마감 임박 (종료일이 오늘 포함 7일 이내)
+  function outingDday(o){
+    if(!o.endsOn) return null;
+    var end = new Date(String(o.endsOn).slice(0,10) + 'T00:00:00');
+    var today = new Date(); today.setHours(0,0,0,0);
+    var diff = Math.round((end - today) / 86400000);
+    if(diff < 0 || diff > 7) return null;
+    return diff === 0 ? '오늘 마감' : 'D-' + diff;
+  }
+
+  // 화면에 보여줄 목록: 운영자가 등록한 게 있으면 그것만, 없으면 예시
+  function activeOutings(){
+    return remoteOutings.length ? remoteOutings : OUTINGS;
+  }
+  function outingsAreSample(){
+    return outingsLoaded && remoteOutings.length === 0;
+  }
+  function findOuting(id){
+    var all = activeOutings();
+    for(var i=0;i<all.length;i++){ if(String(all[i].id) === String(id)) return all[i]; }
+    return null;
+  }
 
   function defaultState(){
     var now = Date.now();
@@ -1026,7 +1242,7 @@
   function loadState(){
     var d = defaultState();
     try{
-      var raw = localStorage.getItem(storageKey());
+      var raw = (sb && !authUser) ? null : localStorage.getItem(storageKey());
       // 예전 단일 키 데이터는 주인을 알 수 없으므로 보관함으로 옮긴다.
       // 로그아웃 상태에서는 개인 정보가 보이지 않아야 하므로 화면에는 쓰지 않는다.
       var legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
@@ -1059,7 +1275,24 @@
   var state = loadState();
 
   function save(){
+    // 로그인해야 고객 정보가 남는다. 비로그인 상태의 입력은 이 화면에서만 살아있다.
+    if(sb && !authUser){
+      try{ localStorage.removeItem(GUEST_STORAGE_KEY); }catch(e){}
+      return;
+    }
     try{ localStorage.setItem(storageKey(), JSON.stringify(state)); }catch(e){}
+    scheduleProfileSync();
+  }
+
+  // 프로필을 고칠 때마다 서버에 밀어넣되, 연타는 한 번으로 묶는다
+  var profileSyncTimer = null;
+  function scheduleProfileSync(){
+    if(!sb || !authUser || !state.onboarded) return;
+    if(profileSyncTimer) clearTimeout(profileSyncTimer);
+    profileSyncTimer = setTimeout(function(){
+      profileSyncTimer = null;
+      saveProfileRemote();
+    }, 800);
   }
 
   function pregWeeksAt(dueDateStr, ts){
@@ -1303,9 +1536,14 @@
     }).join('');
 
     var valid = isProfileValid();
+    var needsLogin = !!sb && !authUser;
     var startBtn = document.getElementById('start-btn');
     startBtn.disabled = !valid;
-    document.getElementById('start-helper').textContent = valid ? '준비됐어요. 시작해볼까요?' : '단계 · 보호자 구분 · 날짜 · 지역을 선택하면 시작할 수 있어요';
+    startBtn.textContent = needsLogin ? '로그인하고 시작하기' : '다다맘 시작하기';
+    document.getElementById('start-helper').textContent =
+      !valid ? '단계 · 보호자 구분 · 날짜 · 지역을 선택하면 시작할 수 있어요'
+      : needsLogin ? '입력한 정보는 로그인한 계정에 저장돼요'
+      : '준비됐어요. 시작해볼까요?';
   }
 
   function setDateBounds(){
@@ -1631,8 +1869,9 @@
   }
 
   function homeOutingCardHtml(){
-    var list = OUTINGS.filter(function(o){ return !state.region || o.region === state.region; });
-    if(!list.length) list = OUTINGS;
+    var pool = activeOutings();
+    var list = pool.filter(function(o){ return !state.region || o.region === state.region; });
+    if(!list.length) list = pool;
     var o = list[0];
     return '<a href="#outing" class="card row" style="align-items:center; gap:13px; padding:15px 16px; text-decoration:none; color:var(--text);">' +
       '<div style="width:44px; height:44px; border-radius:14px; background:var(--chip-c); display:flex; align-items:center; justify-content:center; font-size:21px; flex:0 0 auto;" aria-hidden="true">' + o.emoji + '</div>' +
@@ -1814,30 +2053,102 @@
       }).join('');
     }
 
-    var list = OUTINGS.filter(function(o){
+    var body = document.getElementById('outing-body');
+    if(!body) return;
+
+    if(!outingsLoaded){
+      body.innerHTML = '<div class="card col" style="padding:18px; align-items:center;"><span class="helper">나들이 정보를 불러오는 중...</span></div>';
+      fetchOutings().then(function(){ if((location.hash||'') === '#outing') renderOuting(); });
+      return;
+    }
+
+    var list = activeOutings().filter(function(o){
       var tabMatch = state.outingTab === 'all' || o.category === state.outingTab;
       var regionMatch = !state.outingRegion || state.outingRegion === '전체' || o.region === state.outingRegion;
       return tabMatch && regionMatch;
     });
 
-    var body = document.getElementById('outing-body');
-    if(!body) return;
+    var sampleNote = outingsAreSample()
+      ? '<div class="card col" style="gap:4px; padding:13px 15px;">' +
+          '<span style="font-size:12.5px; font-weight:700;">아직 등록된 나들이 정보가 없어요</span>' +
+          '<span class="helper">아래는 화면 예시입니다. 운영자 콘솔에서 실제 행사를 등록하면 이 자리에 표시돼요.</span>' +
+        '</div>'
+      : '';
+
     if(list.length === 0){
-      body.innerHTML = '<div class="card col" style="padding:18px; align-items:center; gap:6px;"><span class="helper">조건에 맞는 나들이 정보가 아직 없어요</span></div>';
+      body.innerHTML = sampleNote + '<div class="card col" style="padding:18px; align-items:center; gap:6px;"><span class="helper">조건에 맞는 나들이 정보가 아직 없어요</span></div>';
       return;
     }
-    body.innerHTML = list.map(function(o){
-      return '<div class="card col" style="gap:8px; padding:16px;">' +
+    body.innerHTML = sampleNote + list.map(function(o){
+      var dday = outingDday(o);
+      return '<button type="button" class="card col" data-open-outing="' + escapeHtml(String(o.id)) + '"' +
+        ' style="gap:8px; padding:16px; width:100%; text-align:left; border:1px solid var(--border); cursor:pointer;">' +
         '<div class="row" style="align-items:center; gap:8px; flex-wrap:wrap;">' +
-        '<span style="font-size:20px;" aria-hidden="true">' + o.emoji + '</span>' +
+        '<span style="font-size:20px;" aria-hidden="true">' + (o.emoji || '📍') + '</span>' +
         '<span class="eyebrow">' + (o.category === 'event' ? '행사' : '놀거리') + '</span>' +
         '<span style="font-size:11.5px; color:var(--text2);">' + escapeHtml(o.region) + '</span>' +
+        (dday ? '<span class="eyebrow" style="color:var(--accent-strong);">' + dday + '</span>' : '') +
         '</div>' +
         '<span style="font-size:14.5px; font-weight:700; line-height:1.4;">' + escapeHtml(o.title) + '</span>' +
-        '<span style="font-size:12.5px; color:var(--text2);">' + escapeHtml(o.place) + ' · ' + escapeHtml(o.when) + '</span>' +
-        '<span style="font-size:11.5px; color:var(--text2);">추천 연령 ' + escapeHtml(o.ageFit) + '</span>' +
-        '</div>';
+        '<span style="font-size:12.5px; color:var(--text2);">' +
+          (o.place ? escapeHtml(o.place) + ' · ' : '') + escapeHtml(outingWhen(o)) + '</span>' +
+        '<div class="row" style="align-items:center; gap:6px; width:100%;">' +
+          '<span style="flex:1; min-width:0; font-size:11.5px; color:var(--text2);">' +
+            (o.ageFit ? '추천 연령 ' + escapeHtml(o.ageFit) : '') + '</span>' +
+          '<span style="flex:0 0 auto; font-size:11.5px; font-weight:800; color:var(--accent-strong);">자세히 보기 ›</span>' +
+        '</div>' +
+        '</button>';
     }).join('');
+  }
+
+  // ---------- 나들이 상세 ----------
+  function outingRow(label, value){
+    if(!value) return '';
+    return '<div class="row" style="align-items:flex-start; gap:10px;">' +
+      '<span style="flex:0 0 62px; font-size:12px; color:var(--text2);">' + escapeHtml(label) + '</span>' +
+      '<span style="flex:1; min-width:0; font-size:13px; line-height:1.55; word-break:break-word;">' + value + '</span>' +
+    '</div>';
+  }
+
+  function outingModalHtml(o){
+    var dday = outingDday(o);
+    var mapHref = o.address ? 'https://map.naver.com/p/search/' + encodeURIComponent(o.address) : '';
+    var addressHtml = o.address
+      ? escapeHtml(o.address) +
+        ' <a href="' + mapHref + '" target="_blank" rel="noopener noreferrer" ' +
+        'style="font-weight:800; color:var(--accent-strong); text-decoration:none; white-space:nowrap;">지도 ›</a>'
+      : '';
+    var link = '';
+    if(o.linkUrl && /^https?:\/\//i.test(o.linkUrl)){
+      link = '<a href="' + escapeHtml(o.linkUrl) + '" target="_blank" rel="noopener noreferrer" ' +
+             'class="btn-primary" style="height:46px; display:flex; align-items:center; justify-content:center; text-decoration:none;">' +
+             '공식 안내 · 예약하기</a>';
+    }
+    var foot = [];
+    if(o.source) foot.push('출처 ' + escapeHtml(o.source));
+    if(o.checkedOn) foot.push(String(o.checkedOn).slice(0,10) + ' 확인');
+    if(!o.remote) foot.push('화면 예시 데이터');
+
+    return '<div class="modal-head"><h3 class="display">' + escapeHtml(o.title) + '</h3>' +
+        '<button class="modal-close" data-close-modal aria-label="닫기">\u2715</button></div>' +
+      '<div class="row" style="align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:10px;">' +
+        '<span style="font-size:18px;" aria-hidden="true">' + (o.emoji || '📍') + '</span>' +
+        '<span class="eyebrow">' + (o.category === 'event' ? '행사' : '놀거리') + '</span>' +
+        '<span style="font-size:11.5px; color:var(--text2);">' + escapeHtml(o.region) + '</span>' +
+        (dday ? '<span class="eyebrow" style="color:var(--accent-strong);">' + dday + '</span>' : '') +
+      '</div>' +
+      (o.description ? '<p class="modal-desc" style="white-space:pre-wrap;">' + escapeHtml(o.description) + '</p>' : '') +
+      '<div class="col" style="gap:9px; max-height:44vh; overflow-y:auto; padding:2px 0;">' +
+        outingRow('장소', o.place ? escapeHtml(o.place) : '') +
+        outingRow('주소', addressHtml) +
+        outingRow('기간', escapeHtml(outingWhen(o))) +
+        outingRow('운영시간', o.hours ? escapeHtml(o.hours) : '') +
+        outingRow('요금', o.fee ? escapeHtml(o.fee) : '') +
+        outingRow('대상', o.ageFit ? escapeHtml(o.ageFit) : '') +
+      '</div>' +
+      (link ? '<div style="margin-top:12px;">' + link + '</div>' : '') +
+      (foot.length ? '<span class="helper" style="opacity:0.75; margin-top:8px; display:block;">' + foot.join(' · ') + '</span>' : '') +
+      '<span class="helper" style="opacity:0.75;">방문 전 공식 안내에서 일정과 요금을 한 번 더 확인해주세요.</span>';
   }
 
   // ---------- COMMUNITY ----------
@@ -1889,8 +2200,16 @@
     });
 
     var body = document.getElementById('community-body');
+    var guestBanner = (sb && !authUser)
+      ? '<div class="card col" style="gap:8px; padding:15px 16px;">' +
+          '<span style="font-size:13px; font-weight:800;">지금은 둘러보기 중이에요</span>' +
+          '<span class="helper">글쓰기·댓글과 챌린지·체험단·성장기록은 로그인하면 이용할 수 있어요.</span>' +
+          '<button type="button" class="btn-primary" data-open-auth-modal style="height:42px; font-size:13px;">로그인하고 시작하기</button>' +
+        '</div>'
+      : '';
+
     if(state.communityTab === 'notice'){
-      body.innerHTML = '<div class="col" style="gap:12px;">' + noticeListHtml() + '</div>';
+      body.innerHTML = guestBanner + '<div class="col" style="gap:12px;">' + noticeListHtml() + '</div>';
       if(!noticesLoaded){ fetchNotices().then(function(){ if(state.communityTab === 'notice') renderCommunity(); }); }
       return;
     }
@@ -1933,9 +2252,9 @@
           '<span style="font-size:12px;">공유</span></button></div></div>';
       }).join('') : '<div class="card col" style="padding:18px; align-items:center; gap:6px;"><span style="font-size:13px; color:var(--text2);">' + (state.viewMineOnly === 'posts' ? '아직 작성한 글이 없어요' : '아직 또래 글이 없어요') + '</span><span class="helper">전체 보기로 다른 글도 둘러보세요</span></div>';
 
-      body.innerHTML = filterBar + listHtml;
+      body.innerHTML = guestBanner + filterBar + listHtml;
     } else {
-      body.innerHTML = QNAS.map(function(q){
+      body.innerHTML = guestBanner + QNAS.map(function(q){
         return '<div class="card col" style="gap:8px; padding:16px;">' +
           '<div class="row" style="align-items:center; gap:8px;"><span style="font-size:11px; font-weight:700; color:var(--accent2); background:var(--accent-soft); padding:3px 8px; border-radius:999px;">Q</span>' +
           '<span style="font-size:12.5px; color:var(--text2);">' + escapeHtml(q.author) + '</span></div>' +
@@ -1949,10 +2268,7 @@
   function renderMy(){
     var _pb = document.getElementById('my-profile-banner');
     if(_pb){
-      _pb.innerHTML = state.onboarded ? (authUser ? '' :
-        '<div class="card col" style="gap:6px; padding:14px 16px;">' +
-        '<span style="font-size:12.5px; font-weight:700;">로그인하지 않은 상태예요</span>' +
-        '<span class="helper">지금 입력한 정보는 이 기기에만 저장돼요. 로그인하면 계정에 안전하게 보관됩니다.</span></div>') :
+      _pb.innerHTML = state.onboarded ? '' :
         '<a href="#onboarding" class="card col" style="gap:6px; padding:16px; text-decoration:none; color:var(--text);">' +
         '<span style="font-size:13.5px; font-weight:800;">아이 정보를 등록해주세요</span>' +
         '<span class="helper">등록해야 글쓰기·챌린지·체험단을 이용할 수 있어요</span></a>';
@@ -2697,12 +3013,25 @@
   function route(){
     var id = (location.hash || '').replace('#', '');
     var valid = ['onboarding','home','challenge','benefit','community','outing','growth','my','admin','policy','terms'];
-    var publicPages = ['policy','terms'];
+    // 로그인 없이 볼 수 있는 화면: 커뮤니티 글 열람과 약관뿐
+    var guestPages = ['onboarding','community','policy','terms'];
     if(valid.indexOf(id) === -1){
       location.hash = '#' + (state.onboarded ? 'home' : 'onboarding');
       return;
     }
-    if(!state.onboarded && !state.browsing && id !== 'onboarding' && publicPages.indexOf(id) === -1){
+    if(sb){
+      if(!authResolved){ showScreen(id); renderAll(id); return; }   // 세션 확인 중
+      if(!authUser && guestPages.indexOf(id) === -1){
+        location.hash = '#onboarding';
+        showToast('로그인하면 이용할 수 있어요');
+        return;
+      }
+      // 로그인은 했지만 아이 정보를 아직 안 넣은 상태 (운영자 콘솔은 예외)
+      if(authUser && !state.onboarded && id !== 'admin' && guestPages.indexOf(id) === -1){
+        location.hash = '#onboarding';
+        return;
+      }
+    }else if(!state.onboarded && !state.browsing && id !== 'onboarding' && ['policy','terms'].indexOf(id) === -1){
       location.hash = '#onboarding';
       return;
     }
@@ -2712,6 +3041,9 @@
       refreshRemote();
     }
     if(id === 'growth'){ renderGrowthScreen(); }
+    if(id === 'outing' && !outingsLoaded){
+      fetchOutings().then(function(){ if((location.hash||'') === '#outing') renderOuting(); });
+    }
     if(id === 'admin'){ renderAdmin(); }
     if(id === 'policy' || id === 'terms'){ renderLegal(id); }
   }
@@ -2757,6 +3089,10 @@
       renderAdmin();
       return;
     }
+    if(e.target.closest('#ot-submit')){ handleOutingSubmit(); return; }
+    var otDel = e.target.closest('[data-outing-delete]');
+    if(otDel){ handleOutingDelete(otDel.getAttribute('data-outing-delete')); return; }
+
     var del = e.target.closest('[data-notice-delete]');
     if(del){
       var id = del.getAttribute('data-notice-delete');
@@ -2799,9 +3135,94 @@
       }
     }
     state = loadState();
+    // 방금 로그인한 사람이 온보딩 화면에 서 있으면 홈으로 보낸다
+    // (MY에서 프로필을 고치러 들어온 경우는 로그인 상태가 바뀌지 않으므로 해당 없음)
+    if(authUser && state.onboarded){
+      var h0 = location.hash || '';
+      if(h0 === '' || h0 === '#onboarding'){ location.hash = '#home'; }
+    }
     if(location.hash === '#growth'){ renderGrowthScreen(); }
     renderAll((location.hash || '').replace('#',''));
     route();
+
+    // 서버에 저장된 프로필이 있으면 그것이 기준이다 (기기를 바꿔도 따라온다)
+    if(authUser){
+      var wasOnboarded = !!state.onboarded;
+      fetchProfileRow().then(function(row){
+        var hadRow = !!(row && row.onboarded);
+        if(row) applyProfileRow(row);
+
+        if(!hadRow && pendingOnboarding){
+          // 로그인 직전에 입력해둔 값으로 가입을 마무리한다
+          state.nickname   = pendingOnboarding.nickname;
+          state.kidType    = pendingOnboarding.kidType;
+          state.parentRole = pendingOnboarding.parentRole;
+          state.dueDate    = pendingOnboarding.dueDate;
+          state.birthMonth = pendingOnboarding.birthMonth;
+          state.region     = pendingOnboarding.region;
+          state.interests  = pendingOnboarding.interests || [];
+          state.onboarded  = true;
+          state.browsing   = false;
+          pendingOnboarding = null;
+          save();
+          saveProfileRemote();
+          location.hash = '#home';
+          showToast('반가워요! 준비됐어요');
+        }else if(hadRow){
+          save();
+          // 다른 기기에서 가입해둔 계정으로 방금 들어왔다면 바로 홈으로
+          var h = location.hash || '';
+          if(!wasOnboarded && (h === '' || h === '#onboarding')){ location.hash = '#home'; }
+        }else if(state.onboarded){
+          saveProfileRemote();   // 이 기기에만 있던 프로필을 계정으로 올린다
+        }
+        renderAll((location.hash || '').replace('#',''));
+        route();
+      });
+    }
+  }
+
+  // 로그인 직전에 온보딩 화면에서 입력해둔 값 (로그인 후 계정으로 옮긴다)
+  var pendingOnboarding = null;
+
+  // ---------- 서버 프로필 (계정에 귀속되는 고객 정보) ----------
+  async function fetchProfileRow(){
+    if(!sb || !authUser) return null;
+    try{
+      var res = await sb.from('profiles').select('*').eq('id', authUser.id).maybeSingle();
+      if(res.error) return null;
+      return res.data || null;
+    }catch(e){ return null; }
+  }
+
+  function applyProfileRow(row){
+    if(!row) return false;
+    state.nickname   = row.nickname || '';
+    state.kidType    = row.kid_type || null;
+    state.parentRole = row.parent_role || null;
+    state.dueDate    = row.due_date ? String(row.due_date).slice(0,10) : '';
+    state.birthMonth = row.birth_month || '';
+    state.region     = row.region || null;
+    state.interests  = Array.isArray(row.interests) ? row.interests : [];
+    state.onboarded  = !!row.onboarded;
+    return true;
+  }
+
+  async function saveProfileRemote(){
+    if(!sb || !authUser) return;
+    try{
+      await sb.from('profiles').upsert({
+        id: authUser.id,
+        nickname: state.nickname || null,
+        kid_type: state.kidType,
+        parent_role: state.parentRole,
+        due_date: state.dueDate || null,
+        birth_month: state.birthMonth || null,
+        region: state.region,
+        interests: Array.isArray(state.interests) ? state.interests : [],
+        onboarded: !!state.onboarded
+      });
+    }catch(e){}
   }
 
   // ---------- 로그인 게이트 ----------
@@ -3091,13 +3512,27 @@
       return;
     }
     if(e.target.closest('#browse-btn')){
-      state.browsing = true; save();
-      location.hash = '#home';
+      state.browsing = true;
+      location.hash = '#community';
       return;
     }
     if(e.target.closest('#start-btn')){
       if(!isProfileValid()) return;
-      state.onboarded = true; state.browsing = false; save();
+      if(sb && !authUser){
+        // 고객 정보는 계정에 저장되어야 하므로 로그인을 먼저 받는다.
+        // 방금 입력한 내용은 로그인 후 그대로 이어받는다.
+        pendingOnboarding = {
+          nickname: state.nickname, kidType: state.kidType, parentRole: state.parentRole,
+          dueDate: state.dueDate, birthMonth: state.birthMonth,
+          region: state.region, interests: (state.interests || []).slice()
+        };
+        openModal(authModalHtml());
+        showToast('로그인하면 입력한 내용 그대로 시작해요');
+        return;
+      }
+      state.onboarded = true; state.browsing = false;
+      save();
+      saveProfileRemote();
       location.hash = '#home';
       return;
     }
@@ -3301,6 +3736,13 @@
     var reactBtn = e.target.closest('[data-react-comment]');
     if(reactBtn){
       handleCommentReact(reactBtn.getAttribute('data-react-comment'), reactBtn.getAttribute('data-react-emoji'));
+      return;
+    }
+
+    var outingBtn = e.target.closest('[data-open-outing]');
+    if(outingBtn){
+      var oo = findOuting(outingBtn.getAttribute('data-open-outing'));
+      if(oo) openModal(outingModalHtml(oo));
       return;
     }
 
