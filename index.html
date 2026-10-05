@@ -684,7 +684,7 @@
           renderAccount();
           refreshAdminStatus();
           if(prevId !== nextId){ switchStateForAccount(); }
-          if(event === 'SIGNED_IN'){ showToast('로그인됐어요'); }
+          if(event === 'SIGNED_IN'){ clearAuthDraft(); showToast('로그인됐어요'); }
         });
       }
     }catch(e){ /* 인증을 지원하지 않는 클라이언트에서도 앱 초기화는 계속 진행 */ }
@@ -737,13 +737,37 @@
       '<span class="helper" id="auth-hint"></span>';
   }
 
+  // 폼을 다시 그리면 input 이 통째로 교체되므로, 치던 값이 사라진다.
+  // 비밀번호 칸은 '이메일 링크' 보기에서는 아예 없어지므로 DOM 이 아니라
+  // 여기에 들고 있어야 왕복해도 살아남는다.
+  var authDraft = { email: '', password: '' };
+
+  function captureAuthDraft(){
+    var e = document.getElementById('auth-email');
+    var p = document.getElementById('auth-password');
+    if(e) authDraft.email = e.value;
+    if(p) authDraft.password = p.value;
+  }
+
+  function restoreAuthDraft(){
+    var e = document.getElementById('auth-email');
+    var p = document.getElementById('auth-password');
+    // input 이벤트를 다시 쏴야 제출 버튼의 disabled 가 맞춰진다.
+    if(e && authDraft.email){ e.value = authDraft.email; e.dispatchEvent(new Event('input', { bubbles:true })); }
+    if(p && authDraft.password){ p.value = authDraft.password; p.dispatchEvent(new Event('input', { bubbles:true })); }
+  }
+
+  function clearAuthDraft(){ authDraft = { email: '', password: '' }; }
+
   // 로그인 폼은 모달과 첫 화면 두 군데에 있을 수 있다.
   // 탭(로그인/회원가입)이나 방식(비밀번호/이메일 링크)을 바꾸면 둘 다 다시 그린다.
   function refreshAuthForms(){
+    captureAuthDraft();
     var card = document.getElementById('modal-card');
     if(card && card.innerHTML) card.innerHTML = authModalHtml();
     var inline = document.getElementById('onboarding-auth');
     if(inline && inline.offsetParent !== null) inline.innerHTML = authBodyHtml();
+    restoreAuthDraft();
   }
 
   async function handleKakaoSignIn(){
@@ -1907,9 +1931,16 @@
       needLogin ? '로그인하고 시작해보세요.'
                 : '현재 단계에 맞는 정보와 참여할 수 있는 캠페인만 보여드릴게요.';
     if(needLogin){
-      // 입력 중인 내용을 지우지 않도록, 비어 있을 때만 그린다
       var inline = document.getElementById('onboarding-auth');
-      if(inline && !inline.innerHTML) inline.innerHTML = authBodyHtml();
+      var onScreen = welcome && welcome.offsetParent !== null;
+      if(inline){
+        // 첫 화면이 안 보이는데 폼을 남겨두면 모달의 로그인 폼과 id 가 겹친다.
+        // getElementById 는 먼저 나오는 쪽(첫 화면)을 돌려주므로, 모달에 입력해도
+        // 빈 값을 읽어 제출이 조용히 무시된다. 그래서 화면 밖이면 비워 둔다.
+        if(!onScreen) inline.innerHTML = '';
+        // 입력 중인 내용을 지우지 않도록, 비어 있을 때만 그린다
+        else if(!inline.innerHTML) inline.innerHTML = authBodyHtml();
+      }
       return;
     }
 
@@ -3883,6 +3914,9 @@
   var _modalLastFocus = null;
   function openModal(html){
     _modalLastFocus = document.activeElement;
+    // 모달이 열려 있는 동안에는 첫 화면의 로그인 폼을 비운다 (id 중복 방지)
+    var inlineAuth = document.getElementById('onboarding-auth');
+    if(inlineAuth) inlineAuth.innerHTML = '';
     document.getElementById('modal-card').innerHTML = html;
     document.getElementById('modal-backdrop').hidden = false;
     var card = document.getElementById('modal-card');
@@ -3892,6 +3926,8 @@
   function closeModal(){
     document.getElementById('modal-backdrop').hidden = true;
     document.getElementById('modal-card').innerHTML = '';
+    clearAuthDraft();   // 모달을 닫으면 치던 비밀번호를 메모리에 남기지 않는다
+    renderOnboarding(); // 첫 화면이 보이는 중이었다면 로그인 폼을 다시 채운다
     if(_modalLastFocus && typeof _modalLastFocus.focus === 'function'){ _modalLastFocus.focus(); }
     _modalLastFocus = null;
   }
