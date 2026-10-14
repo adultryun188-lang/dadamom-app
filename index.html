@@ -6,6 +6,11 @@
 <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="./icons/icon-512.png">
 <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#C94318">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="다다맘">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&display=swap">
 <style>
   :root{
@@ -5498,6 +5503,17 @@
     if(e.target.id === 'post-consent'){ updatePostSubmit(); }
     if(e.target.id === 'apply-consent'){ updateApplySubmit(); }
   });
+
+  // ---------- 서비스워커 (홈 화면 설치용) ----------
+  // index.html 은 network-first 로 받아오므로 배포한 변경이 바로 반영된다.
+  // shortcut: 버전이 고정값이라 아이콘·manifest 를 바꾸면 v 를 올려야 새로 받는다.
+  if('serviceWorker' in navigator && location.protocol === 'https:'){
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('./sw.js?v=1').catch(function(err){
+        console.warn('[다다맘] 서비스워커 등록 실패', err);
+      });
+    });
+  }
 
   window.addEventListener('hashchange', route);
   setDateBounds();
