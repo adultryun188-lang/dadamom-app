@@ -11,6 +11,13 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="다다맘">
+<script>
+  // PC 로 첫 화면(주소만)을 열면 커뮤니티 사이트로 보낸다. 앱 기능은 #home 처럼 해시를 붙여 들어온다.
+  // 로그인 콜백(?code= 등)은 앱이 처리해야 하므로 쿼리가 있으면 보내지 않는다.
+  if(!location.hash && !location.search && window.matchMedia('(min-width:960px)').matches && !window.matchMedia('(display-mode: standalone)').matches){
+    location.replace('./community.html');
+  }
+</script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&display=swap">
 <style>
   :root{
@@ -249,6 +256,28 @@
   /* 320px 이하 화면에서도 가로 스크롤 카드열의 스크롤바가 보이지 않도록 */
   [style*="overflow-x:auto"]{ scrollbar-width:none; -ms-overflow-style:none; }
   [style*="overflow-x:auto"]::-webkit-scrollbar{ display:none; height:0; }
+
+  /* PC 화면: 하단 탭바를 왼쪽 메뉴로 옮기고 본문은 가운데 읽기 폭으로 둔다. 모바일은 위 규칙 그대로. */
+  @media (min-width:960px){
+    .app{ max-width:1200px; }
+    .screen{ position:relative; }
+    .screen:has(> .navbar){ padding-left:220px; }
+    .navbar{
+      position:absolute; left:0; top:0; bottom:0; width:220px;
+      flex-direction:column; align-items:stretch; justify-content:flex-start; gap:4px;
+      border-top:none; border-right:1px solid var(--border); padding:28px 14px;
+    }
+    .navbar::before{ content:'다다맘'; font-family:'Jua',sans-serif; font-size:24px; color:var(--accent-strong); padding:0 14px 18px; }
+    .navbar button{ flex:0 0 auto; flex-direction:row; gap:12px; font-size:15px; padding:12px 14px; border-radius:14px; }
+    .navbar button.active{ background:var(--accent-soft); }
+    .navbar button:hover{ background:var(--accent-soft); }
+    .pad{ padding-inline:max(32px, calc((100% - 720px) / 2)); }
+    .hscroll, .home-feedbar{ margin-inline:0; padding-inline:0; }
+    #home-fab, #fab{ right:40px !important; bottom:40px !important; }
+    .modal-backdrop{ align-items:center; }
+    .modal-card{ max-width:520px; border-radius:24px; padding-bottom:24px; }
+    .toast{ bottom:40px; }
+  }
 </style>
 
 <div class="app" id="app">
@@ -422,8 +451,11 @@
 
   <!-- COMMUNITY -->
   <section class="screen" id="screen-community">
-    <div class="pad row" style="flex:0 0 auto; padding-block-start:28px; align-items:center; justify-content:space-between;">
-      <h1 class="display" style="font-size:22px;">커뮤니티</h1>
+    <div class="pad row" style="flex:0 0 auto; padding-block-start:28px; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+      <div class="col" style="gap:2px;">
+        <h1 class="display" style="font-size:22px;">커뮤니티</h1>
+        <a href="./community.html" class="link-quiet" style="font-size:12px;">게시판·검색은 웹 커뮤니티에서 ↗</a>
+      </div>
       <div class="segmented round" role="tablist" aria-label="커뮤니티 종류" id="community-tabs">
         <button data-community-tab="notice" role="tab">공지</button>
         <button data-community-tab="brag" role="tab">이야기</button>
@@ -2635,6 +2667,8 @@
     var list = pool.filter(function(o){ return !state.region || o.region === state.region; });
     if(!list.length) list = pool;
     var o = list[0];
+    // 나들이가 0건이면 카드를 빼야 한다. 그대로 두면 o.emoji 에서 홈 피드 렌더링이 통째로 멈춘다.
+    if(!o) return '';
     return '<a href="#outing" class="card row" style="align-items:center; gap:13px; padding:15px 16px; text-decoration:none; color:var(--text);">' +
       '<div style="width:44px; height:44px; border-radius:14px; background:var(--chip-c); display:flex; align-items:center; justify-content:center; font-size:21px; flex:0 0 auto;" aria-hidden="true">' + o.emoji + '</div>' +
       '<div class="col" style="gap:3px; min-width:0; flex:1;">' +
