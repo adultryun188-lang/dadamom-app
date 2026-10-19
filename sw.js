@@ -17,6 +17,7 @@ const PRECACHE = [
   './',
   './index.html',
   './offline.html',
+  './community-flow.js',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',

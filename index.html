@@ -23,6 +23,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="다다맘">
+<script src="./community-flow.js"></script>
 <script>
   // PC 로 첫 화면(주소만)을 열면 커뮤니티 사이트로 보낸다. 앱 기능은 #home 처럼 해시를 붙여 들어온다.
   // 로그인 콜백(?code= 등)은 앱이 처리해야 하므로 쿼리가 있으면 보내지 않는다.
@@ -222,10 +223,11 @@
   .hero-cta{ display:inline-flex; align-items:center; gap:6px; font-size:13.5px; font-weight:700; background:var(--surface); color:var(--accent); padding:10px 16px; border-radius:14px; }
 
   .segmented{ display:flex; gap:6px; background:var(--pill-bg); padding:4px; border-radius:14px; }
-  .segmented button{ flex:1; padding:9px 0; border-radius:10px; border:none; font-size:12.5px; font-weight:700; background:none; color:var(--text2); }
+  .segmented button{ flex:1; padding:9px 0; border-radius:10px; border:none; font-size:12.5px; font-weight:700; background:none; color:var(--text2); white-space:nowrap; }
   .segmented button[aria-selected="true"]{ background:var(--surface); color:var(--text); }
   .segmented.round{ border-radius:999px; width:fit-content; }
-  .segmented.round button{ padding:7px 14px; border-radius:999px; }
+  /* round 형은 글자 길이대로 눕는다. flex:1 이면 '체중'과 '키'가 같은 너비로 눌려 세로로 접힌다. */
+  .segmented.round button{ padding:7px 14px; border-radius:999px; flex:0 0 auto; }
 
   .badge-ad{ font-size:10px; font-weight:700; color:var(--text2); border:1px solid var(--border); padding:1px 6px; border-radius:8px; letter-spacing:.02em; }
   .badge-match{ font-size:10.5px; font-weight:700; color:var(--chip-c-ink); background:var(--chip-c); padding:2px 8px; border-radius:999px; }
@@ -401,6 +403,7 @@
       <div class="col" style="gap:10px;">
         <span style="font-size:13px; font-weight:700; color:var(--text2);">관심 분야 (복수 선택, 선택)</span>
         <div class="row" style="flex-wrap:wrap; gap:8px;" id="interest-group" role="group" aria-label="관심 분야 선택"></div>
+        <span class="helper" id="interest-hint" aria-live="polite"></span>
       </div>
       </div>
     </div>
@@ -544,6 +547,14 @@
           </div>
         </div>
         <a href="#onboarding" class="btn-ghost">아이 정보 수정</a>
+      </div>
+
+      <div class="card col" id="my-interest-card" style="gap:10px; padding:18px;">
+        <div class="col" style="gap:3px;">
+          <h2 class="display" style="font-size:16px;">관심 분야</h2>
+          <span class="helper" id="my-interest-hint"></span>
+        </div>
+        <div class="row" style="flex-wrap:wrap; gap:8px;" id="my-interest-group" role="group" aria-label="관심 분야 수정"></div>
       </div>
 
       <div class="card row" id="account-card" style="align-items:center; gap:12px; padding:14px 18px;">
@@ -984,6 +995,15 @@
     try{ localStorage.removeItem(PENDING_CONSENT_KEY); }catch(e){}
   }
 
+  // 이미 가입된 이메일. 인증 메일을 켜 두면 Supabase 는 가입 여부를 숨기려고 성공처럼 답하고
+  // (user.identities 가 빈 배열) 메일은 보내지 않는다. 인증을 끈 프로젝트는 user_already_exists 오류가 온다.
+  var REPEATED_SIGNUP_MSG = '이미 가입된 이메일이에요. 로그인하거나 카카오·구글로 들어와 주세요.';
+  function isRepeatedSignup(res){
+    if(res.error) return res.error.code === 'user_already_exists' || /already registered/i.test(res.error.message || '');
+    var u = res.data && res.data.user;
+    return !!(u && Array.isArray(u.identities) && u.identities.length === 0);
+  }
+
   function handleSignupNext(){
     captureAuthDraft();
     if(!signupStep1Ok()) return;
@@ -1015,12 +1035,12 @@
         email: email,
         password: authDraft.password,
         options: {
-          emailRedirectTo: location.href.split('#')[0],
+          emailRedirectTo: authCallbackUrl(),
           data: nickname ? { nickname: nickname } : {}
         }
       });
-      if(res.error){
-        if(hint) hint.textContent = '회원가입 실패: ' + res.error.message;
+      if(isRepeatedSignup(res) || res.error){
+        if(hint) hint.textContent = isRepeatedSignup(res) ? REPEATED_SIGNUP_MSG : '회원가입 실패: ' + res.error.message;
         if(btn){ btn.disabled = false; btn.textContent = '가입 완료'; }
         try{ localStorage.removeItem(PENDING_CONSENT_KEY); }catch(e){}
         return;
@@ -1109,7 +1129,7 @@
     var btn = document.getElementById('kakao-signin-btn');
     if(btn){ btn.disabled = true; }
     try{
-      var res = await sb.auth.signInWithOAuth({ provider: 'kakao', options: { redirectTo: location.href.split('#')[0], scopes: 'profile_nickname profile_image' } });
+      var res = await sb.auth.signInWithOAuth({ provider: 'kakao', options: { redirectTo: authCallbackUrl(), scopes: 'profile_nickname profile_image' } });
       if(res && res.error){
         if(hint) hint.textContent = '카카오 로그인 실패: ' + res.error.message;
         if(btn){ btn.disabled = false; }
@@ -1130,7 +1150,7 @@
     var btn = document.getElementById('google-signin-btn');
     if(btn){ btn.disabled = true; }
     try{
-      var res = await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.href.split('#')[0] } });
+      var res = await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: authCallbackUrl() } });
       if(res && res.error){
         if(hint) hint.textContent = '구글 로그인 실패: ' + res.error.message;
         if(btn){ btn.disabled = false; }
@@ -1158,8 +1178,13 @@
     if(btn){ btn.disabled = true; btn.textContent = isSignup ? '가입하는 중...' : '로그인하는 중...'; }
     try{
       var res = isSignup
-        ? await sb.auth.signUp({ email: email, password: password, options: { emailRedirectTo: location.href.split('#')[0] } })
+        ? await sb.auth.signUp({ email: email, password: password, options: { emailRedirectTo: authCallbackUrl() } })
         : await sb.auth.signInWithPassword({ email: email, password: password });
+      if(isSignup && isRepeatedSignup(res)){
+        if(hint) hint.textContent = REPEATED_SIGNUP_MSG;
+        if(btn){ btn.disabled = false; btn.textContent = '회원가입하기'; }
+        return;
+      }
       if(res.error){
         if(hint) hint.textContent = (isSignup ? '회원가입 실패: ' : '로그인 실패: ') + res.error.message;
         if(btn){ btn.disabled = false; btn.textContent = isSignup ? '회원가입하기' : '로그인하기'; }
@@ -1192,7 +1217,7 @@
     }
     if(btn){ btn.disabled = true; btn.textContent = '보내는 중...'; }
     try{
-      var res = await sb.auth.signInWithOtp({ email: email, options: { emailRedirectTo: location.href.split('#')[0] } });
+      var res = await sb.auth.signInWithOtp({ email: email, options: { emailRedirectTo: authCallbackUrl() } });
       if(res.error){
         if(hint) hint.textContent = '전송 실패: ' + res.error.message;
         if(btn){ btn.disabled = false; btn.textContent = '로그인 링크 받기'; }
@@ -1770,9 +1795,18 @@
     {id:'my', label:'MY', icon:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4.5 5-6 8-6s6.5 1.5 8 6"/>'}
   ];
 
+  // topics — 관심 분야 키. 고른 분야와 겹치면 위로 올리고 배지를 붙인다.
   // 체험단 목록. 실제 캠페인이 정해지면 여기에 추가한다.
   // 예: {key:'a', brand:'브랜드', title:'제품명', deadline:'10/31', total:50, bg:'var(--chip-a)', eligibility:'both', topics:['이유식']}
   var TRIALS = [];
+  // 체험단이 내 관심 분야에 걸리는지. topics 가 없으면 제목·브랜드로 넘겨짚는다.
+  function trialInterest(t){
+    var mine = myInterests();
+    if(!mine.length) return null;
+    var tp = t.topics || [];
+    for(var i=0;i<tp.length;i++){ if(mine.indexOf(tp[i]) > -1) return tp[i]; }
+    return matchedInterest((t.title || '') + ' ' + (t.brand || ''));
+  }
   // TODO: 실제 캠페인 마감일로 교체해주세요 (지금은 플레이스홀더 값입니다)
   var CHALLENGE_DEADLINE = '2026-10-15';
   function daysUntil(dateStr){
@@ -1792,7 +1826,69 @@
     return d ? (Date.now() > d.getTime()) : false;
   }
   var REGIONS = ['서울', '인천', '경기', '기타'];
-  var INTERESTS = ['이유식', '수면교육', '산후관리', '장난감', '안전용품', '외출템'];
+  // 관심 분야.
+  //  stage — 단계에 맞는 것만 보여준다 (임신 중인 분께 어린이집을 물어볼 이유가 없다).
+  //  kw    — 글·체험단 본문과 맞춰보는 키워드. 이걸로 "내 관심" 필터와 추천이 돈다.
+  // 기존 사용자가 고른 6개(이유식·수면교육·산후관리·장난감·안전용품·외출템)는 이름을 그대로 뒀다.
+  // 이름이 바뀌면 이미 저장된 값이 붕 뜨기 때문이다.
+  var INTEREST_DEFS = [
+    // 임신 중
+    {k:'태교',        stage:'pregnant',  kw:['태교','태담','태동','클래식']},
+    {k:'입덧·영양',    stage:'pregnant',  kw:['입덧','엽산','철분','임신 체중','영양제']},
+    {k:'출산준비물',   stage:'pregnant',  kw:['출산준비','출산가방','배냇','신생아 준비','출산용품']},
+    {k:'산부인과·검진', stage:'pregnant',  kw:['산부인과','검진','초음파','기형아','임당','양수']},
+    {k:'산후조리원',   stage:'pregnant',  kw:['조리원','산후조리']},
+    // 육아 중
+    {k:'이유식',      stage:'parenting', kw:['이유식','유아식','간식','식판','보관팩','분유물']},
+    {k:'수유·분유',    stage:'parenting', kw:['수유','모유','분유','젖병','유축','단유']},
+    {k:'수면교육',     stage:'parenting', kw:['수면','밤잠','낮잠','통잠','새벽수유','잠투정']},
+    {k:'기저귀·목욕',  stage:'parenting', kw:['기저귀','목욕','배변','발진','기저귀갈이']},
+    {k:'발달·놀이',    stage:'parenting', kw:['발달','놀이','걸음마','옹알이','말문','뒤집기']},
+    {k:'어린이집',     stage:'parenting', kw:['어린이집','등원','적응기','가정보육','돌봄']},
+    {k:'아이 건강',    stage:'parenting', kw:['소아과','예방접종','아토피','열이','감기','수족구']},
+    // 단계 무관
+    {k:'산후관리',     stage:'both', kw:['산후','회복','골반','산후우울','다이어트']},
+    {k:'장난감',       stage:'both', kw:['장난감','교구','전집','그림책','원목']},
+    {k:'안전용품',     stage:'both', kw:['카시트','안전문','모서리','안전용품','낙상']},
+    {k:'외출템',       stage:'both', kw:['유모차','아기띠','외출','나들이','힙시트']},
+    {k:'육아템 특가',  stage:'both', kw:['특가','공구','할인','세일','직구','최저가']},
+    {k:'아빠 육아',    stage:'both', kw:['아빠','남편','독박','육아휴직','주말 육아']}
+  ];
+
+  // 온보딩과 MY 에서 같은 칩을 쓴다.
+  function interestChipsHtml(){
+    return interestsForStage(state.kidType).map(function(d){
+      var on = myInterests().indexOf(d.k) > -1;
+      return '<button type="button" class="chip' + (on ? ' on' : '') + '" data-interest="' +
+        escapeHtml(d.k) + '" aria-pressed="' + on + '">' + escapeHtml(d.k) + '</button>';
+    }).join('');
+  }
+
+  function interestsForStage(stage){
+    return INTEREST_DEFS.filter(function(d){ return d.stage === 'both' || d.stage === stage; });
+  }
+  function interestDef(k){
+    for(var i=0;i<INTEREST_DEFS.length;i++){ if(INTEREST_DEFS[i].k === k) return INTEREST_DEFS[i]; }
+    return null;
+  }
+  function myInterests(){
+    return Array.isArray(state.interests) ? state.interests : [];
+  }
+  // 글·체험단이 내 관심 분야에 걸리면 그 분야 이름을 돌려준다. 안 걸리면 null.
+  function matchedInterest(text){
+    var mine = myInterests();
+    if(!mine.length) return null;
+    var t = String(text == null ? '' : text);
+    if(!t) return null;
+    for(var i=0;i<mine.length;i++){
+      var d = interestDef(mine[i]);
+      if(t.indexOf(mine[i]) > -1) return mine[i];
+      if(!d) continue;
+      for(var j=0;j<d.kw.length;j++){ if(t.indexOf(d.kw[j]) > -1) return mine[i]; }
+    }
+    return null;
+  }
+
   var OUTINGS = [];
 
   // ---------- 나들이: 원격 데이터 ----------
@@ -1900,6 +1996,7 @@
       appliedCount:{a:0, b:0, c:0},
       myVotes:[], myLikes:[], myEntries:[], myPosts:[],
       peerOnly:false,
+      feedFilter:'all',
       viewMineOnly:null,
       careLog:[],
       growthRecords:[],
@@ -2255,11 +2352,13 @@
 
   async function fetchEntries(){
     if(!sb) return null;
+    var requestState = state;
     try{
       var res = await sb.from('challenge_entries').select('*').eq('status', 'approved').order('created_at', {ascending:false}).limit(50);
       if(res.error || !res.data) return null;
       var merged = newestFirst(res.data.concat(await fetchOwnUnapproved('challenge_entries')));
       var mineVotes = await fetchMyReactionIds('entry_votes', 'entry_id');
+      if(state !== requestState) return null;
       if(mineVotes){ state.myVotes = mineVotes; save(); }
       var votedIds = mineVotes || state.myVotes;
       // media_url 은 DB 값을 그대로 쓰지 않는다. media_path 로 짧은 서명 URL 을 새로 받는다.
@@ -2278,14 +2377,17 @@
 
   async function fetchPosts(){
     if(!sb) return null;
+    var requestState = state;
     try{
       var res = await sb.from('community_posts').select('*').eq('status', 'approved').order('created_at', {ascending:false}).limit(50);
       if(res.error || !res.data) return null;
       var merged = newestFirst(res.data.concat(await fetchOwnUnapproved('community_posts')));
       var mineLikes = await fetchMyReactionIds('post_likes', 'post_id');
+      if(state !== requestState) return null;
       if(mineLikes){ state.myLikes = mineLikes; save(); }
       var likedIds = mineLikes || state.myLikes;
       var mineSaved = await fetchMyReactionIds('post_bookmarks', 'post_id');
+      if(state !== requestState) return null;
       if(mineSaved) savedPostIds = mineSaved;
       var rows = merged.map(function(r){
         return {
@@ -2300,15 +2402,33 @@
     }catch(e){ return null; }
   }
 
+  // 신청 인원수. 예전에는 benefit_applications 를 직접 세었는데, RLS 가 본인 행만
+  // 보여주기 때문에 누구에게나 0 아니면 1 이 나왔다. 진행 막대가 늘 비어 있었고
+  // "모집 인원이 차면 마감" 도 영영 걸리지 않았다. 합계만 돌려주는 RPC 로 바꾼다.
+  // (RLS 를 열면 누가 신청했는지가 드러나므로 그 길은 쓰지 않는다.)
   async function fetchAppliedCounts(){
     if(!sb) return null;
     try{
+      var res = await sb.rpc('trial_application_counts');
+      if(res.error || !Array.isArray(res.data)) return null;
       var out = {};
-      for(var i=0;i<TRIALS.length;i++){
-        var key = TRIALS[i].key;
-        var res = await sb.from('benefit_applications').select('id', {count:'exact', head:true}).eq('trial_key', key);
-        out[key] = res.count || 0;
-      }
+      for(var i=0;i<TRIALS.length;i++) out[TRIALS[i].key] = 0;
+      res.data.forEach(function(row){ out[row.trial_key] = Number(row.n) || 0; });
+      return out;
+    }catch(e){ return null; }
+  }
+
+  // 내가 이미 신청한 체험단. 예전에는 기기 localStorage 의 state.applied 가 전부라
+  // 다른 기기나 저장소를 지운 뒤에는 "신청하기" 로 보였고, 눌러야 오류가 났다.
+  // 서버가 진실이다.
+  async function fetchMyApplications(){
+    if(!sb || !authUser) return null;
+    try{
+      var res = await sb.from('benefit_applications').select('trial_key').eq('owner_id', authUser.id);
+      if(res.error || !Array.isArray(res.data)) return null;
+      var out = {};
+      for(var i=0;i<TRIALS.length;i++) out[TRIALS[i].key] = false;
+      res.data.forEach(function(row){ out[row.trial_key] = true; });
       return out;
     }catch(e){ return null; }
   }
@@ -2328,15 +2448,17 @@
 
   function refreshRemote(){
     if(!sb) return;
+    var requestState = state;
     resignLocalMedia().then(function(changed){
-      if(!changed) return;
+      if(!changed || state !== requestState) return;
       var here = (location.hash || '').replace('#','');
       if(here === 'home') renderHome();
       if(here === 'community') renderCommunity();
       if(here === 'challenge') renderChallenge();
     });
-    Promise.all([fetchEntries(), fetchPosts(), fetchAppliedCounts()]).then(function(r){
-      var entries = r[0], posts = r[1], counts = r[2];
+    Promise.all([fetchEntries(), fetchPosts(), fetchAppliedCounts(), fetchMyApplications()]).then(function(r){
+      if(state !== requestState) return;
+      var entries = r[0], posts = r[1], counts = r[2], mine = r[3];
       if(entries){
         var prevMineEntries = state.entries.filter(function(e){
           return state.myEntries.indexOf(e.id) > -1 && !entries.some(function(x){ return x.id === e.id; });
@@ -2350,8 +2472,12 @@
         state.posts = prevMinePosts.concat(posts);
       }
       if(counts) state.appliedCount = Object.assign({}, state.appliedCount, counts);
+      // 서버가 알려준 내 신청 내역으로 '덮어쓴다'. 기기에 남은 값과 합치면
+      // 취소된 신청이 영영 "신청 완료" 로 남는다.
+      if(mine) state.applied = mine;
       save();
       renderAll((location.hash || '').replace('#',''));
+      if(location.hash === '#growth') renderGrowthScreen();
     });
     checkNoti();
   }
@@ -2439,10 +2565,14 @@
     }).join('');
 
     var ig = document.getElementById('interest-group');
-    ig.innerHTML = INTERESTS.map(function(t){
-      var on = state.interests.indexOf(t) > -1;
-      return '<button type="button" class="chip' + (on ? ' on' : '') + '" data-interest="' + t + '" aria-pressed="' + on + '">' + t + '</button>';
-    }).join('');
+    ig.innerHTML = interestChipsHtml();
+    var ih = document.getElementById('interest-hint');
+    if(ih){
+      var n = myInterests().length;
+      ih.textContent = n
+        ? (n + '개 선택 — 홈과 혜택에서 이 분야를 먼저 보여드려요')
+        : '고르면 홈 피드와 체험단을 이 분야 위주로 보여드려요';
+    }
 
     var valid = isProfileValid();
     var needsLogin = !!sb && !authUser;
@@ -2700,10 +2830,14 @@
           (cClosed ? '결과' : (cIneligible ? '대상 아님' : '참여')) + '</span>' +
       '</a>');
 
-    // 2) 체험단
+    // 2) 체험단 — 관심 분야에 걸리는 것부터
     var trials = TRIALS.filter(function(t){ return !trialExpired(t); });
+    trials = trials.slice().sort(function(a, b){
+      return (trialInterest(b) ? 1 : 0) - (trialInterest(a) ? 1 : 0);
+    });
     trials.slice(0, 3).forEach(function(t){
       var fit = (t.eligibility === 'both' || t.eligibility === state.kidType);
+      var hit = trialInterest(t);
       var d = parseMD(t.deadline);
       var dl = d ? Math.ceil((d.getTime() - Date.now()) / 86400000) : null;
       var closed = (dl != null && dl < 0);
@@ -2717,7 +2851,7 @@
               (dday ? '<span class="dday' + (closed ? ' off' : '') + '">' + dday + '</span>' : '') +
             '</div>' +
             '<span class="helper">' + escapeHtml(t.brand) + ' · ' + t.total + '명 모집' +
-              (fit ? '' : ' · 대상 아님') + '</span>' +
+              (hit ? ' · 관심 분야 ' + escapeHtml(hit) : '') + (fit ? '' : ' · 대상 아님') + '</span>' +
           '</div>' +
           '<span class="mission-go' + (closed || !fit ? ' off' : '') + '">' +
             (closed ? '마감' : (fit ? '신청' : '대상 아님')) + '</span>' +
@@ -2731,10 +2865,12 @@
     var av = myAgeValue();
     var chips = [
       { k:'all',   label:'전체' },
-      { k:'peer',  label:(av != null ? (ageLabel() + ' 또래') : '또래') },
-      { k:'photo', label:'사진 있는 글' },
-      { k:'mine',  label:'내 글' }
+      { k:'peer',  label:(av != null ? (ageLabel() + ' 또래') : '또래') }
     ];
+    // 관심 분야를 고른 사람에게만 보여준다. 안 고른 사람에게는 늘 0건이라 의미가 없다.
+    if(myInterests().length) chips.push({ k:'interest', label:'내 관심' });
+    chips.push({ k:'photo', label:'사진 있는 글' });
+    chips.push({ k:'mine',  label:'내 글' });
     return chips.map(function(c){
       return '<button type="button" class="chip-f" data-home-feed="' + c.k + '" aria-pressed="' +
         (state.homeFeed === c.k) + '">' + escapeHtml(c.label) + '</button>';
@@ -2814,12 +2950,15 @@
       posts = posts.filter(function(p){ return !!(p.media_url || p.img); });
     } else if(state.homeFeed === 'mine'){
       posts = posts.filter(function(p){ return !!p.mine; });
+    } else if(state.homeFeed === 'interest'){
+      posts = posts.filter(function(p){ return !!matchedInterest(p.text); });
     }
 
     if(!posts.length){
       var msg = state.homeFeed === 'mine' ? '아직 작성한 글이 없어요'
               : state.homeFeed === 'peer' ? '아직 또래 글이 없어요'
               : state.homeFeed === 'photo' ? '사진이 있는 글이 아직 없어요'
+              : state.homeFeed === 'interest' ? '관심 분야에 걸리는 글이 아직 없어요'
               : '아직 올라온 글이 없어요';
       return '<div class="card col" style="padding:22px; align-items:center; gap:7px;">' +
         '<span style="font-size:13.5px; font-weight:700;">' + msg + '</span>' +
@@ -2935,6 +3074,7 @@
         var full = count >= t.total || expired;
         var pct = Math.round(count / t.total * 100);
         var matches = t.eligibility === 'both' || t.eligibility === state.kidType;
+        var hit = trialInterest(t);
         var eligLabel = t.eligibility === 'both' ? '전체' : (t.eligibility === 'pregnant' ? '임산부' : '10~24개월');
         var btnLabel = done ? '신청 완료' : (full ? '모집 마감' : (!matches ? '대상이 아니에요' : '신청하기'));
         var btnDisabled = done || full || !matches;
@@ -2942,7 +3082,7 @@
           '<div class="row" style="gap:12px;">' +
           '<div style="flex:0 0 auto; width:68px; height:68px; border-radius:14px; background:' + t.bg + ';" role="img" aria-label="' + escapeHtml(t.title) + ' 제품 사진"></div>' +
           '<div class="col" style="gap:4px; flex:1; min-width:0;">' +
-          '<div class="row" style="align-items:center; gap:6px; flex-wrap:wrap;"><span style="font-size:11.5px; color:var(--text2);">' + escapeHtml(t.brand) + '</span><span class="badge-ad">광고</span>' + (matches ? '<span class="badge-match">내 단계에 맞아요</span>' : '') + '</div>' +
+          '<div class="row" style="align-items:center; gap:6px; flex-wrap:wrap;"><span style="font-size:11.5px; color:var(--text2);">' + escapeHtml(t.brand) + '</span><span class="badge-ad">광고</span>' + (matches ? '<span class="badge-match">내 단계에 맞아요</span>' : '') + (hit ? '<span class="badge-match">관심 ' + escapeHtml(hit) + '</span>' : '') + '</div>' +
           '<span style="font-size:14.5px; font-weight:700; line-height:1.4;">' + escapeHtml(t.title) + '</span>' +
           '<span style="font-size:11.5px; color:var(--text2);">마감 ' + t.deadline + ' · 대상 ' + eligLabel + '</span></div></div>' +
           '<div class="col" style="gap:6px;"><div style="height:6px; border-radius:999px; background:var(--track); overflow:hidden;">' +
@@ -3113,13 +3253,14 @@
   // 커뮤니티 글 목록이 비었을 때. 예전에는 필터와 상관없이 "또래 글이 없어요 · 전체 보기로
   // 둘러보세요" 가 떠서, 이미 '전체' 를 보고 있는 사람에게 '전체' 를 보라고 했다.
   function communityEmptyHtml(){
+    var f = state.feedFilter || 'all';
     var mine = state.viewMineOnly === 'posts';
-    var peer = !!state.peerOnly;
     var msg = mine ? '아직 작성한 글이 없어요'
             : state.communityTab === 'qna' ? '아직 올라온 질문이 없어요'
-            : peer ? '아직 또래 글이 없어요'
+            : f === 'peer' ? '아직 또래 글이 없어요'
+            : f === 'interest' ? '관심 분야에 걸리는 글이 아직 없어요'
             : '아직 올라온 글이 없어요';
-    var sub = (!mine && peer) ? '전체 보기로 다른 글도 둘러보세요'
+    var sub = (!mine && (f === 'peer' || f === 'interest')) ? '전체 보기로 다른 글도 둘러보세요'
             : (sb && !authUser) ? '로그인하고 첫 글을 남겨보세요'
             : '첫 글을 남겨보세요';
     return '<div class="card col" style="padding:18px; align-items:center; gap:6px;">' +
@@ -3154,19 +3295,29 @@
       if(state.communityTab === 'qna') allPosts = allPosts.filter(function(p){ return /^\[질문\]/.test(p.text || ''); });
       var myAgeValue = state.kidType === 'pregnant' ? pregWeeks(state.dueDate) : (state.kidType === 'parenting' ? ageMonths(state.birthMonth) : null);
       var peerThreshold = state.kidType === 'pregnant' ? 4 : 2;
-      var posts = (state.peerOnly && myAgeValue != null)
-        ? allPosts.filter(function(p){ return p.stage === state.kidType && p.age_value != null && Math.abs(p.age_value - myAgeValue) <= peerThreshold; })
-        : allPosts;
+      // peerOnly 는 예전 boolean 이었다. feedFilter 로 옮기면서 값을 넘겨받는다.
+      if(!state.feedFilter) state.feedFilter = state.peerOnly ? 'peer' : 'all';
+      var posts = allPosts;
+      if(state.feedFilter === 'peer' && myAgeValue != null){
+        posts = allPosts.filter(function(p){ return p.stage === state.kidType && p.age_value != null && Math.abs(p.age_value - myAgeValue) <= peerThreshold; });
+      } else if(state.feedFilter === 'interest'){
+        posts = allPosts.filter(function(p){ return !!matchedInterest(p.text); });
+      }
       if(state.viewMineOnly === 'posts'){ posts = posts.filter(function(p){ return p.mine; }); }
 
       var mineBanner = state.viewMineOnly === 'posts'
         ? '<div class="row" style="align-items:center; justify-content:space-between; background:var(--accent-soft); border-radius:12px; padding:10px 14px;"><span style="font-size:12.5px; font-weight:700; color:var(--accent2);">내 게시물만 보는 중</span><button type="button" data-clear-my-filter class="link-quiet" style="background:none; border:none;">전체보기</button></div>'
         : '';
-      var filterBar = mineBanner + '<div class="row" style="align-items:center; justify-content:space-between;">' +
+      var hasInt = myInterests().length > 0;
+      var filterBar = mineBanner + '<div class="row" style="align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">' +
         '<div class="segmented round" role="tablist" aria-label="피드 필터">' +
-        '<button data-peer-toggle="all" role="tab" aria-selected="' + (!state.peerOnly) + '">전체</button>' +
-        '<button data-peer-toggle="peer" role="tab" aria-selected="' + (!!state.peerOnly) + '">또래 공감</button>' +
-        '</div>' + (state.peerOnly && myAgeValue != null ? '<span class="helper">' + escapeHtml(ageLabel()) + ' 또래</span>' : '') + '</div>';
+        '<button data-peer-toggle="all" role="tab" aria-selected="' + (state.feedFilter === 'all') + '">전체</button>' +
+        '<button data-peer-toggle="peer" role="tab" aria-selected="' + (state.feedFilter === 'peer') + '">또래 공감</button>' +
+        (hasInt ? '<button data-peer-toggle="interest" role="tab" aria-selected="' + (state.feedFilter === 'interest') + '">내 관심</button>' : '') +
+        '</div>' +
+        (state.feedFilter === 'peer' && myAgeValue != null ? '<span class="helper">' + escapeHtml(ageLabel()) + ' 또래</span>' : '') +
+        (state.feedFilter === 'interest' ? '<span class="helper">' + escapeHtml(myInterests().join(' · ')) + '</span>' : '') +
+        '</div>';
 
       var listHtml = posts.length ? posts.map(function(p){
         var media = p.media_url
@@ -3200,7 +3351,21 @@
   }
 
   // ---------- MY ----------
+  function renderMyInterests(){
+    var g = document.getElementById('my-interest-group');
+    if(!g) return;
+    g.innerHTML = interestChipsHtml();
+    var h = document.getElementById('my-interest-hint');
+    if(h){
+      var picked = myInterests();
+      h.textContent = picked.length
+        ? ('홈 피드와 체험단에서 ' + picked.join(' · ') + ' 관련 소식을 먼저 보여드려요')
+        : '고르면 홈 피드와 체험단을 이 분야 위주로 보여드려요';
+    }
+  }
+
   function renderMy(){
+    renderMyInterests();
     var _pb = document.getElementById('my-profile-banner');
     if(_pb){
       _pb.innerHTML = state.onboarded ? '' :
@@ -4143,7 +4308,7 @@
     }
     showScreen(id);
     renderAll(id);
-    if(id === 'home' || id === 'challenge' || id === 'benefit' || id === 'community'){
+    if(['home','challenge','benefit','community','my','growth'].indexOf(id) > -1){
       refreshRemote();
     }
     if(id === 'growth'){ renderGrowthScreen(); renderAlbum(); }
@@ -4258,6 +4423,12 @@
   // ---------- 계정 전환 시 로컬 상태 교체 ----------
   // 로그인하면 그 계정의 데이터를, 로그아웃하면 게스트 데이터를 보여준다.
   function switchStateForAccount(){
+    // 계정이 바뀌면 이전 계정의 알림·스크랩·열린 모달을 넘기지 않는다.
+    if(!document.getElementById('modal-backdrop').hidden) closeModal();
+    clearAuthDraft();
+    savedPostIds = [];
+    noti = { items: [], unseen: 0, seen: 0 };
+    renderBell();
     // 게스트로 프로필을 만든 뒤 로그인한 경우, 그 프로필을 계정으로 넘겨준다(이동).
     if(authUser && authUser.id){
       var accKey = 'dadamom_v2::' + authUser.id;
@@ -4299,8 +4470,10 @@
 
     // 서버에 저장된 프로필이 있으면 그것이 기준이다 (기기를 바꿔도 따라온다)
     if(authUser){
+      var profileUid = authUser.id;
       var wasOnboarded = !!state.onboarded;
       fetchProfileRow().then(function(row){
+        if(!authUser || authUser.id !== profileUid) return;
         var hadRow = !!(row && row.onboarded);
         if(row) applyProfileRow(row);
 
@@ -4328,6 +4501,7 @@
           showToast('등록했어요');
         }else if(hadRow){
           save();
+          if(resumeCommunityReturn()) return;
           // 다른 기기에서 가입해둔 계정으로 방금 들어왔다면 바로 홈으로
           var h = location.hash || '';
           if(!wasOnboarded && (h === '' || h === '#onboarding')){ location.hash = '#home'; }
@@ -4342,6 +4516,19 @@
 
   // 로그인 직전에 온보딩 화면에서 입력해둔 값 (로그인 후 계정으로 옮긴다)
   var pendingOnboarding = null;
+
+  function authCallbackUrl(){ return window.DadamomCommunityFlow.callbackUrl(location.href); }
+
+  // 허용된 커뮤니티 내부 경로만 복귀한다. 서버 프로필 확인/저장 후 호출한다.
+  var communityReturnStarted = false;
+  function resumeCommunityReturn(){
+    if(communityReturnStarted || !authUser || !state.onboarded) return false;
+    var target = window.DadamomCommunityFlow.returnUrl(location.href);
+    if(!target) return false;
+    communityReturnStarted = true;
+    location.replace(target);
+    return true;
+  }
 
   // ---------- 서버 프로필 (계정에 귀속되는 고객 정보) ----------
   async function fetchProfileRow(){
@@ -4367,7 +4554,8 @@
   }
 
   async function saveProfileRemote(){
-    if(!sb || !authUser) return;
+    if(!sb || !authUser) return false;
+    var profileUid = authUser.id, profileState = state;
     try{
       var res = await sb.from('profiles').upsert({
         id: authUser.id,
@@ -4381,8 +4569,11 @@
         onboarded: !!state.onboarded,
         signup_from: storedFrom()   // 행이 처음 생길 때만 남는다 (수정 때는 DB 가 옛 값 유지)
       });
-      if(res && res.error) console.warn('[다다맘] 프로필 저장 실패', res.error);
-    }catch(e){ console.warn('[다다맘] 프로필 저장 실패', e); }
+      if(res && res.error){ console.warn('[다다맘] 프로필 저장 실패', res.error); return false; }
+      if(!authUser || authUser.id !== profileUid || state !== profileState) return false;
+      resumeCommunityReturn();
+      return true;
+    }catch(e){ console.warn('[다다맘] 프로필 저장 실패', e); return false; }
   }
 
   // 홍보 효과 측정: 마지막 접속일을 하루 한 번만 남긴다 (날짜만).
@@ -4400,7 +4591,17 @@
     }catch(e){ console.warn('[다다맘] last_seen 갱신 실패', e); }
   }
   // 백그라운드에 며칠 떠 있던 앱(설치형)으로 돌아와도 '앱을 연 것'으로 친다
-  document.addEventListener('visibilitychange', function(){ if(!document.hidden) touchLastSeen(); });
+  document.addEventListener('visibilitychange', function(){
+    if(!document.hidden){ touchLastSeen(); refreshVisibleFeed(); }
+  });
+  window.addEventListener('focus', refreshVisibleFeed);
+  var lastFeedRefresh = 0;
+  function refreshVisibleFeed(){
+    if(document.hidden || Date.now() - lastFeedRefresh < 1500) return;
+    if(['#home','#community','#growth','#my'].indexOf(location.hash) === -1) return;
+    lastFeedRefresh = Date.now();
+    refreshRemote();
+  }
 
   // ---------- 로그인 게이트 ----------
   // 서버에 쓰는 동작(글쓰기·챌린지 참여·체험단 신청)은 로그인이 필요합니다.
@@ -4618,6 +4819,11 @@
 
   function shareUrlFor(){ return location.href.split('#')[0]; }
 
+  function sharePostUrlFor(post){
+    if(!post || post.status !== 'approved' || post.visibility === 'private' || !sb) return '';
+    return window.DadamomCommunityFlow.postUrl(post.id, location.href);
+  }
+
   function openShareModal(payload){
     shareTarget = payload;
     openModal(shareModalHtml());
@@ -4829,9 +5035,17 @@
     var interest = e.target.closest('[data-interest]');
     if(interest){
       var t = interest.getAttribute('data-interest');
+      if(!Array.isArray(state.interests)) state.interests = [];
       var idx = state.interests.indexOf(t);
       if(idx > -1) state.interests.splice(idx,1); else state.interests.push(t);
-      save(); renderOnboarding(); return;
+      save();
+      // 온보딩에서 고르든 MY 에서 고치든, 열려 있는 화면만 다시 그린다.
+      if(document.getElementById('interest-group')) renderOnboarding();
+      if(document.getElementById('my-interest-group')) renderMyInterests();
+      var here = (location.hash || '').replace('#','');
+      if(here === 'home'){ renderHome(); }
+      if(here === 'benefit'){ renderBenefit(); }
+      return;
     }
 
     var topicBtn = e.target.closest('[data-post-topic]');
@@ -4865,6 +5079,18 @@
       }
       state.onboarded = true; state.browsing = false;
       save();
+      if(sb && window.DadamomCommunityFlow.returnUrl(location.href)){
+        var onboardingState = state;
+        document.getElementById('start-btn').disabled = true;
+        saveProfileRemote().then(function(ok){
+          if(state !== onboardingState) return;
+          if(!ok){
+            state.onboarded = false; save(); renderOnboarding();
+            showToast('아이 정보를 저장하지 못했어요. 다시 시도해주세요');
+          }
+        });
+        return;
+      }
       saveProfileRemote();
       location.hash = '#home';
       return;
@@ -4978,7 +5204,9 @@
     }
     var peerToggle = e.target.closest('[data-peer-toggle]');
     if(peerToggle){
-      state.peerOnly = peerToggle.getAttribute('data-peer-toggle') === 'peer';
+      var pick = peerToggle.getAttribute('data-peer-toggle');
+      state.feedFilter = pick;
+      state.peerOnly = (pick === 'peer');   // 예전 키도 같이 유지
       save(); renderCommunity();
       return;
     }
@@ -5017,8 +5245,10 @@
       var spid = sharePostBtn.getAttribute('data-share-post');
       var spost = state.posts.filter(function(x){ return x.id === spid; })[0];
       if(spost){
+        var postUrl = sharePostUrlFor(spost);
+        if(!postUrl){ showToast('공개 승인된 글만 링크로 공유할 수 있어요'); return; }
         var excerpt = spost.text.length > 60 ? spost.text.slice(0,60) + '…' : spost.text;
-        openShareModal({ title:'다다맘', text: excerpt + ' - 다다맘에서 더 보기', url: shareUrlFor() });
+        openShareModal({ title:'다다맘', text: excerpt + ' - 다다맘에서 더 보기', url: postUrl });
       }
       return;
     }
@@ -5513,6 +5743,15 @@
       var res = await sb.from('benefit_applications').insert(payload);
       if(res.error){
         console.error('benefit_applications insert error', res.error);
+        // 23505 = 같은 체험단에 이미 신청돼 있다. 다른 기기에서 신청했거나
+        // 이 기기의 저장소가 지워진 경우다. 오류가 아니라 상태를 맞춰주면 된다.
+        if(res.error.code === '23505'){
+          state.applied[akey] = true;
+          save();
+          closeModal(); renderBenefit(); renderHome();
+          showToast('이미 신청하신 체험단이에요');
+          return;
+        }
         showToast('신청 실패: ' + (res.error && res.error.message ? res.error.message : '다시 시도해주세요'));
         if(btn){ btn.disabled = false; btn.textContent = '신청 완료하기'; }
         return;
@@ -5668,20 +5907,26 @@
 
   // ---------- 사진 카드 만들기 ----------
   function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight, maxLines){
-    var words = String(text || '').split(' ');
-    var line = '', lines = [];
-    for(var i=0;i<words.length;i++){
-      var test = line + words[i] + ' ';
-      if(ctx.measureText(test).width > maxWidth && line){
-        lines.push(line);
-        line = words[i] + ' ';
-        if(lines.length === maxLines) break;
-      } else {
-        line = test;
-      }
+    var value = String(text || '').replace(/\r\n?/g, '\n');
+    var split = function(s){
+      return typeof Intl.Segmenter === 'function'
+        ? Array.from(new Intl.Segmenter('ko', { granularity:'grapheme' }).segment(s), function(v){ return v.segment; })
+        : Array.from(s);
+    };
+    var chars = split(value), line = '', lines = [];
+    chars.forEach(function(ch){
+      if(ch === '\n'){ lines.push(line); line = ''; return; }
+      if(line && ctx.measureText(line + ch).width > maxWidth){ lines.push(line); line = ch; }
+      else line += ch;
+    });
+    if(line) lines.push(line);
+    var shown = lines.slice(0, maxLines);
+    if(lines.length > maxLines){
+      var last = split(shown[maxLines - 1] || '');
+      while(last.length && ctx.measureText(last.join('') + '…').width > maxWidth) last.pop();
+      shown[maxLines - 1] = last.join('') + '…';
     }
-    if(lines.length < maxLines && line.trim()) lines.push(line);
-    lines.slice(0, maxLines).forEach(function(l, i){ ctx.fillText(l.trim(), x, y + i * lineHeight); });
+    shown.forEach(function(l, i){ ctx.fillText(l, x, y + i * lineHeight); });
   }
 
   function buildShareCard(it){
@@ -5689,7 +5934,7 @@
     img.crossOrigin = 'anonymous';
     img.onload = function(){
       try{
-        var W = 600, boxH = 600, H = 760;
+        var W = 600, boxH = 600, H = 820;
         var canvas = document.createElement('canvas');
         canvas.width = W; canvas.height = H;
         var ctx = canvas.getContext('2d');
