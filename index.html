@@ -415,7 +415,7 @@
   <section class="screen" id="screen-home" style="position:relative;">
     <div class="scroll pad">
       <div class="row" style="align-items:center; justify-content:space-between;">
-        <div class="col" style="gap:4px; min-width:0; flex:1;">
+        <div class="col" style="gap:4px; min-width:0; flex:1 1 auto;">
           <span style="font-size:13px; color:var(--text2);">안녕하세요</span>
           <h1 class="display" id="home-name" style="font-size:21px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></h1>
         </div>
@@ -423,9 +423,9 @@
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
           <span id="home-bell-n" hidden style="position:absolute; top:5px; right:3px; min-width:17px; height:17px; padding:0 4px; border-radius:999px; background:var(--accent); color:#fff; font-size:10.5px; font-weight:800; line-height:17px; text-align:center;"></span>
         </button>
-        <a href="#my" class="pill" style="display:flex; align-items:center; gap:6px; padding:8px 12px; background:var(--surface); border:1px solid var(--border); font-size:12.5px; color:var(--text2); text-decoration:none;">
-          <span id="home-chip"></span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+        <a href="#my" class="pill" style="display:flex; align-items:center; gap:6px; padding:8px 12px; background:var(--surface); border:1px solid var(--border); font-size:12.5px; color:var(--text2); text-decoration:none; min-width:84px; flex:0 100 auto;">
+          <span id="home-chip" style="min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></span>
+          <svg style="flex:0 0 auto;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
         </a>
       </div>
 
@@ -1504,12 +1504,52 @@
           }).join('')
         : '<p class="helper">아직 신청이 없어요.</p>');
 
-    el.innerHTML = reportAdminHtml() + outingAdminHtml() + noticeAdmin + applyAdmin +
+    var signupAdmin = await signupStatsHtml();
+
+    el.innerHTML = reportAdminHtml() + signupAdmin + outingAdminHtml() + noticeAdmin + applyAdmin +
       '<h2 class="display" style="font-size:15px; margin-top:6px;">콘텐츠 검수</h2>' +
       ((!pendingEntries.length && !pendingPosts.length)
         ? '<p class="helper">지금은 검수 대기 중인 콘텐츠가 없어요.</p>' : '') +
       (pendingEntries.length ? '<h3 class="display" style="font-size:13.5px;">챌린지 참여 (' + pendingEntries.length + ')</h3>' + entryHtml : '') +
       (pendingPosts.length ? '<h3 class="display" style="font-size:13.5px;">커뮤니티 글 (' + pendingPosts.length + ')</h3>' + postHtml : '');
+  }
+
+  // ---------- 운영자: 가입 경로 (홍보 시험용, docs/홍보_측정.md 와 같은 기준) ----------
+  // 관리자는 RLS(pf_select 의 is_admin())로 전체 프로필을 읽을 수 있다. 경로·날짜 세 칸만 읽는다.
+  // shortcut: 최근 30일 가입자를 브라우저에서 최대 1000명까지 세어 합친다, 그보다 많아지면 합계만 돌려주는 RPC 로 바꾼다.
+  function kstDay(ms){ return new Date(ms + 9 * 36e5).toISOString().slice(0, 10); }
+
+  async function signupStatsHtml(){
+    var now = Date.now(), since = kstDay(now - 29 * 864e5), week = kstDay(now - 6 * 864e5);
+    var head = '<h2 class="display" style="font-size:15px; margin-top:6px;">가입 경로 (최근 30일 가입)</h2>';
+    var rows;
+    try{
+      var r = await sb.from('profiles').select('signup_from,last_seen,created_at').gte('created_at', since + 'T00:00:00+09:00').limit(1000);
+      if(r.error || !Array.isArray(r.data)) throw r.error;
+      rows = r.data;
+    }catch(e){ return head + '<p class="helper">가입 경로를 불러오지 못했어요. 새로고침해 주세요.</p>'; }
+    var by = {};
+    rows.forEach(function(p){
+      var k = p.signup_from || '(경로 없음)', joined = kstDay(Date.parse(p.created_at));
+      var g = by[k] || (by[k] = { n:0, back:0, week:0 });
+      g.n++;
+      if(p.last_seen && p.last_seen > joined) g.back++;   // 가입한 날 다음부터 다시 연 사람
+      if(p.last_seen && p.last_seen >= week) g.week++;
+    });
+    var keys = Object.keys(by).sort(function(a, b){ return by[b].n - by[a].n; });
+    if(!keys.length) return head + '<p class="helper">최근 30일 가입자가 없어요.</p>';
+    var cell = 'padding:7px 6px; border-top:1px solid var(--border); text-align:right;';
+    return head +
+      '<div class="card" style="padding:6px 12px 10px; overflow-x:auto;"><table style="width:100%; border-collapse:collapse; font-size:12.5px;">' +
+      '<tr style="color:var(--text2);"><th style="text-align:left; padding:6px; font-weight:700;">경로</th><th style="padding:6px; text-align:right;">가입</th>' +
+        '<th style="padding:6px; text-align:right;">다시 옴</th><th style="padding:6px; text-align:right;">7일 내 접속</th></tr>' +
+      keys.map(function(k){
+        var g = by[k];
+        return '<tr><td style="' + cell + ' text-align:left; word-break:break-all;">' + escapeHtml(k) + '</td><td style="' + cell + '">' + g.n + '</td>' +
+          '<td style="' + cell + '">' + g.back + '</td><td style="' + cell + '">' + g.week + '</td></tr>';
+      }).join('') +
+      '</table></div>' +
+      '<p class="helper">"다시 옴" = 가입한 다음 날 이후 한 번이라도 다시 연 사람. 날짜 단위라 근사치예요. 운영자·테스트 계정도 섞여 있어요.</p>';
   }
 
   // ---------- 운영자: 신고 대기열 ----------
