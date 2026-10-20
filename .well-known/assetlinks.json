@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "kr.dadaran.dadamom",
+      "sha256_cert_fingerprints": [
+        "BB:F3:C0:45:26:A4:6C:E5:66:19:71:EF:E2:B5:98:39:29:AA:D0:4D:54:F9:0B:F2:DD:93:14:5B:51:2F:A0:4C"
+      ]
+    }
+  }
+]
