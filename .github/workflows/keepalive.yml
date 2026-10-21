@@ -20,7 +20,7 @@ jobs:
     steps:
       - name: 운영 API 읽기 요청
         run: |
-          page=$(curl -fsS https://adultryun188-lang.github.io/dadamom-app/index.html)
+          page=$(curl -fsSL https://dadamom.co.kr/index.html)   # 2026-10-19 도메인 이전 뒤 옛 주소는 301 이라 -L 없이 읽으면 실패
           url=$(printf '%s' "$page" | grep -o "var SUPABASE_URL = '[^']*'" | cut -d"'" -f2)
           key=$(printf '%s' "$page" | grep -o "var SUPABASE_KEY = '[^']*'" | cut -d"'" -f2)
           test -n "$url" && test -n "$key"
