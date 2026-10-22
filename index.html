@@ -9,7 +9,7 @@
 <link rel="icon" type="image/png" sizes="512x512" href="./icons/icon-512.png">
 <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
 <link rel="manifest" href="./manifest.webmanifest">
-<meta name="theme-color" content="#C94318">
+<meta name="theme-color" content="#FFFBF7">
 <!-- 공유 미리보기 -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="다다맘">
@@ -35,47 +35,32 @@
     location.replace('./community.html' + (onlyFrom ? location.search : ''));
   }
 </script>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&display=swap">
 <style>
-  :root{
+  :root, :root[data-theme="dark"]{
     color-scheme: light;
-    --bg:#FFFBF5; --surface:#FFFFFF; --border:#F0E4D6;
-    --text:#2B2118; --text2:#6E5F50;
-    --accent:#FF7A59; --accent-ink:#FFFFFF; --accent-soft:#FFF3EE;
-    --accent-strong:#C94318;
+    --bg:#FFFBF7; --surface:#FFFFFF; --border:#F1E2D8;
+    --text:#44362F; --text2:#6B584D;
+    --accent:#A34429; --accent-ink:#773B26; --accent-soft:#FFF0E7;
+    --accent-strong:#A34429;
     --accent2:#8A6512; --accent2-soft:#FFF3D6;
     --chip-a:#FFF3D6; --chip-a-ink:#8A6512;
     --chip-b:#FFE8DE; --chip-b-ink:#B84B2E;
     --chip-c:#EAF2E9; --chip-c-ink:#3F6B49;
-    --pill-bg:#F0E4D6; --track:#F0E4D6;
-    --shadow: 0 10px 24px rgba(43,33,24,0.10);
-    --overlay: rgba(28,20,14,0.45);
+    --pill-bg:#F6ECE1; --track:#F6ECE1;
+    --shadow:0 8px 24px rgba(150,95,60,.06);
+    --overlay:rgba(101,77,59,.22);
   }
-  /* 항상 밝고 산뜻한 라이트 테마로 고정 (기기의 다크모드 설정과 무관) */
-  :root[data-theme="dark"]{
-    color-scheme: dark;
-    --bg:#1C1712; --surface:#25201A; --border:#3A2F24;
-    --text:#F5EDE3; --text2:#C2B3A2;
-    --accent:#FF8B6B; --accent-ink:#241812; --accent-soft:#3A2A20;
-    --accent-strong:#FF8B6B;
-    --accent2:#E0B355; --accent2-soft:#3A2E17;
-    --chip-a:#3A2E17; --chip-a-ink:#E7C067;
-    --chip-b:#3A2620; --chip-b-ink:#F0937A;
-    --chip-c:#22301F; --chip-c-ink:#94D19E;
-    --pill-bg:#332A22; --track:#332A22;
-    --shadow: 0 10px 24px rgba(0,0,0,0.35);
-    --overlay: rgba(0,0,0,0.55);
-  }
+  /* 기기 설정이나 남아 있는 테마 속성과 무관하게 밝은 테마를 유지한다. */
 
   *{box-sizing:border-box;}
   [hidden]{ display:none !important; }
   html,body{height:100%;}
   body{
     margin:0; background:var(--bg); color:var(--text);
-    font-family:'Gowun Dodum','Apple SD Gothic Neo',sans-serif;
+    font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
     -webkit-tap-highlight-color:transparent;
   }
-  .display{font-family:'Jua','Gowun Dodum','Apple SD Gothic Neo',sans-serif; letter-spacing:-0.01em;}
+  .display{font-family:inherit; font-weight:700; letter-spacing:-0.02em;}
   button{font-family:inherit; cursor:pointer;}
   a{color:inherit;}
   h1,h2,p{margin:0;}
@@ -132,6 +117,14 @@
     font-size:15px; font-weight:700; border:1px solid var(--border); text-decoration:none; cursor:pointer; margin-top:10px;
   }
   .btn-google:disabled{ opacity:.5; cursor:not-allowed; }
+  .btn-naver{
+    display:flex; align-items:center; justify-content:center; gap:8px; width:100%;
+    min-height:50px; border-radius:18px; background:#03A94D; color:#fff;
+    font-size:19px; font-weight:700; border:none; text-decoration:none; cursor:pointer; margin-top:10px;
+  }
+  .btn-naver:disabled{ cursor:not-allowed; }
+  .btn-naver:focus-visible{ outline:3px solid var(--text); outline-offset:3px; }
+  .naver-login-note{ display:block; margin-top:6px; }
   .auth-divider{
     display:flex; align-items:center; gap:10px; margin:14px 0; color:var(--text2); font-size:12px;
   }
@@ -278,40 +271,55 @@
   /* ── 웹 커뮤니티(community.html)와 같은 톤 ──
      배치는 건드리지 않고 색·그림자·버튼·메뉴 표현만 바꾼다. */
   :root{
-    --btn-grad: linear-gradient(135deg,#D2491C 0%,#B53A12 100%);
-    --card-shadow: 0 1px 2px rgba(120,60,20,.04), 0 8px 24px rgba(201,67,24,.07);
+    --btn-grad:#FFE0CF;
+    --card-shadow:0 2px 10px rgba(150,95,60,.04);
   }
   :root:not([data-theme="dark"]) body,
   :root:not([data-theme="dark"]) .app{
-    background:
-      radial-gradient(520px 300px at 0% -6%, #FFE2D3 0%, transparent 62%),
-      radial-gradient(460px 280px at 100% 2%, #FFF1C9 0%, transparent 62%),
-      radial-gradient(560px 360px at 50% 106%, #FDE6EE 0%, transparent 62%),
-      var(--bg);
+    background:var(--bg);
   }
   :root:not([data-theme="dark"]) .card{ border-color:#F3E3D3; box-shadow:var(--card-shadow); }
   :root:not([data-theme="dark"]) #home-status > .card:first-child,
   :root:not([data-theme="dark"]) #screen-my > .scroll > .card:first-child{
-    background:linear-gradient(120deg,#FFE0D0 0%,#FFEBD8 45%,#FFF4CC 100%); border-color:#FBDCC7;
+    background:linear-gradient(120deg,#FFF0E3,#FFF8DE); border-color:#F3DDC8;
   }
-  .btn-primary{ background:var(--btn-grad); box-shadow:0 6px 16px rgba(201,67,24,.25); transition:transform .12s, box-shadow .12s; }
-  .btn-primary:not(:disabled):hover{ transform:translateY(-1px); box-shadow:0 10px 22px rgba(201,67,24,.3); }
+  .btn-primary{ background:var(--btn-grad); border:1px solid #F1B99E; box-shadow:none; transition:background .12s; }
+  .btn-primary:not(:disabled):hover{ background:#FFD3BA; }
   .btn-ghost{ transition:box-shadow .12s, background .12s; }
   .btn-ghost:hover{ background:#FFFBF7; box-shadow:0 4px 12px rgba(201,67,24,.08); }
-  .chip.on, .chip-f[aria-pressed="true"]{ border:1px solid var(--text); background:var(--text); color:var(--bg); }
-  .segmented button[aria-selected="true"]{ box-shadow:0 2px 8px rgba(120,60,20,.10); }
+  .chip.on, .chip-f[aria-pressed="true"]{ border:1px solid #EDBFA5; background:var(--accent-soft); color:var(--accent-strong); }
+  .segmented button[aria-selected="true"]{ box-shadow:0 2px 8px rgba(120,60,20,.06); color:var(--accent-strong); }
   .mission-go{ background:var(--accent-soft); color:#B53A12; }   /* accent-strong 은 이 배경에서 4.49:1 로 기준(4.5) 미달 */
-  #home-fab, #fab{ background:var(--btn-grad) !important; box-shadow:0 10px 24px rgba(201,67,24,.32) !important; }
+  #home-fab, #fab{ background:var(--btn-grad) !important; border:1px solid #EDBFA5 !important; box-shadow:0 6px 18px rgba(150,95,60,.12) !important; }
   .navbar{ background:rgba(255,255,255,.88); backdrop-filter:saturate(1.4) blur(14px); -webkit-backdrop-filter:saturate(1.4) blur(14px); }
-  .navbar button.active{ color:var(--accent-strong); }
+  .navbar button.active{ color:var(--accent-strong); background:#FFF0E7; border-radius:14px; }
   .nav-site{ display:none; }
   .share-chip{ display:flex; align-items:center; justify-content:center; gap:8px; font-weight:700; color:var(--text); }
   .share-chip svg{ flex:0 0 auto; display:block; }
   .badge-match{ white-space:nowrap; }
   :root:not([data-theme="dark"]) .my-avatar{ background:#fff !important; box-shadow:0 4px 14px rgba(201,67,24,.16); display:flex; align-items:center; justify-content:center; }
   :root:not([data-theme="dark"]) .my-avatar::before{ content:'🙂'; font-size:28px; }
-  .modal-card{ box-shadow:0 -10px 40px rgba(43,33,24,.12); }
+  .modal-card{ background:#FFFDF9; border:1px solid #EDDDCF; box-shadow:0 -10px 40px rgba(111,76,47,.10); overscroll-behavior:contain; }
   .field input:focus, .field select:focus, .field textarea:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 4px rgba(255,122,89,.14); }
+  .field input, .field select, .field textarea{ background:#FFFEFC; font-size:16px; line-height:1.6; }
+  .field input::placeholder, .field textarea::placeholder{ color:#78665A; opacity:1; }
+  *:focus-visible{ outline:3px solid var(--accent-strong); outline-offset:3px; }
+  .field input:focus-visible, .field select:focus-visible, .field textarea:focus-visible{ outline:2px solid var(--accent-strong); outline-offset:2px; }
+  .modal-close{ min-width:44px; min-height:44px; }
+  .segmented button{ min-height:44px; }
+  .test-banner{ background:#FFF0D6; color:#78501E; border-bottom:1px solid #E9CFAC; }
+  .test-banner .env{ opacity:1; }
+  .hero{ background:linear-gradient(120deg,#FFE9DD,#FFF3DC 60%,#FFF9EC); color:var(--text); border:1px solid #F1D8C8; }
+  .hero-eyebrow{ background:#FFFDF8; color:var(--accent-strong); border:1px solid #F1D8C8; }
+  .hero-cta{ color:var(--accent-strong); }
+  .mission-banner{ border:1px solid #F1D8C8; background:linear-gradient(120deg,#FFF2E8,#FFF8E7); }
+  .mission-banner-dday{ background:#FFE0CF; color:var(--accent-ink); }
+  #home-bell-n{ background:#FFE0CF !important; color:var(--accent-ink) !important; }
+  .toast{ background:#FFF7E5; color:var(--text); border:1px solid #EAD5B1; }
+  #screen-challenge > .scroll > .col:first-of-type{ background:linear-gradient(120deg,#FFF0E3,#FFF8DE); border:1px solid #F1D8C8; border-radius:20px; padding:20px; }
+  #challenge-prize{ background:#FFFDF8 !important; }
+  .legal{ line-height:1.85; }
+  @media (prefers-reduced-motion:reduce){ *, *::before, *::after{ scroll-behavior:auto !important; transition:none !important; animation:none !important; } }
 
   /* PC 화면: 하단 탭바를 왼쪽 메뉴로 옮기고 본문은 가운데 읽기 폭으로 둔다. 모바일은 위 규칙 그대로. */
   @media (min-width:960px){
@@ -323,10 +331,10 @@
       flex-direction:column; align-items:stretch; justify-content:flex-start; gap:4px;
       border-top:none; border-right:1px solid var(--border); padding:28px 14px;
     }
-    .navbar::before{ content:'다다맘'; font-family:'Jua',sans-serif; font-size:26px; color:var(--accent-strong); padding:0 14px 18px; }
+    .navbar::before{ content:'다다맘'; font-family:inherit; font-weight:800; font-size:26px; color:var(--accent-strong); padding:0 14px 18px; }
     .navbar button{ flex:0 0 auto; flex-direction:row; gap:12px; font-size:15px; padding:12px 14px; border-radius:14px; }
     .navbar button:hover{ background:rgba(255,122,89,.08); color:var(--text); }
-    .navbar button.active{ background:var(--text); color:var(--bg); }
+    .navbar button.active{ background:#FFF0E7; color:var(--accent-strong); }
     .nav-site{ display:flex; align-items:center; gap:10px; margin-top:auto; padding:14px; border-radius:16px;
       background:linear-gradient(150deg,#FFF1E8,#FFF8E6); border:1px solid #F6DCCB; color:var(--accent-strong);
       font-size:14px; font-weight:700; text-decoration:none; }
@@ -339,6 +347,7 @@
     .toast{ bottom:40px; }
   }
 </style>
+<link rel="stylesheet" href="./rounded-ui.css?v=20261022-4">
 
 <div class="app" id="app">
 
@@ -411,6 +420,7 @@
       </div>
     </div>
     <div class="pad col" style="flex:0 0 auto; gap:8px; padding-block:16px calc(22px + env(safe-area-inset-bottom,0px)); border-top:1px solid var(--border); background:var(--bg);">
+      <button type="button" id="welcome-login-btn" class="btn-primary" data-open-auth-modal style="display:none;">로그인하고 시작하기</button>
       <button id="start-btn" class="btn-primary" disabled>다다맘 시작하기</button>
       <button type="button" id="browse-btn" class="link-quiet" style="background:none; border:none; padding:10px 0; font-size:13px;">로그인 없이 커뮤니티 둘러보기</button>
       <span class="helper" id="start-helper" style="text-align:center;">단계 · 날짜 · 지역을 선택하면 시작할 수 있어요</span>
@@ -752,6 +762,8 @@
   var DAY = 86400000;
   var SUPABASE_URL = 'https://hjqchbpxwviengdzvado.supabase.co';
   var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqcWNoYnB4d3ZpZW5nZHp2YWRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxMzE5NDYsImV4cCI6MjEwNTcwNzk0Nn0.eNnZoYwfKu0ACJeSxHRYnLtCeYBZjKleHLZ03rvPGZE';
+  // 운영은 env.js 가 없다. 네이버 로그인은 검수 통과 후 { NAVER_LOGIN: true } 로 켠다.
+  var ENV = {};
   var sb = null;
   try{
     if(window.supabase && window.supabase.createClient){
@@ -821,6 +833,10 @@
   var authView = 'password';
   var authMode = 'login';
 
+  function naverButtonLabelHtml(){
+    return '<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.273 12.845 7.376 0H0v24h7.727V11.155L16.624 24H24V0h-7.727z"/></svg>네이버로 로그인';
+  }
+
   function authModalHtml(){
     var head = '<div class="modal-head"><h3 class="display">로그인</h3><button class="modal-close" data-close-modal aria-label="닫기">✕</button></div>';
     return head + authBodyHtml();
@@ -829,7 +845,29 @@
   // 로그인 폼 본체. 모달에도 쓰고, 첫 화면에도 그대로 심는다.
   function authBodyHtml(){
     var head = '';
-    var social = ''+
+    // true: 연동 검증 준비 완료, 'preview': 버튼만 표시하고 외부 인증은 차단.
+    // 설정 누락/false이면 숨긴다. 기존 카카오·구글 스위치와 독립적으로 관리한다.
+    var naverVisible = ENV.NAVER_LOGIN === true || ENV.NAVER_LOGIN === 'preview';
+    // 소셜 로그인은 환경마다 제공자 설정이 다르다.
+    // 제공자가 등록되지 않은 환경에서 외부 오류 페이지로 이동하지 않도록
+    // 환경 설정으로 카카오·구글 버튼을 끌 수 있다.
+    if(ENV.SOCIAL_LOGIN === false && !naverVisible){
+      var socialOff =
+        '<div class="card col" style="gap:4px; padding:13px 15px; margin-bottom:14px;">' +
+          '<span style="font-size:12.5px; font-weight:700;">이 환경에서는 이메일 로그인만 됩니다</span>' +
+          '<span class="helper">카카오·구글 로그인은 이 환경에서 꺼져 있어요.</span>' +
+        '</div>';
+      if(authView === 'magiclink'){
+        return head + socialOff +
+          '<div class="field"><label for="auth-email">이메일</label><input type="email" id="auth-email" placeholder="you@example.com" autocomplete="email" value="' + escapeHtml(authDraft.email) + '"></div>' +
+          '<button class="btn-primary" id="auth-submit" style="width:100%;" disabled>로그인 링크 받기</button>' +
+          '<button type="button" data-auth-view="password" class="link-quiet" style="background:none; border:none; margin-top:10px; padding:2px 0;">비밀번호로 로그인·회원가입</button>' +
+          '<span class="helper" id="auth-hint"></span>';
+      }
+      return head + socialOff + authPasswordFormHtml();
+    }
+
+    var social = ENV.SOCIAL_LOGIN === false ? '' : ''+
       '<button type="button" class="btn-kakao" id="kakao-signin-btn">' +
         '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3C6.477 3 2 6.463 2 10.742c0 2.708 1.79 5.09 4.49 6.462l-1.145 4.19a.4.4 0 0 0 .61.44l4.94-3.27c.35.03.7.05 1.05.05 5.523 0 10-3.463 10-7.872C22 6.463 17.523 3 12 3z" fill="#191919"/></svg>' +
         '카카오로 로그인' +
@@ -842,8 +880,16 @@
           '<path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.1-4 5.4l6.3 5.2C40.7 36 44 30.8 44 24c0-1.2-.1-2.4-.4-3.5z"/>' +
         '</svg>' +
         '구글로 로그인' +
-      '</button>' +
-      '<div class="auth-divider">또는 이메일로</div>';
+      '</button>';
+
+    if(naverVisible){
+      var naverReady = ENV.NAVER_LOGIN === true;
+      social += '<button type="button" class="btn-naver" id="naver-signin-btn"' +
+        (naverReady ? '' : ' disabled aria-describedby="naver-login-note"') + '>' +
+        naverButtonLabelHtml() + '</button>' +
+        (naverReady ? '' : '<span class="helper naver-login-note" id="naver-login-note">연결 준비 중 · 네이버 개발자 설정 후 사용할 수 있어요.</span>');
+    }
+    social += '<div class="auth-divider">또는 이메일로</div>';
 
     if(authView === 'magiclink'){
       return head + social +
@@ -853,12 +899,79 @@
         '<span class="helper" id="auth-hint"></span>';
     }
 
+    return head + social + authPasswordFormHtml();
+  }
+
+  // 폼을 다시 그리면 input 이 통째로 교체되므로, 치던 값이 사라진다.
+  // 그래서 화면이 아니라 여기를 원본으로 삼는다. 그려낼 때 value / checked 로 박아 넣고,
+  // 사용자가 칠 때마다 여기로 되받는다. 단계를 오가도 값이 유지된다.
+  var AUTH_BLANK = { email:'', password:'', password2:'', nickname:'',
+                     terms:false, privacy:false, age14:false, marketing:false };
+  var authDraft = Object.assign({}, AUTH_BLANK);
+  var signupStep = 1;          // 1 = 계정 정보, 2 = 약관 동의
+  var signupDone = null;       // 가입 직후 완료 화면에 쓸 값 { email, needVerify }
+
+  function captureAuthDraft(){
+    var g = function(id){ return document.getElementById(id); };
+    var map = { email:'auth-email', password:'auth-password',
+                password2:'auth-password2', nickname:'auth-nickname' };
+    Object.keys(map).forEach(function(k){ var el=g(map[k]); if(el) authDraft[k]=el.value; });
+    ['terms','privacy','age14','marketing'].forEach(function(k){
+      var el=g('consent-'+k); if(el) authDraft[k]=el.checked;
+    });
+  }
+
+  function clearAuthDraft(){
+    authDraft = Object.assign({}, AUTH_BLANK);
+    signupStep = 1; signupDone = null;
+  }
+
+  // 가입 1단계를 넘어갈 수 있는 조건
+  function signupStep1Ok(){
+    return EMAIL_RE.test((authDraft.email||'').trim())
+        && passwordOk(authDraft.password)
+        && authDraft.password === authDraft.password2;
+  }
+  function passwordOk(pw){
+    pw = pw || '';
+    return pw.length >= 8 && /[A-Za-z]/.test(pw) && /[0-9]/.test(pw);
+  }
+  var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  // 그려낸 뒤 버튼 활성 상태를 상태값에 맞춘다
+  function syncAuthButtons(){
+    var g = function(id){ return document.getElementById(id); };
+    var next = g('signup-next');
+    if(next) next.disabled = !signupStep1Ok();
+    var sub = g('signup-submit');
+    if(sub) sub.disabled = !(authDraft.terms && authDraft.privacy && authDraft.age14);
+    var all = g('consent-all');
+    if(all) all.checked = authDraft.terms && authDraft.privacy && authDraft.age14 && authDraft.marketing;
+    var login = g('auth-password-submit');
+    if(login) login.disabled = !(EMAIL_RE.test((authDraft.email||'').trim()) && (authDraft.password||'').length >= 6);
+    var link = g('auth-submit');
+    if(link) link.disabled = !EMAIL_RE.test((authDraft.email||'').trim());
+  }
+
+  // 로그인 폼은 모달과 첫 화면 두 군데에 있을 수 있다.
+  // 탭(로그인/회원가입)이나 방식(비밀번호/이메일 링크)을 바꾸면 둘 다 다시 그린다.
+  function refreshAuthForms(){
+    captureAuthDraft();
+    var card = document.getElementById('modal-card');
+    if(card && card.innerHTML) card.innerHTML = authModalHtml();
+    var inline = document.getElementById('onboarding-auth');
+    if(inline && inline.offsetParent !== null) inline.innerHTML = authBodyHtml();
+    syncAuthButtons();
+  }
+
+  // 이메일·비밀번호 폼. 소셜 로그인이 있든 없든 같은 폼을 쓴다.
+  function authPasswordFormHtml(){
     var tabs = '<div class="segmented" role="tablist" aria-label="로그인 방식" id="auth-mode-tabs">' +
         '<button data-auth-mode="login" role="tab" aria-selected="' + (authMode === 'login') + '">로그인</button>' +
         '<button data-auth-mode="signup" role="tab" aria-selected="' + (authMode === 'signup') + '">회원가입</button>' +
       '</div>';
-    if(authMode === 'signup') return head + social + tabs + signupHtml();
-    return head + social + tabs +
+    if(authMode === 'signup') return tabs + signupHtml();
+    return tabs +
       '<div class="field"><label for="auth-email">이메일</label><input type="email" id="auth-email" placeholder="you@example.com" autocomplete="email" value="' + escapeHtml(authDraft.email) + '"></div>' +
       '<div class="field"><label for="auth-password">비밀번호</label><input type="password" id="auth-password" autocomplete="current-password" value="' + escapeHtml(authDraft.password) + '"></div>' +
       '<button class="btn-primary" id="auth-password-submit" style="width:100%;" disabled>로그인하기</button>' +
@@ -1069,68 +1182,6 @@
     }
   }
 
-  // 폼을 다시 그리면 input 이 통째로 교체되므로, 치던 값이 사라진다.
-  // 그래서 화면이 아니라 여기를 원본으로 삼는다. 그려낼 때 value / checked 로 박아 넣고,
-  // 사용자가 칠 때마다 여기로 되받는다. 단계를 오가도 값이 유지된다.
-  var AUTH_BLANK = { email:'', password:'', password2:'', nickname:'',
-                     terms:false, privacy:false, age14:false, marketing:false };
-  var authDraft = Object.assign({}, AUTH_BLANK);
-  var signupStep = 1;          // 1 = 계정 정보, 2 = 약관 동의
-  var signupDone = null;       // 가입 직후 완료 화면에 쓸 값 { email, needVerify }
-
-  function captureAuthDraft(){
-    var g = function(id){ return document.getElementById(id); };
-    var map = { email:'auth-email', password:'auth-password',
-                password2:'auth-password2', nickname:'auth-nickname' };
-    Object.keys(map).forEach(function(k){ var el=g(map[k]); if(el) authDraft[k]=el.value; });
-    ['terms','privacy','age14','marketing'].forEach(function(k){
-      var el=g('consent-'+k); if(el) authDraft[k]=el.checked;
-    });
-  }
-
-  function clearAuthDraft(){
-    authDraft = Object.assign({}, AUTH_BLANK);
-    signupStep = 1; signupDone = null;
-  }
-
-  // 가입 1단계를 넘어갈 수 있는 조건
-  function signupStep1Ok(){
-    return EMAIL_RE.test((authDraft.email||'').trim())
-        && passwordOk(authDraft.password)
-        && authDraft.password === authDraft.password2;
-  }
-  function passwordOk(pw){
-    pw = pw || '';
-    return pw.length >= 8 && /[A-Za-z]/.test(pw) && /[0-9]/.test(pw);
-  }
-  var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-  // 그려낸 뒤 버튼 활성 상태를 상태값에 맞춘다
-  function syncAuthButtons(){
-    var g = function(id){ return document.getElementById(id); };
-    var next = g('signup-next');
-    if(next) next.disabled = !signupStep1Ok();
-    var sub = g('signup-submit');
-    if(sub) sub.disabled = !(authDraft.terms && authDraft.privacy && authDraft.age14);
-    var all = g('consent-all');
-    if(all) all.checked = authDraft.terms && authDraft.privacy && authDraft.age14 && authDraft.marketing;
-    var login = g('auth-password-submit');
-    if(login) login.disabled = !(EMAIL_RE.test((authDraft.email||'').trim()) && (authDraft.password||'').length >= 6);
-    var link = g('auth-submit');
-    if(link) link.disabled = !EMAIL_RE.test((authDraft.email||'').trim());
-  }
-
-  // 로그인 폼은 모달과 첫 화면 두 군데에 있을 수 있다.
-  // 탭(로그인/회원가입)이나 방식(비밀번호/이메일 링크)을 바꾸면 둘 다 다시 그린다.
-  function refreshAuthForms(){
-    captureAuthDraft();
-    var card = document.getElementById('modal-card');
-    if(card && card.innerHTML) card.innerHTML = authModalHtml();
-    var inline = document.getElementById('onboarding-auth');
-    if(inline && inline.offsetParent !== null) inline.innerHTML = authBodyHtml();
-    syncAuthButtons();
-  }
-
   async function handleKakaoSignIn(){
     var hint = document.getElementById('auth-hint');
     if(!sb || !sb.auth || typeof sb.auth.signInWithOAuth !== 'function'){
@@ -1172,6 +1223,46 @@
       if(btn){ btn.disabled = false; }
     }
   }
+
+  var naverSignInPending = false;
+  async function handleNaverSignIn(){
+    var hint = document.getElementById('auth-hint');
+    if(ENV.NAVER_LOGIN !== true){
+      if(hint) hint.textContent = '네이버 로그인 연결을 준비 중이에요. 이메일이나 다른 로그인 방법을 이용해주세요.';
+      return;
+    }
+    if(naverSignInPending) return;
+    if(!sb || !sb.auth || typeof sb.auth.signInWithOAuth !== 'function'){
+      if(hint) hint.textContent = '지금은 네이버 로그인을 사용할 수 없어요.';
+      return;
+    }
+    var btn = document.getElementById('naver-signin-btn');
+    naverSignInPending = true;
+    if(btn){ btn.disabled = true; btn.textContent = '네이버로 이동 중...'; }
+    if(hint) hint.textContent = '';
+    try{
+      // Client Secret 및 토큰 교환은 Supabase에서만 처리한다. 브라우저에 넣지 않는다.
+      // 네이버 discovery가 공개한 scope만 사용한다(email scope는 지원 목록에 없음).
+      // ?naver_reprompt=1 로 열면 네이버가 동의 화면을 다시 보여준다 (이미 동의한 계정의 검수 캡처·제공 항목 추가 때)
+      var naverOpts = { redirectTo: authCallbackUrl(), scopes: 'openid profile' };
+      if(/[?&]naver_reprompt=1(?:&|$)/.test(location.search)) naverOpts.queryParams = { auth_type: 'reprompt' };
+      var res = await sb.auth.signInWithOAuth({ provider: 'custom:naver', options: naverOpts });
+      if(!res || res.error) throw new Error('naver-oauth-start-failed');
+      // 인증 페이지로 이동한다. 재시도 가능한 오류 외에는 중복 요청을 허용하지 않는다.
+    }catch(e){
+      naverSignInPending = false;
+      if(hint) hint.textContent = '네이버 로그인을 시작하지 못했어요. 잠시 후 다시 시도하거나 다른 로그인 방법을 이용해주세요.';
+      if(btn){ btn.disabled = false; btn.innerHTML = naverButtonLabelHtml(); }
+    }
+  }
+
+  // 외부 인증 화면에서 뒤로 돌아온 bfcache 화면에 '이동 중' 상태를 남기지 않는다.
+  window.addEventListener('pageshow', function(e){
+    if(!e.persisted) return;
+    naverSignInPending = false;
+    var btn = document.getElementById('naver-signin-btn');
+    if(btn && ENV.NAVER_LOGIN === true){ btn.disabled = false; btn.innerHTML = naverButtonLabelHtml(); }
+  });
 
   async function handlePasswordAuth(){
     var emailEl = document.getElementById('auth-email');
@@ -1531,7 +1622,7 @@
                 '<span class="helper">' + escapeHtml(a.trial_key || '') + ' · ' + escapeHtml(a.region || '') + '</span>' +
               '</div>' +
               '<span class="helper" data-app-pii="' + a.id + '">' +
-                escapeHtml(a.contact_masked || '***') + ' · ' + escapeHtml(a.address_masked || '***') + '</span>' +
+                escapeHtml(a.name_masked || '***') + ' · ' + escapeHtml(a.contact_masked || '***') + ' · ' + escapeHtml(a.address_masked || '***') + '</span>' +
               '<div class="row" style="align-items:center; gap:8px;">' +
                 '<span class="helper" style="flex:1;">파기 예정 ' + escapeHtml(String(a.purge_after || '-')) + '</span>' +
                 '<button type="button" class="btn-ghost" style="flex:0 0 auto; height:32px; padding:0 12px; font-size:12px;" data-reveal-pii="' + a.id + '">배송지 열기</button>' +
@@ -2278,42 +2369,6 @@
     return rows;
   }
 
-  // 내 글에만 붙는 상태 배지. 반려된 글도 작성자에게는 보여야 지울 수 있다.
-  function myStatusBadge(row){
-    if(!row.mine) return '';
-    if(row.status === 'pending')  return ' <span class="badge-match">검수 중</span>';
-    if(row.status && row.status !== 'approved') return ' <span class="badge-match">게시 안 됨</span>';
-    return '';
-  }
-
-  // 내 글인지는 서버의 owner_id 로 판단한다.
-  // 기기 목록(state.myPosts / state.myEntries)만 보면, 저장소를 지우거나 다른 기기에서
-  // 열었을 때 내 글인데도 '삭제' 대신 '신고' 가 떠서 자기 글을 못 지운다.
-  // 로그인 전에 쓴 글이나 '나만 보기' 항목은 서버에 owner_id 가 없으므로 기기 목록을 함께 본다.
-  function isMineRow(ownerId, id, localList){
-    if(authUser && ownerId && ownerId === authUser.id) return true;
-    return localList.indexOf(id) > -1;
-  }
-
-  // 승인된 것만 가져오면 내가 쓴 검수 대기·반려 글이 다른 기기에서는 아예 안 보인다.
-  // 안 보이면 지울 수도 없다. 내 것은 상태와 상관없이 가져온다.
-  // (RLS 가 '본인 것' 만 내주므로 남의 대기글은 여전히 안 보인다.)
-  async function fetchOwnUnapproved(table){
-    if(!sb || !authUser) return [];
-    try{
-      var res = await sb.from(table).select('*')
-        .eq('owner_id', authUser.id).neq('status', 'approved')
-        .order('created_at', {ascending:false}).limit(50);
-      return (res.error || !Array.isArray(res.data)) ? [] : res.data;
-    }catch(e){ return []; }
-  }
-
-  function newestFirst(rows){
-    return rows.sort(function(a,b){
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-    });
-  }
-
   // ---------- 반응(응원·좋아요) ----------
   // P0-03: 숫자를 직접 증감하는 increment_* RPC 를 쓰지 않는다.
   // (대상, 사용자) 행을 entry_votes / post_likes 에 넣거나 지우고,
@@ -2359,6 +2414,42 @@
       if(r.error || !r.data) return null;
       return r.data.map(function(x){ return x[col]; });
     }catch(e){ return null; }
+  }
+
+  // 내 글에만 붙는 상태 배지. 반려된 글도 작성자에게는 보여야 지울 수 있다.
+  function myStatusBadge(row){
+    if(!row.mine) return '';
+    if(row.status === 'pending')  return ' <span class="badge-match">검수 중</span>';
+    if(row.status && row.status !== 'approved') return ' <span class="badge-match">게시 안 됨</span>';
+    return '';
+  }
+
+  // 내 글인지는 서버의 owner_id 로 판단한다.
+  // 기기 목록(state.myPosts / state.myEntries)만 보면, 저장소를 지우거나 다른 기기에서
+  // 열었을 때 내 글인데도 '삭제' 대신 '신고' 가 떠서 자기 글을 못 지운다.
+  // 로그인 전에 쓴 글이나 '나만 보기' 항목은 서버에 owner_id 가 없으므로 기기 목록을 함께 본다.
+  function isMineRow(ownerId, id, localList){
+    if(authUser && ownerId && ownerId === authUser.id) return true;
+    return localList.indexOf(id) > -1;
+  }
+
+  // 승인된 것만 가져오면 내가 쓴 검수 대기·반려 글이 다른 기기에서는 아예 안 보인다.
+  // 안 보이면 지울 수도 없다. 내 것은 상태와 상관없이 가져온다.
+  // (RLS 가 '본인 것' 만 내주므로 남의 대기글은 여전히 안 보인다.)
+  async function fetchOwnUnapproved(table){
+    if(!sb || !authUser) return [];
+    try{
+      var res = await sb.from(table).select('*')
+        .eq('owner_id', authUser.id).neq('status', 'approved')
+        .order('created_at', {ascending:false}).limit(50);
+      return (res.error || !Array.isArray(res.data)) ? [] : res.data;
+    }catch(e){ return []; }
+  }
+
+  function newestFirst(rows){
+    return rows.sort(function(a,b){
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
   }
 
   async function fetchEntries(){
@@ -3082,7 +3173,7 @@
       }
       body.innerHTML = benefitMineBanner + trialSource.map(function(t){
         var done = state.applied[t.key];
-        var count = state.appliedCount[t.key];
+        var count = Number(state.appliedCount[t.key]) || 0;   // 신청 수를 아직 못 받았으면 0 (예전엔 "undefined / 20명")
         var expired = trialExpired(t);
         var full = count >= t.total || expired;
         var pct = Math.round(count / t.total * 100);
@@ -3101,7 +3192,7 @@
           '<div class="col" style="gap:6px;"><div style="height:6px; border-radius:999px; background:var(--track); overflow:hidden;">' +
           '<div style="height:100%; width:' + pct + '%; background:var(--accent);"></div></div>' +
           '<span style="font-size:11.5px; color:var(--text2);">' + count + ' / ' + t.total + '명 신청</span></div>' +
-          '<button data-open-apply="' + t.key + '" ' + (btnDisabled ? 'disabled' : '') + ' style="height:44px; border-radius:16px; border:none; font-size:14px; font-weight:700; background:' + (btnDisabled ? 'var(--pill-bg)' : 'var(--accent-strong)') + '; color:' + (btnDisabled ? 'var(--text2)' : 'var(--accent-ink)') + ';">' + btnLabel + '</button>' +
+          '<button data-open-apply="' + t.key + '" ' + (btnDisabled ? 'disabled' : '') + ' style="height:44px; border-radius:16px; border:none; font-size:14px; font-weight:700; background:' + (btnDisabled ? 'var(--pill-bg)' : 'var(--btn-grad)') + '; color:' + (btnDisabled ? 'var(--text2)' : 'var(--accent-ink)') + ';">' + btnLabel + '</button>' +
           '</div>';
       }).join('');
     } else {
@@ -3254,7 +3345,7 @@
       var ds = d ? (d.getFullYear() + '.' + ('0'+(d.getMonth()+1)).slice(-2) + '.' + ('0'+d.getDate()).slice(-2)) : '';
       return '<div class="card col" style="gap:9px; padding:16px;">' +
         '<div class="row" style="align-items:center; gap:7px;">' +
-          (n.pinned ? '<span style="font-size:11px; font-weight:800; color:#fff; background:var(--accent-strong); padding:2px 8px; border-radius:999px;">중요</span>' : '') +
+          (n.pinned ? '<span style="font-size:11px; font-weight:800; color:var(--accent-strong); background:var(--accent-soft); padding:2px 8px; border-radius:999px;">중요</span>' : '') +
           '<span style="font-size:14px; font-weight:800; line-height:1.4; flex:1; min-width:0;">' + escapeHtml(n.title || '') + '</span>' +
         '</div>' +
         '<p style="font-size:13.5px; line-height:1.7; color:var(--text2); margin:0; white-space:pre-wrap;">' + escapeHtml(n.body || '') + '</p>' +
@@ -4105,14 +4196,15 @@
     '<h2>1. 수집하는 개인정보 항목 및 수집 방법</h2>' +
     '<table><tr><th>구분</th><th>수집 항목</th><th>수집 시점</th></tr>' +
     '<tr><td>소셜 로그인<br>(카카오·구글)</td><td>이메일 주소, 닉네임, 프로필 사진</td><td>소셜 계정으로 로그인할 때</td></tr>' +
+    '<tr><td>네이버 로그인</td><td>이름, 이메일 주소, 휴대전화번호, 네이버 회원 식별값</td><td>네이버 계정으로 로그인할 때 (이름·휴대전화번호는 체험단 배송정보를 미리 채우는 데 사용)</td></tr>' +
     '<tr><td>이메일 가입</td><td>이메일 주소, 비밀번호(암호화 저장)</td><td>이메일로 가입할 때</td></tr>' +
     '<tr><td>프로필 설정</td><td>닉네임, 거주 지역, 아이의 생년월 또는 출산예정일, 보호자 구분(엄마·아빠·보호자)</td><td>온보딩 단계에서 직접 입력</td></tr>' +
-    '<tr><td>체험단 신청</td><td>연락처, 배송지 주소</td><td>체험단을 신청할 때</td></tr>' +
+    '<tr><td>체험단 신청</td><td>받는 분 이름, 연락처, 배송지 주소</td><td>체험단을 신청할 때</td></tr>' +
     '<tr><td>챌린지 경품 당첨</td><td>받는 분 이름, 연락처, 배송지 주소</td><td>당첨 안내 메일에 회신할 때</td></tr>' +
     '<tr><td>콘텐츠 등록</td><td>게시글·댓글 내용, 첨부한 사진 및 영상</td><td>커뮤니티 글 또는 챌린지 참가작을 올릴 때</td></tr>' +
     '<tr><td>자동 수집</td><td>서비스 이용 기록, 접속 로그</td><td>서비스 이용 과정에서 자동 생성</td></tr></table>' +
     '<div class="note">육아 기록(수유·수면·기저귀 등), 성장곡선, 예방접종, 타임라인 등 개인 기록 기능의 데이터는 서버로 전송되지 않고 <strong>이용자의 기기 내부(브라우저 저장소)에만 저장</strong>됩니다. 회사는 해당 정보를 열람할 수 없습니다.</div>' +
-    '<div class="note"><strong>체험단 배송 정보</strong>(연락처·배송지)는 다른 신청 정보와 <strong>분리된 저장소</strong>에 보관되며, 운영자 화면에서도 기본적으로 가려져 표시됩니다. 배송 등 실제 처리가 필요할 때만 사유를 남기고 열람하며, <strong>열람 기록이 서버에 남습니다.</strong> 신청일로부터 <strong>90일이 지나면 배송 정보는 파기</strong>되고, 신청 이력(닉네임·지역)만 남습니다.</div>' +
+    '<div class="note"><strong>체험단 배송 정보</strong>(받는 분 이름·연락처·배송지)는 다른 신청 정보와 <strong>분리된 저장소</strong>에 보관되며, 운영자 화면에서도 기본적으로 가려져 표시됩니다. 배송 등 실제 처리가 필요할 때만 사유를 남기고 열람하며, <strong>열람 기록이 서버에 남습니다.</strong> 신청일로부터 <strong>90일이 지나면 배송 정보는 파기</strong>되고, 신청 이력(닉네임·지역)만 남습니다.</div>' +
     '<div class="note"><strong>동의 이력</strong>(언제 어떤 항목에 동의·철회했는지)은 별도의 기록으로 서버에 보관됩니다. 이 기록은 추가만 가능하며 사후에 수정·삭제되지 않습니다. 회원 탈퇴 시에는 함께 삭제됩니다.</div>' +
     '<div class="note"><strong>성장 앨범</strong>에 올린 사진은 예외적으로 서버(비공개 저장소)에 보관됩니다. 기기를 바꿔도 사진이 유지되도록 하기 위한 것이며, <strong>본인 계정으로만 열람할 수 있도록 접근이 제한</strong>됩니다. 공개 링크가 생성되지 않고, 다른 이용자는 물론 검색엔진에도 노출되지 않습니다. 회원 탈퇴 시 사진도 함께 삭제됩니다.</div>' +
 
@@ -4129,7 +4221,7 @@
     '<p>원칙적으로 개인정보 수집·이용 목적이 달성되면 지체 없이 파기합니다. 다만 다음의 경우에는 명시한 기간 동안 보관합니다.</p>' +
     '<table><tr><th>구분</th><th>보유 기간</th><th>근거</th></tr>' +
     '<tr><td>회원 정보</td><td>회원 탈퇴 시까지</td><td>서비스 제공</td></tr>' +
-    '<tr><td>체험단 배송 정보<br>(연락처·주소)</td><td>신청일로부터 90일 (매일 자동 파기)</td><td>체험단 선정·배송</td></tr>' +
+    '<tr><td>체험단 배송 정보<br>(이름·연락처·주소)</td><td>신청일로부터 90일 (매일 자동 파기)</td><td>체험단 선정·배송</td></tr>' +
     '<tr><td>챌린지 경품 배송 정보<br>(이름·연락처·주소)</td><td>배송 완료 후 30일</td><td>배송 확인·분실 대응</td></tr>' +
     '<tr><td>계약 또는 청약철회 기록</td><td>5년</td><td>전자상거래법</td></tr>' +
     '<tr><td>소비자 불만·분쟁처리 기록</td><td>3년</td><td>전자상거래법</td></tr>' +
@@ -4147,7 +4239,7 @@
     '<table><tr><th>수탁자</th><th>위탁 업무</th></tr>' +
     '<tr><td>Supabase, Inc.</td><td>회원 인증 처리, 데이터베이스 및 파일 저장소 운영</td></tr>' +
     '<tr><td>GitHub, Inc.</td><td>서비스 웹페이지 호스팅</td></tr>' +
-    '<tr><td>카카오 · Google</td><td>소셜 로그인 인증 처리</td></tr></table>' +
+    '<tr><td>카카오 · Google · 네이버</td><td>소셜 로그인 인증 처리</td></tr></table>' +
 
     '<h2>6. 이용자의 권리와 행사 방법</h2>' +
     '<p>이용자는 언제든지 자신의 개인정보에 대해 열람, 정정, 삭제, 처리정지를 요구할 수 있습니다. 앱 내 MY 화면에서 직접 수정하거나, 아래 연락처로 요청하시면 지체 없이 조치합니다. 만 14세 미만 아동의 개인정보는 수집하지 않습니다.</p>' +
@@ -4403,7 +4495,7 @@
       var row = rr.data[0];
       var box = document.querySelector('[data-app-pii="' + aid + '"]');
       if(box){
-        box.textContent = (row.contact || '(연락처 없음)') + ' · ' + (row.address || '(주소 없음)');
+        box.textContent = (row.recipient_name || '(이름 없음)') + ' · ' + (row.contact || '(연락처 없음)') + ' · ' + (row.address || '(주소 없음)');
         box.style.color = 'var(--text)';
         box.style.fontWeight = '700';
       }
@@ -5031,10 +5123,24 @@
       '<button class="btn-primary" id="post-submit" style="width:100%;" disabled>글 올리기</button>';
   }
 
+  // 네이버 로그인 때 받은 휴대전화(user_metadata.phone, 중계 함수 naver-userinfo). 체험단 연락처 칸을 미리 채우는 데만 쓴다.
+  function knownPhone(){
+    var p = authUser && authUser.meta && authUser.meta.phone;
+    return (typeof p === 'string' && /^[0-9+\- ]{9,20}$/.test(p)) ? p : '';
+  }
+
+  // 네이버 로그인 때 받은 이름(user_metadata.name). 받는 분 이름 칸을 미리 채우는 데만 쓴다.
+  function knownName(){
+    var n = authUser && authUser.meta && authUser.meta.name;
+    return (typeof n === 'string' && n.trim().length <= 30) ? n.trim() : '';
+  }
+
   function applyModalHtml(trial){
     return '<div class="modal-head"><h3 class="display">' + escapeHtml(trial.title) + '</h3><button class="modal-close" data-close-modal aria-label="닫기">✕</button></div>' +
       '<p class="modal-desc">' + escapeHtml(trial.brand) + ' · 마감 ' + trial.deadline + ' · 광고(협찬) 제품이에요.</p>' +
-      '<div class="field"><label for="apply-contact">연락처 *</label><input type="tel" id="apply-contact" inputmode="tel" placeholder="010-0000-0000"></div>' +
+      '<div class="field"><label for="apply-name">받는 분 이름 *</label><input type="text" id="apply-name" autocomplete="name" maxlength="30" placeholder="배송받으실 분 이름" value="' + escapeHtml(knownName()) + '"></div>' +
+      '<div class="field"><label for="apply-contact">연락처 *</label><input type="tel" id="apply-contact" inputmode="tel" placeholder="010-0000-0000" value="' + escapeHtml(knownPhone()) + '">' +
+        (knownPhone() ? '<span class="helper">네이버 계정의 이름·번호를 채워 뒀어요. 다른 분이 받으시면 고쳐 주세요.</span>' : '') + '</div>' +
       '<div class="field"><label for="apply-address">배송지 주소 *</label><input type="text" id="apply-address" placeholder="배송받으실 주소를 입력해주세요"></div>' +
       '<label class="check-row"><input type="checkbox" id="apply-consent"> 배송을 위해 연락처와 주소를 제공하는 것에 동의해요 *</label>' +
       '<label class="check-row"><input type="checkbox" id="apply-consent2"> 브랜드가 제 후기를 광고에 활용하는 것에 동의해요 (선택)</label>' +
@@ -5575,6 +5681,7 @@
     if(e.target.closest('#signup-submit')){ handleSignupSubmit(); return; }
     if(e.target.closest('#kakao-signin-btn')){ handleKakaoSignIn(); return; }
     if(e.target.closest('#google-signin-btn')){ handleGoogleSignIn(); return; }
+    if(e.target.closest('#naver-signin-btn')){ handleNaverSignIn(); return; }
     if(e.target.closest('#auth-submit')){ handleAuthSubmit(); return; }
     if(e.target.closest('#auth-password-submit')){ handlePasswordAuth(); return; }
 
@@ -5839,8 +5946,10 @@
       return;
     }
     var btn = document.getElementById('apply-submit');
+    var nameEl = document.getElementById('apply-name');
     var contactEl = document.getElementById('apply-contact');
     var addressEl = document.getElementById('apply-address');
+    var nameVal = nameEl ? nameEl.value.trim() : '';
     var contactVal = contactEl ? contactEl.value.trim() : '';
     var addressVal = addressEl ? addressEl.value.trim() : '';
     if(btn){ btn.disabled = true; btn.textContent = '접수 중...'; }
@@ -5872,7 +5981,7 @@
         return;
       }
       if(appId){
-        var pii = await sb.from('benefit_applications_pii').insert({ application_id: appId, contact: contactVal, address: addressVal });
+        var pii = await sb.from('benefit_applications_pii').insert({ application_id: appId, recipient_name: nameVal, contact: contactVal, address: addressVal });
         if(pii.error){
           // 배송지가 없으면 당첨돼도 보낼 수가 없다. 신청 자체를 되돌린다.
           console.error('benefit_applications_pii insert error', pii.error);
@@ -5897,12 +6006,13 @@
 
   // ---------- 성장기록 입력 ----------
   function updateApplySubmit(){
+    var name = document.getElementById('apply-name');
     var contact = document.getElementById('apply-contact');
     var address = document.getElementById('apply-address');
     var consent = document.getElementById('apply-consent');
     var btn = document.getElementById('apply-submit');
     if(!btn) return;
-    btn.disabled = !(contact && contact.value.trim() && address && address.value.trim() && consent && consent.checked);
+    btn.disabled = !(name && name.value.trim() && contact && contact.value.trim() && address && address.value.trim() && consent && consent.checked);
   }
 
   function updateGrowthSubmit(){
@@ -6130,7 +6240,7 @@
     }
     if(e.target.id === 'entry-note'){ updateEntrySubmit(); }
     if(e.target.id === 'post-text'){ updatePostSubmit(); }
-    if(e.target.id === 'apply-contact' || e.target.id === 'apply-address'){ updateApplySubmit(); }
+    if(e.target.id === 'apply-name' || e.target.id === 'apply-contact' || e.target.id === 'apply-address'){ updateApplySubmit(); }
     if(e.target.id === 'growth-height' || e.target.id === 'growth-weight'){ updateGrowthSubmit(); }
     if(e.target.id === 'comment-text'){
       var cbtn = document.getElementById('comment-submit');

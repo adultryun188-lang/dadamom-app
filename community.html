@@ -24,7 +24,6 @@
 <!-- 앱(index.html)과 같은 DB·같은 로그인 세션을 쓴다. 키는 index.html 과 같은 공개(anon) 키다. -->
 <script>window.DADAMOM_ENV = { SUPABASE_URL: 'https://hjqchbpxwviengdzvado.supabase.co', SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqcWNoYnB4d3ZpZW5nZHp2YWRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxMzE5NDYsImV4cCI6MjEwNTcwNzk0Nn0.eNnZoYwfKu0ACJeSxHRYnLtCeYBZjKleHLZ03rvPGZE' };</script>
 <script src="./community-flow.js"></script>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&display=swap">
 <style>
   :root{
     --bg:#FFF8F1; --surface:#FFFFFF; --border:#F3E3D3; --line:#F8EEE4;
@@ -360,6 +359,46 @@
   .noti-item .tx{ flex:1; min-width:0; }
   .noti-item .meta{ display:block; font-size:11.5px; color:var(--text3); margin-top:2px; }
 
+  /* ---------- 브랜드관 ---------- */
+  .mall-banners{ display:grid; grid-auto-flow:column; grid-auto-columns:100%; overflow-x:auto; scroll-snap-type:x mandatory; gap:12px; padding:16px 20px; scrollbar-width:none; }
+  .mall-banners::-webkit-scrollbar{ display:none; }
+  .mall-banner{ scroll-snap-align:start; border-radius:18px; min-height:150px; padding:24px; display:flex; flex-direction:column; justify-content:flex-end; gap:6px; color:var(--text); background-size:cover; background-position:center; position:relative; overflow:hidden; }
+  .mall-banner.img{ color:#fff; }
+  .mall-banner.img::before{ content:''; position:absolute; inset:0; background:linear-gradient(180deg,transparent 30%,rgba(0,0,0,.55)); }
+  .mall-banner > *{ position:relative; }
+  .mall-banner b{ font-size:22px; }
+  .mall-banner span{ font-size:14px; opacity:.9; }
+  .mall-sec{ padding:4px 20px 20px; }
+  .mall-sec h2{ font-size:17px; margin:14px 0 10px; display:flex; align-items:center; gap:8px; }
+  .brand-row{ display:flex; gap:12px; overflow-x:auto; padding-bottom:6px; scrollbar-width:thin; }
+  .brand-chip{ flex:0 0 auto; width:92px; display:flex; flex-direction:column; align-items:center; gap:6px; padding:12px 6px; border-radius:16px; border:1px solid var(--border); background:#fff; font-size:12.5px; font-weight:700; color:var(--text); text-align:center; }
+  .brand-chip.on{ background:var(--coral); border-color:var(--coral); color:#fff; }
+  .brand-logo{ width:54px; height:54px; border-radius:50%; background:var(--coral-soft); display:flex; align-items:center; justify-content:center; font-size:22px; overflow:hidden; color:var(--deep); }
+  .brand-logo img{ width:100%; height:100%; object-fit:cover; }
+  .prod-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:14px; }
+  @media (max-width:720px){ .prod-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; } .mall-banner{ min-height:120px; padding:18px; } .mall-banner b{ font-size:18px; } }
+  .prod{ display:flex; flex-direction:column; gap:6px; min-width:0; }
+  .prod .ph{ aspect-ratio:1; border-radius:14px; background:linear-gradient(140deg,var(--coral-soft),#FFF4E4); display:flex; align-items:center; justify-content:center; font-size:40px; overflow:hidden; }
+  .prod .ph img{ width:100%; height:100%; object-fit:cover; }
+  .prod .bn{ font-size:12px; color:var(--text3); }
+  .prod .nm{ font-size:14px; font-weight:700; color:var(--text); line-height:1.35; word-break:keep-all; }
+  .prod .was{ font-size:12px; color:var(--text3); text-decoration:line-through; }
+  .prod .now{ font-size:15px; font-weight:800; color:var(--text); }
+  .prod .pct{ color:var(--deep); margin-right:4px; }
+  .prod .buy{ margin-top:2px; font-size:12.5px; font-weight:700; color:#B03A13; }
+  .prod .deal{ align-self:flex-start; font-size:11px; font-weight:800; color:#fff; background:var(--deep); border-radius:6px; padding:2px 6px; }
+  .mall-note{ font-size:12px; color:var(--text3); padding:0 20px 18px; }
+  .hidden-tag{ font-size:11px; color:#fff; background:#8A8A8A; border-radius:6px; padding:1px 5px; margin-left:4px; }
+  .brand-head{ display:flex; gap:16px; align-items:center; padding:20px; flex-wrap:wrap; }
+  .brand-head .brand-logo{ width:76px; height:76px; font-size:30px; }
+  .ma-list{ list-style:none; margin:0; padding:0; }
+  .ma-list li{ display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--line); font-size:13.5px; }
+  .ma-list li .t{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .ma-form{ display:flex; flex-direction:column; gap:10px; max-height:70vh; overflow:auto; }
+  .ma-form label{ display:flex; flex-direction:column; gap:4px; font-size:12.5px; font-weight:700; color:var(--text2); }
+  .ma-form label.ck{ flex-direction:row; align-items:center; gap:8px; }
+  .ma-form input[type=checkbox]{ width:auto; }
+
   @media (max-width:980px){
     .layout{ grid-template-columns:minmax(0,1fr); }
     .topic-grid{ grid-template-columns:repeat(2,1fr); }
@@ -415,13 +454,238 @@
     .topic-card{ padding:14px 12px; }
   }
   @media (prefers-reduced-motion:reduce){ *{ transition:none !important; scroll-behavior:auto !important; } }
-</style>
 
+  /* =====================================================================
+     디자인 2판 (2026-10-22) — 손글씨 글꼴·이모지 장식·그라데이션을 걷어내고
+     흰 카드 + 얇은 선 + 한 가지 강조색(코랄)으로 정돈. 아래 규칙이 위 규칙을 덮어쓴다.
+     ===================================================================== */
+  :root{
+    --bg:#FFFBF7; --surface:#FFFFFF; --border:#F1E2D8; --line:#F8EEE7;
+    --text:#44362F; --text2:#6B584D; --text3:#78665A;
+    --coral:#F38B69; --coral-soft:#FFF0E7; --deep:#A34429; --action-ink:#773B26;
+    --btn:#FFE0CF; --shadow:0 2px 10px rgba(150,95,60,.035); --shadow-lg:0 8px 24px rgba(150,95,60,.08); --r:20px;
+  }
+  body{ font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif; background:var(--bg); font-size:14.5px; letter-spacing:-.01em; }
+  .display{ font-family:inherit; font-weight:700; letter-spacing:-.02em; }
+  .logo-text{ font-weight:800; font-size:22px; letter-spacing:-.03em; color:var(--text); }
+  .logo-text small{ font-family:inherit; font-weight:500; color:var(--text3); }
+  .top{ background:rgba(255,255,255,.92); border-bottom:1px solid var(--border); }
+  .search{ border-radius:14px; box-shadow:none; background:#FFF8F2; border-color:var(--border); }
+  .search select{ border-radius:8px; background:#fff; color:var(--text2); }
+  .search button{ border-radius:10px; background:var(--btn); color:var(--action-ink); min-height:38px; }
+  .btn{ border-radius:10px; font-weight:600; box-shadow:none; }
+  .btn:hover{ background:#FAF8F6; box-shadow:none; }
+  .btn.primary{ background:var(--btn); border-color:#F1B99E; color:var(--action-ink); box-shadow:none; }
+  .btn.primary:hover{ background:#FFD3BA; transform:none; box-shadow:none; }
+  .btn.soft{ background:var(--coral-soft); color:var(--deep); }
+  .nav-row{ height:52px; gap:2px; }
+  .nav-row a{ border-radius:0; padding:15px 14px 13px; font-weight:600; color:var(--text2); border-bottom:2px solid transparent; }
+  .nav-row a:hover{ background:none; color:var(--text); }
+  .nav-row a.on{ background:#FFF4ED; color:var(--deep); border-bottom-color:var(--coral); border-radius:12px 12px 0 0; }
+  .nav-row .app-link{ border-radius:8px; padding:7px 12px; border:none; background:var(--coral-soft); color:var(--deep); }
+  .panel{ border-radius:var(--r); box-shadow:var(--shadow); }
+  .panel-h{ padding:18px 22px; }
+  .panel-h h1{ font-size:21px; }
+  .panel-h h2{ font-size:16.5px; font-weight:700; }
+  .bubble, .hero-deco{ display:none !important; }
+  body{ background:#FFFBF7; }
+  .more{ font-weight:600; color:var(--text3); }
+  .more:hover{ color:var(--deep); }
+  .chip{ border-radius:8px; font-weight:600; }
+  .chip.on{ background:var(--coral-soft); border-color:#F6C9B8; color:var(--deep); }
+  .tag{ border-radius:6px; font-weight:700; }
+  .list tbody tr:hover{ background:#FAF8F6; }
+  .list .title a:visited{ color:#7A716A; }
+  .pcard{ border-color:var(--border); border-radius:12px; padding:16px 18px; transition:border-color .15s; }
+  .pcard:hover{ border-color:#D9D1C8; transform:none; box-shadow:none; }
+  .pcard .t{ font-weight:700; }
+  .empty .em{ font-size:30px; opacity:.8; }
+  .side li a:hover{ background:#FAF8F6; }
+  .rank{ border-radius:6px; background:#F1EDE8; color:var(--text2); }
+  .side li:nth-child(1) .rank, .side li:nth-child(2) .rank, .side li:nth-child(3) .rank{ background:var(--coral-soft); color:var(--deep); }
+  .me-card{ background:#fff; }
+  .me-card .avatar{ box-shadow:none; background:var(--coral-soft); }
+  .app-card{ background:linear-gradient(150deg,#FFF1E8,#FFF8E2); color:var(--text); border:1px solid #F6E2D3; }
+  .app-card p{ color:var(--text2); }
+  .app-card b, .app-card h2, .app-card h3{ color:var(--text); }
+  .tag.t-공지{ background:var(--coral-soft); color:var(--deep); }
+  .app-card .links a{ background:#fff; border-color:#F1DFD2; color:var(--text); }
+  .app-card .links a:hover{ background:#FFF6F0; }
+  .rank, .stat b{ font-family:inherit; }
+  .gcard{ border-color:var(--border); border-radius:14px; }
+  .gcard:hover{ transform:none; box-shadow:var(--shadow-lg); }
+  .gcard .ph{ background:#F3EEE8; }
+  .cheer{ border-radius:8px; font-weight:700; }
+  .cheer[aria-pressed="true"], .vote button[aria-pressed="true"]{ background:var(--btn); color:var(--action-ink); border-color:#F1B99E; box-shadow:none; }
+  .dday{ background:var(--btn); color:var(--action-ink); border-radius:8px; }
+  .dday.off{ background:#F3EDE6; color:var(--text2); }
+  .pager .on{ background:var(--btn); color:var(--action-ink); }
+  .toast{ background:#FFF7E5; color:var(--text); border:1px solid #EAD5B1; }
+  .brand-chip.on{ background:var(--coral-soft); color:var(--deep); border-color:#F1B99E; }
+  .prod .deal, .bell .badge, .c-item .who .op{ background:var(--btn); color:var(--action-ink); }
+  .mall-banner.img{ color:var(--text); }
+  .mall-banner.img::before{ background:linear-gradient(180deg,rgba(255,251,247,.05),rgba(255,251,247,.96)); }
+  .ocard{ border-color:var(--border); border-radius:12px; }
+  .ocard .em{ background:#EEF6F1; border-radius:12px; }
+  .footer{ background:#fff; border-top:1px solid var(--border); }
+
+  /* 홈: 챌린지 대표 영역 */
+  .feature-ch{ display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,1fr); gap:0; background:linear-gradient(120deg,#FFE9DD 0%,#FFF3DC 55%,#FFF9EC 100%); color:var(--text); border-radius:20px; overflow:hidden; border:1px solid #F8DCCB; }
+  .feature-ch .fc-in{ padding:34px 34px 30px; display:flex; flex-direction:column; gap:14px; justify-content:center; }
+  .feature-ch .lbl{ display:inline-flex; align-self:flex-start; gap:8px; align-items:center; font-size:12.5px; font-weight:700; color:var(--deep); letter-spacing:.02em; }
+  .feature-ch .lbl b{ background:#fff; color:var(--deep); border:1px solid #EDC8B4; border-radius:8px; padding:4px 9px; }
+  .feature-ch h1{ margin:0; font-size:32px; line-height:1.25; letter-spacing:-.03em; }
+  .feature-ch p{ margin:0; color:var(--text2); line-height:1.7; font-size:15px; }
+  .feature-ch .facts{ display:flex; flex-wrap:wrap; gap:8px; }
+  .feature-ch .facts span{ font-size:12.5px; font-weight:600; color:var(--text2); background:rgba(255,255,255,.75); border:1px solid #F3DCCD; border-radius:8px; padding:6px 10px; }
+  .feature-ch .facts span strong{ color:var(--text); }
+  .feature-ch .cta{ display:flex; gap:8px; flex-wrap:wrap; margin-top:4px; }
+  .feature-ch .cta .btn{ border-color:#F0D3C3; background:#fff; color:var(--text); padding:11px 18px; }
+  .feature-ch .cta .btn.primary{ background:var(--btn); border-color:#EAB095; color:var(--action-ink); }
+  .feature-ch .cta .btn:hover{ background:#FFF6F0; }
+  .feature-ch .cta .btn.primary:hover{ background:#FFD3BA; }
+  .feature-ch .mosaic{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); grid-auto-rows:minmax(120px,1fr); gap:10px; min-height:300px; padding:20px; }
+  .feature-ch .mosaic > a, .feature-ch .mosaic > span{ position:relative; display:flex; align-items:center; justify-content:center; overflow:hidden; border-radius:18px; background:rgba(255,255,255,.7); border:1px solid #F1D8C8; color:var(--text2); font-weight:600; line-height:1.5; font-size:13px; text-align:center; padding:14px; min-width:0; }
+  .feature-ch .mosaic img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .feature-ch .mosaic a{ border-style:solid; }
+  .feature-ch .mosaic .v{ position:absolute; left:8px; bottom:8px; z-index:1; font-size:11.5px; font-weight:700; background:rgba(255,255,255,.92); color:var(--deep); border-radius:6px; padding:2px 7px; }
+  .feature-ch .mosaic .fc-invite{ flex-direction:column; gap:12px; background:linear-gradient(160deg,#FFFDF8,#FFF2CB); border-style:dashed; }
+  .feature-ch .fc-invite b{ font-size:18px; font-weight:700; color:var(--text); }
+  .feature-ch .fc-invite small{ color:var(--deep); font-size:12px; }
+  .feature-ch .fc-entry-name{ padding-bottom:20px; font-size:18px; }
+  .feature-ch .fc-entry-name::before{ content:'첫걸음의 주인공'; display:block; margin-bottom:10px; font-size:12px; font-weight:500; color:var(--text2); }
+  .feature-ch .mosaic.is-empty .fc-invite{ grid-column:1/-1; }
+  .home-intro{ display:flex; align-items:center; gap:18px; flex-wrap:wrap; padding:20px 22px; }
+  .home-intro h2{ margin:0; font-size:18px; flex:1 1 280px; }
+  .home-intro h2 em{ font-style:normal; color:var(--deep); }
+  .home-intro .stats{ margin:0; gap:22px; }
+  .home-intro .stat{ background:none; border:none; padding:0; text-align:left; }
+  .home-intro .stat b{ font-size:20px; color:var(--text); }
+  .topic-grid{ gap:10px; }
+  .topic-card{ border:1px solid var(--border); border-radius:16px; padding:18px; box-shadow:none; }
+  .topic-card:hover{ border-color:#D9D1C8; transform:none; box-shadow:none; }
+  .topic-card .em{ display:none; }
+  .topic-card b{ font-family:inherit; font-weight:700; font-size:15.5px; }
+  .topic-card.c-qna{ background:#F0F6FF; border-color:#DBE6F5; } .topic-card.c-brag{ background:#FFF4DF; border-color:#F1DFB7; }
+  .topic-card.c-worry{ background:#F6F1FC; border-color:#E9DFF3; } .topic-card.c-info{ background:#EFF8F1; border-color:#DBEBDC; }
+  .home-mall .prod-grid{ grid-template-columns:repeat(4,minmax(0,1fr)); padding:0 22px 22px; }
+  /* 챌린지 화면 */
+  .ch-hero{ background:linear-gradient(120deg,#FFE9DD 0%,#FFF3DC 60%,#FFF9EC 100%); color:var(--text); padding:30px 30px 26px; }
+  .ch-hero h1{ color:var(--text); font-size:28px; }
+  .ch-hero .helper{ color:var(--text2); font-size:13.5px; }
+  .ch-hero .dday{ background:#fff; color:var(--deep); }
+  .ch-steps{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; padding:18px 22px 4px; }
+  .ch-steps div{ border:1px solid var(--border); border-radius:12px; padding:14px 16px; }
+  .ch-steps b{ display:block; font-size:12px; color:var(--deep); margin-bottom:4px; }
+  .ch-steps span{ font-size:13.5px; color:var(--text2); line-height:1.55; }
+  .ch-steps div:nth-child(1){ background:#FFF7EE; }
+  .ch-steps div:nth-child(2){ background:#FFFBEF; }
+  .ch-steps div:nth-child(3){ background:#F2FAF3; }
+  .skip-link{ position:fixed; top:8px; left:16px; z-index:100; padding:12px 18px; background:#fff; color:var(--deep); border:2px solid var(--deep); border-radius:12px; transform:translateY(-160%); }
+  .skip-link:focus{ transform:translateY(0); }
+  .test-label{ display:block; width:max-content; margin-top:5px; border:1px solid #EDC2AA; background:#FFF4E8; color:#8B4529; font-size:10px; font-weight:700; letter-spacing:.04em; padding:2px 6px; border-radius:5px; }
+  .btn, .chip, .cheer, .pager a, .pager span{ min-height:44px; }
+  input::placeholder, textarea::placeholder{ color:var(--text3); opacity:1; }
+  *:focus-visible{ outline:3px solid var(--deep); outline-offset:3px; }
+  /* 상세·작성·브랜드·나들이·개인 화면도 홈과 같은 밝은 표면을 쓴다. */
+  .panel:has(> .panel-h h1) > .panel-h{ background:linear-gradient(115deg,#FFF3EA,#FFFCF3); }
+  .post-h{ background:linear-gradient(120deg,#FFF2E8,#FFFCF4); padding-block:26px 22px; }
+  .post-meta{ gap:10px 14px; line-height:1.7; }
+  .post-body{ padding-block:30px; }
+  .vote button{ background:#FFF8F1; border:1px solid #EDC8B4; border-radius:18px; box-shadow:none; }
+  .post-act{ background:#FFFCF8; gap:8px; }
+  .link-btn{ display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:8px 12px; }
+  #save-btn[aria-pressed="true"]{ background:#FFF3D6; color:#76531B; }
+  .comments{ background:#FFF8F1; }
+  .comments h2{ padding-block:20px; }
+  .c-item{ background:#FFFEFC; }
+  .c-form{ gap:12px; }
+  .c-form .row{ flex-wrap:wrap; }
+  .c-form .row .btn{ margin-left:auto; }
+  .note{ background:linear-gradient(120deg,#FFF5E8,#FFFBEF); border:1px solid #EEDFC6; }
+  .form{ gap:22px; padding-block:26px; }
+  .form input[type=text], .form textarea, .c-form textarea, .modal-card input, .modal-card textarea, .ma-form select{
+    background:#FFFEFC; border-color:#E6D6CA; font-size:16px; line-height:1.6;
+  }
+  .form input[type=file]{ width:100%; min-height:44px; font-size:14px; color:var(--text2); }
+  .form input[type=file]::file-selector-button{ min-height:44px; padding:8px 14px; margin-right:10px; border:1px solid var(--border); border-radius:10px; background:#FFF0E7; color:var(--action-ink); cursor:pointer; font:inherit; }
+  .form input[type=text]:focus-visible, .form input[type=file]:focus-visible, .form textarea:focus-visible, .c-form textarea:focus-visible, .modal-card input:focus-visible, .modal-card textarea:focus-visible, .ma-form select:focus-visible{
+    outline:2px solid var(--deep); outline-offset:2px; border-color:var(--deep); box-shadow:0 0 0 4px #FFF0E7;
+  }
+  .modal{ background:rgba(101,77,59,.22); }
+  .modal-card{ background:#FFFDF9; border:1px solid #EDDDCF; box-shadow:0 20px 70px rgba(111,76,47,.16); max-height:calc(100vh - 32px); max-height:calc(100dvh - 32px); overflow-y:auto; overscroll-behavior:contain; }
+  .popup-foot button{ min-height:44px; }
+  .lightbox{ background:#FFFDF9 !important; }
+  .lightbox img{ object-fit:contain; }
+  .my-head{ background:linear-gradient(120deg,#FFF0E3,#FFF8DE); }
+  .my-head .avatar{ border:1px solid var(--border); box-shadow:none; }
+  .kid .v{ font-family:inherit; font-weight:700; }
+  .kid{ border:1px solid var(--border); }
+  .brand-head{ background:linear-gradient(120deg,#FFF5E9,#F4FAF1); gap:14px; }
+  .brand-head > div{ min-width:0 !important; flex-basis:180px !important; }
+  .brand-head .brand-logo{ background:#fff; border:1px solid var(--border); }
+  .brand-chip{ border-radius:16px; padding:14px 8px; }
+  .prod{ padding:12px; border:1px solid var(--border); border-radius:18px; background:#FFFEFC; gap:8px; transition:border-color .15s; }
+  .prod:hover{ border-color:#DDAE94; }
+  .prod .ph{ background:linear-gradient(140deg,#FFF0E7,#FFF8E7); border-radius:12px; }
+  .prod .nm{ line-height:1.6; }
+  .prod .buy{ display:flex; align-items:center; min-height:36px; color:var(--deep); }
+  .mall-note{ margin:0 20px 20px; padding:14px 16px; border:1px solid #DCE9D8; border-radius:14px; background:#F5FAF1; color:#4D654C; line-height:1.7; }
+  .hidden-tag{ background:#F2EDE6; color:var(--text2); }
+  .out-list{ gap:16px; }
+  .ocard{ padding:18px; border-radius:18px; background:linear-gradient(120deg,#FFFFFF,#FAFCF6); }
+  .ocard .em{ background:#EDF6E8; }
+  .ocard .d{ line-height:1.75; }
+  .ocard .more{ align-self:flex-start; display:inline-flex; align-items:center; min-height:44px; color:#4D654C; }
+  .empty{ margin:16px; padding:36px 20px; border:1px dashed #EAD6C4; border-radius:18px; background:linear-gradient(130deg,#FFFAF3,#FFFDF7); }
+  .empty .btn{ margin-top:8px; }
+  .gallery > .empty, .out-list > .empty, .post-cards > .empty{ grid-column:1 / -1; }
+  @media (max-width:980px){ .home-mall .prod-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
+  @media (max-width:720px){
+    .feature-ch{ grid-template-columns:1fr; }
+    .feature-ch .fc-in{ padding:24px 20px; }
+    .feature-ch h1{ font-size:25px; }
+    .feature-ch .mosaic{ min-height:140px; padding:0 16px 16px; grid-auto-rows:minmax(135px,1fr); }
+    .feature-ch .fc-in{ gap:12px; }
+    .feature-ch .cta{ display:grid; grid-template-columns:1fr; }
+    .feature-ch .cta .btn{ width:100%; }
+    .feature-ch .fc-invite b{ font-size:16px; }
+    .home-intro{ gap:16px; padding:20px; }
+    .home-intro h2{ flex-basis:100%; line-height:1.55; }
+    .home-intro .stats{ flex:1; gap:16px; }
+    .home-intro .stat span{ white-space:nowrap; }
+    .home-intro > .btn{ width:100%; }
+    .nav-row a{ padding-inline:12px; }
+    .post-cards{ grid-template-columns:minmax(0,1fr); }
+    .pcard .t{ white-space:normal; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+    .ch-steps{ grid-template-columns:1fr; }
+    .ch-hero{ padding:22px 20px; }
+    .ch-hero > .btn{ width:100%; }
+    .post-h{ padding:22px 18px; }
+    .post-body{ padding:24px 18px; }
+    .post-act{ justify-content:flex-start; padding:12px; }
+    .form{ padding:22px 18px; gap:20px; }
+    .form textarea{ min-height:220px; }
+    .modal{ padding:12px; }
+    .modal-card{ padding:22px; max-height:calc(100vh - 24px); max-height:calc(100dvh - 24px); }
+    .popup-hero{ margin:-22px -22px 0; padding:24px 22px 18px; }
+    .brand-head > .btn{ width:100%; }
+    .prod{ padding:10px; border-radius:14px; }
+    .prod .nm{ font-size:13.5px; }
+    .prod .ph{ font-size:32px; }
+    .ocard{ padding:16px; gap:12px; }
+    .ocard .em{ width:44px; height:44px; font-size:28px; }
+    .my-head > .btn{ width:100%; }
+  }
+</style>
+<link rel="stylesheet" href="./rounded-ui.css?v=20261022-4">
+
+<a class="skip-link" href="#main">본문 바로가기</a>
 <header class="top">
   <div class="wrap top-row">
     <a href="#/" class="logo" aria-label="다다맘 커뮤니티 홈">
       <img class="logo-mark" src="./icons/icon-192.png" alt="" aria-hidden="true">
-      <span class="logo-text display">다다맘<small>엄마 아빠 육아 커뮤니티</small></span>
+      <span class="logo-text display">다다맘<small>엄마 아빠 육아 커뮤니티</small><span class="test-label" id="web-test-label" hidden>TEST · 테스트 사이트</span></span>
     </a>
     <form class="search" id="search" role="search">
       <label class="sr" for="q-scope">검색 범위</label>
@@ -436,7 +700,7 @@
 </header>
 
 <div class="wrap layout">
-  <main id="main" class="stack"></main>
+  <main id="main" class="stack" tabindex="-1"></main>
   <aside class="side" id="side">
     <section class="panel" id="side-me"></section>
     <section class="panel"><div class="panel-h"><h2 class="display"><span class="bubble" style="background:#FFE1D6;">🔥</span>주간 인기글</h2></div><ol id="side-hot"><li class="helper" style="padding:10px 20px;">불러오는 중…</li></ol></section>
@@ -479,6 +743,7 @@
     if(fromParam && FROM_RE.test(fromParam) && !localStorage.getItem(FROM_KEY)) localStorage.setItem(FROM_KEY, fromParam);
   }catch(e){}
   var sb = null;
+  if(ENV.SHOW_TEST_BADGE) $('web-test-label').hidden = false;
   try{ sb = window.supabase.createClient(ENV.SUPABASE_URL, ENV.SUPABASE_ANON_KEY); }catch(e){}
 
   var PAGE = 20;
@@ -491,8 +756,9 @@
   var REPORT_REASONS = ['욕설·비방', '음란물·선정성', '광고·스팸', '허위정보', '개인정보 노출', '기타'];
   var NAV = [
     { id:'home',      name:'홈',        href:'#/' },
-    { id:'community', name:'커뮤니티',   href:'#/b/all' },
     { id:'challenge', name:'챌린지',     href:'#/challenge' },
+    { id:'community', name:'커뮤니티',   href:'#/b/all' },
+    { id:'brand',     name:'브랜드관',   href:'#/brand' },
     { id:'outing',    name:'나들이',     href:'#/outing' },
     { id:'my',        name:'마이페이지', href:'#/my' }
   ];
@@ -637,10 +903,13 @@
 
   async function render(){
     var r = route(), s0 = r.seg[0] || '', main = $('main');
+    document.querySelector('.layout').classList.toggle('is-brand', s0 === 'brand');
+    document.querySelector('.layout').classList.toggle('is-social', s0 === '' || s0 === 'b' || s0 === 'mine' || s0 === 'challenge');
+    main.dataset.page = s0 === '' ? 'home' : (s0 === 'b' || s0 === 'mine') ? 'community' : s0;
     if(s0 !== 'p') current = null;
     $('q').value = r.params.get('q') || '';
     $('q-scope').value = r.params.get('f') === 'author' ? 'author' : 'text';
-    var section = s0 === '' ? 'home' : (s0 === 'b' || s0 === 'p' || s0 === 'write') ? 'community'
+    var section = s0 === '' ? 'home' : s0 === 'mall-admin' ? 'brand' : (s0 === 'b' || s0 === 'p' || s0 === 'write') ? 'community'
                 : s0 === 'mine' ? 'my' : s0;
     renderNav(section);
     window.scrollTo(0, 0);
@@ -649,6 +918,8 @@
     if(s0 === 'write') return renderWrite(main);
     if(s0 === 'challenge') return renderChallenge(main);
     if(s0 === 'outing') return renderOuting(main, r.params);
+    if(s0 === 'brand') return renderBrandMall(main, r.seg[1], r.params);
+    if(s0 === 'mall-admin') return renderMallAdmin(main);
     if(s0 === 'my') return renderMy(main);
     if(s0 === 'mine') return renderBoard(main, 'mine', r.params);
     var board = s0 === 'b' && r.seg[1] ? r.seg[1] : 'all';
@@ -684,45 +955,64 @@
   // ---------- 홈 ----------
   async function renderHome(main){
     var greet = user && myName() ? '<em>' + esc(myName()) + '</em>님, 오늘 하루는 어땠나요?' : '육아는 함께할 때 <em>덜 힘들고 더 즐거워요</em>';
+    var left = Math.ceil((new Date(CHALLENGE_DEADLINE + 'T23:59:59') - Date.now()) / 86400000);
+    var open = left >= 0, dd = left > 0 ? 'D-' + left : left === 0 ? 'D-DAY' : '마감';
     main.innerHTML =
-      '<section class="hero">' +
-        '<div class="hero-deco" aria-hidden="true"><span>🍼</span><span>🧸</span><span>🌱</span><span>💛</span></div>' +
-        '<div class="hero-in">' +
-          '<span class="eyebrow">🌼 엄마 아빠들의 수다방</span>' +
-          '<h1 class="display">' + greet + '</h1>' +
-          '<p>' + (user && profileStageText() ? esc(profileStageText()) + ' 또래 부모님들의 이야기를 모아봤어요.' : '임신부터 육아까지, 같은 고민을 하는 부모들과 질문하고 자랑하고 정보를 나눠요.') + '</p>' +
-          '<div class="hero-cta"><a class="btn primary" href="#/write">✏️ 글쓰기</a><a class="btn" href="#/b/best">🔥 인기글 보기</a></div>' +
-          '<div class="stats"><div class="stat"><b id="st-today">–</b><span>오늘 새 글</span></div><div class="stat"><b id="st-week">–</b><span>이번 주 댓글</span></div><div class="stat"><b id="st-all">–</b><span>전체 이야기</span></div></div>' +
+      // 다다맘의 대표 기능인 챌린지를 맨 위에 크게
+      '<section class="feature-ch" aria-labelledby="fc-title">' +
+        '<div class="fc-in">' +
+          '<span class="lbl"><b>' + dd + '</b>다다맘 챌린지</span>' +
+          '<h1 class="display" id="fc-title">첫걸음 <em>챌린지</em></h1>' +
+          '<p>아이의 첫걸음, 사진 한 장으로 남겨요. 참가작마다 또래 부모들의 응원이 모이고, 추첨으로 육아용품을 드려요.</p>' +
+          '<div class="facts"><span>대상 <strong>10~24개월</strong></span><span>마감 <strong>11/30</strong> · 발표 12/3</span><span>경품 <strong>4명</strong> · 2만 원 상당 육아용품</span><span id="fc-count">참가작 –</span></div>' +
+          '<div class="cta">' + (open ? '<a class="btn primary" href="./index.html#challenge">앱에서 참여하기</a>' : '') + '<a class="btn" href="#/challenge">참가작 보고 응원하기</a></div>' +
         '</div>' +
+        '<div class="mosaic" id="home-ch"><span>참가작을 불러오는 중…</span></div>' +
       '</section>' +
+      '<section class="panel home-intro"><h2 class="display">' + greet + '</h2>' +
+        '<div class="stats"><div class="stat"><b id="st-today">–</b><span>오늘 새 글</span></div><div class="stat"><b id="st-week">–</b><span>이번 주 댓글</span></div><div class="stat"><b id="st-all">–</b><span>전체 이야기</span></div></div>' +
+        '<a class="btn primary" href="#/write">글쓰기</a></section>' +
+      '<section class="panel"><div class="panel-h"><h2 class="display">지금 뜨는 이야기</h2><a class="more" href="#/b/best">인기글 더보기 ›</a></div><div class="post-cards" id="home-hot"><div class="helper">불러오는 중…</div></div></section>' +
       '<div class="topic-grid">' + BOARDS.filter(function(b){ return b.topic; }).map(function(b){
         return '<a class="topic-card ' + b.cls + '" href="#/b/' + b.id + '"><span class="em" aria-hidden="true">' + b.em + '</span><b>' + b.name + '</b><span>' + esc(b.desc) + '</span></a>';
       }).join('') + '</div>' +
-      '<section class="panel"><div class="panel-h"><h2 class="display"><span class="bubble" style="background:#FFE1D6;">🔥</span>지금 뜨는 이야기</h2><a class="more" href="#/b/best">더보기 ›</a></div><div class="post-cards" id="home-hot"><div class="helper">불러오는 중…</div></div></section>' +
-      '<section class="panel"><div class="panel-h line"><h2 class="display"><span class="bubble" style="background:#DDF1E6;">🆕</span>새로 올라온 글</h2><a class="more" href="#/b/all">전체보기 ›</a></div><div id="home-new"></div></section>' +
-      '<section class="panel"><div class="panel-h"><h2 class="display"><span class="bubble" style="background:#FFF0C2;">🏆</span>챌린지 참가작</h2><a class="more" href="#/challenge">응원하러 가기 ›</a></div><div class="strip" id="home-ch"></div></section>';
+      '<section class="panel"><div class="panel-h line"><h2 class="display">새로 올라온 글</h2><a class="more" href="#/b/all">전체보기 ›</a></div><div id="home-new"></div></section>' +
+      '<section class="panel home-mall" id="home-mall" hidden><div class="panel-h"><h2 class="display">브랜드관 추천</h2><a class="more" href="#/brand">브랜드관 가기 ›</a></div><div class="prod-grid" id="home-mall-list"></div></section>';
 
     var start = new Date(); start.setHours(0,0,0,0);
     var week = new Date(Date.now() - 7 * 86400000).toISOString();
     Promise.all([
       sb.from('community_posts').select('id', { count:'exact', head:true }).eq('status','approved').gte('created_at', start.toISOString()),
       sb.from('post_comments').select('id', { count:'exact', head:true }).gte('created_at', week),
-      sb.from('community_posts').select('id', { count:'exact', head:true }).eq('status','approved')
+      sb.from('community_posts').select('id', { count:'exact', head:true }).eq('status','approved'),
+      sb.from('challenge_entries').select('id', { count:'exact', head:true }).eq('status','approved')
     ]).then(function(r){
       if($('st-today')) $('st-today').textContent = (r[0].count || 0).toLocaleString();
       if($('st-week')) $('st-week').textContent = (r[1].count || 0).toLocaleString();
       if($('st-all')) $('st-all').textContent = (r[2].count || 0).toLocaleString();
+      if($('fc-count')) $('fc-count').innerHTML = '참가작 <strong>' + (r[3].count || 0).toLocaleString() + '</strong>개';
     });
+
+    var ch = await sb.from('challenge_entries').select('id,name,media_path,votes').eq('status','approved').order('votes', { ascending:false }).order('created_at', { ascending:false }).limit(4);
+    var urls = await signUrls((ch.data || []).map(function(e){ return e.media_path; }));
+    var tiles = (ch.data || []).map(function(e){
+      return '<a href="#/challenge" aria-label="' + esc(e.name || '참가작') + ' 응원 ' + (e.votes || 0) + '">' + (urls[e.media_path] ? '<img src="' + esc(urls[e.media_path]) + '" alt="" loading="lazy">' : '<b class="fc-entry-name">' + esc(e.name || '참가작') + '</b>') + '<span class="v">응원 ' + (e.votes || 0) + '</span></a>';
+    });
+    if(tiles.length < 4 && open) tiles.push('<a class="fc-invite" href="./index.html#challenge"><b>다음 주인공은<br>우리 아이</b><small>사진 한 장으로 참여하기 →</small></a>');
+    if(!tiles.length) tiles.push('<span>공개된 참가작을 기다리고 있어요</span>');
+    if($('home-ch')){ $('home-ch').innerHTML = tiles.join(''); $('home-ch').classList.toggle('is-empty', !(ch.data || []).length); }
 
     var hot = await sb.from('community_posts').select(COLS).eq('status','approved').order('likes', { ascending:false }).order('comments', { ascending:false }).order('created_at', { ascending:false }).limit(4);
     if($('home-hot')) $('home-hot').innerHTML = (hot.data || []).length ? hot.data.map(postCardHtml).join('') : emptyHtml('🌱', '아직 글이 없어요. 첫 이야기를 들려주세요!');
     var rows = await sb.from('community_posts').select(COLS).eq('status','approved').order('created_at', { ascending:false }).limit(8);
     if($('home-new')) $('home-new').innerHTML = (rows.data || []).length ? listTableHtml(rows.data, 'all', 0, rows.data.length, true) : emptyHtml('📝', '아직 글이 없어요.');
-    var ch = await sb.from('challenge_entries').select('id,name,media_path,votes').eq('status','approved').order('votes', { ascending:false }).order('created_at', { ascending:false }).limit(4);
-    var urls = await signUrls((ch.data || []).map(function(e){ return e.media_path; }));
-    if($('home-ch')) $('home-ch').innerHTML = (ch.data || []).length ? ch.data.map(function(e){
-      return '<a href="#/challenge" aria-label="' + esc(e.name || '참가작') + ' 응원 ' + (e.votes || 0) + '">' + (urls[e.media_path] ? '<img src="' + esc(urls[e.media_path]) + '" alt="" loading="lazy">' : '👣') + '<span class="v">💛 ' + (e.votes || 0) + '</span></a>';
-    }).join('') : '<div class="helper" style="grid-column:1/-1; padding:10px 0;">아직 공개된 참가작이 없어요. 앱에서 첫 번째로 참여해 보세요!</div>';
+
+    // 브랜드관 추천 상품 4개 (등록된 게 있을 때만 보인다)
+    var mp = await sb.from('mall_products').select('*').eq('visible', true).order('sort_order', { ascending:true }).limit(8);
+    var mb = await sb.from('mall_brands').select('id,name').eq('visible', true);
+    var bmap = {}; (mb.data || []).forEach(function(b){ bmap[b.id] = b; });
+    var picks = (mp.data || []).filter(function(p){ return bmap[p.brand_id]; }).slice(0, 4);
+    if(picks.length && $('home-mall')){ $('home-mall-list').innerHTML = picks.map(function(p){ return prodHtml(p, bmap[p.brand_id]); }).join(''); $('home-mall').hidden = false; }
   }
 
   function postCardHtml(p){
@@ -807,15 +1097,19 @@
       main.innerHTML = panelMsg('내가 쓴 글', '🔐', '로그인하면 내가 쓴 글과 검수 상태를 볼 수 있어요.', '<button class="btn primary" data-login>로그인</button>');
       return;
     }
-    main.innerHTML = '<section class="panel">' +
-      '<div class="panel-h"><h1 class="display">' + (q ? '🔎 "' + esc(q) + '" 검색 결과' : '<span aria-hidden="true">' + meta.em + '</span> ' + esc(meta.name) + (board === 'all' || board === 'mine' ? '' : ' 게시판')) + '</h1>' +
+    main.innerHTML = '<section class="warm-page community-page">' +
+      '<header class="page-hero community-hero"><div class="page-hero-copy"><span class="mall-eyebrow">다다맘 커뮤니티</span>' +
+        '<h1 class="display">' + (q ? '🔎 "' + esc(q) + '" 검색 결과' : esc(meta.name) + (board === 'all' ? ' 이야기' : board === 'mine' ? '' : ' 게시판')) + '</h1>' +
+        '<p class="page-hero-desc">' + esc(q ? '함께 나눈 이야기에서 궁금한 내용을 찾아보세요.' : meta.desc || '궁금한 일도, 자랑하고 싶은 순간도 함께 나눠요.') + '</p>' +
         '<a class="btn primary" href="#/write' + (meta.topic ? '?t=' + encodeURIComponent(meta.topic) : '') + '">✏️ 글쓰기</a></div>' +
-      (board === 'mine' ? '' : boardTabsHtml(q ? '' : board) + '<div class="sub">' +
+        '<div class="page-hero-art community-art" aria-hidden="true"><span class="chat-note chat-note-back">궁금한 하루</span><span class="chat-note chat-note-front">다정한 답장<span>♡ · ♡ · ♡</span></span></div></header>' +
+      '<section class="panel board-panel" aria-label="이야기 목록">' +
+      (board === 'mine' ? '' : boardTabsHtml(q ? '' : board) + '<div class="sub board-filters"><div class="board-filter-group" role="group" aria-label="아이 시기"><span class="filter-label">아이 시기</span>' +
         STAGES.map(function(s){ return '<a class="chip' + (s.id === stage ? ' on' : '') + '" href="' + boardHref(board, Object.assign({}, keep, { s:s.id })) + '">' + s.name + '</a>'; }).join('') +
-        '<span class="sep" aria-hidden="true"></span>' +
+        '</div><div class="board-filter-group" role="group" aria-label="글 정렬"><span class="filter-label">정렬</span>' +
         SORTS.map(function(s){ return '<a class="chip' + (s.id === sort ? ' on' : '') + '" href="' + boardHref(board, Object.assign({}, keep, { o: s.id === 'new' ? '' : s.id })) + '">' + s.name + '</a>'; }).join('') +
-      '</div>') +
-      '<div id="list-body"><div class="empty">불러오는 중…</div></div></section>';
+      '</div></div>') +
+      '<div id="list-body"><div class="empty">불러오는 중…</div></div></section></section>';
 
     var from = (page - 1) * PAGE;
     var qb = sb.from('community_posts').select(COLS, { count:'exact' });
@@ -1335,12 +1629,17 @@
   async function renderChallenge(main){
     var left = Math.ceil((new Date(CHALLENGE_DEADLINE + 'T23:59:59') - Date.now()) / 86400000);
     var dd = left > 0 ? 'D-' + left : left === 0 ? 'D-DAY' : '마감';
-    main.innerHTML = '<section class="panel">' +
-      '<div class="ch-hero"><div><span class="dday' + (left < 0 ? ' off' : '') + '">' + dd + '</span>' +
-        '<h1 class="display">👣 첫걸음 챌린지</h1><span class="helper">걸음마 사진 한 장과 짧은 메모로 참여해요 · 10~24개월 · <b>참가자 중 4명 추첨, 2만 원 상당 육아용품</b> (11/30 마감 · 12/3 발표)</span></div>' +
-        (left >= 0 ? '<a class="btn primary" href="./index.html#challenge">📸 앱에서 참여하기</a>' : '') + '</div>' +
-      '<div class="sub"><a class="chip on" href="#/challenge" id="ch-sort-new">최신순</a><a class="chip" href="#/challenge" id="ch-sort-pop">응원순</a><span class="helper" id="ch-count" style="margin-left:auto;"></span></div>' +
-      '<div class="gallery" id="gallery"><div class="helper">불러오는 중…</div></div></section>';
+    main.innerHTML = '<section class="warm-page challenge-page">' +
+      '<header class="page-hero ch-hero"><div class="page-hero-copy"><span class="mall-eyebrow">다다맘 챌린지 <span class="dday' + (left < 0 ? ' off' : '') + '">' + dd + '</span></span>' +
+        '<h1 class="display">첫걸음 <em>챌린지</em></h1><p class="page-hero-desc">걸음마 사진 한 장과 짧은 메모로 참여해요.<br>처음의 순간을 함께 남기고 응원해요.</p>' +
+        '<div class="challenge-facts"><span>대상 <b>10~24개월</b></span><span>마감 <b>11/30</b> · 발표 <b>12/3</b></span><span><b>참가자 중 4명 추첨</b> · 2만 원 상당 육아용품</span></div>' +
+        (left >= 0 ? '<a class="btn primary" href="./index.html#challenge">앱에서 참여하기</a>' : '') + '</div>' +
+        '<div class="page-hero-art challenge-art" aria-hidden="true"><div class="first-step-poster"><span class="footprint">👣</span><b>작은 한 걸음,<br>커다란 기쁨.</b><span>첫 순간을 함께 응원해요</span></div></div></header>' +
+      '<section class="challenge-guide" aria-labelledby="challenge-guide-title"><div class="mall-section-head"><h2 id="challenge-guide-title">참여는 이렇게 해요</h2></div>' +
+        '<div class="ch-steps"><div><b>1단계</b><span>아이의 첫걸음 순간을 사진으로 찍어요</span></div><div><b>2단계</b><span>앱의 챌린지 탭에서 사진과 한 줄 메모를 올려요</span></div><div><b>3단계</b><span>검수 후 공개되면 또래 부모들의 응원을 받아요</span></div></div></section>' +
+      '<section class="panel challenge-gallery" aria-labelledby="challenge-gallery-title"><div class="panel-h"><h2 class="display" id="challenge-gallery-title">첫걸음의 주인공들</h2><span class="helper" id="ch-count"></span></div>' +
+      '<nav class="sub" aria-label="참가작 정렬"><a class="chip on" href="#/challenge" id="ch-sort-new">최신순</a><a class="chip" href="#/challenge" id="ch-sort-pop">응원순</a></nav>' +
+      '<div class="gallery" id="gallery"><div class="helper">불러오는 중…</div></div></section></section>';
     loadGallery('new');
   }
 
@@ -1405,6 +1704,210 @@
         (link ? '<a class="more" href="' + esc(link) + '" target="_blank" rel="noopener noreferrer">자세히 보기 ↗</a>' : '') +
       '</div></div>';
     }).join('') : emptyHtml('🧺', '지금 소개할 나들이 정보가 없어요. 곧 새 장소를 모아 올게요!');
+  }
+
+  // ---------- 브랜드관 ----------
+  // 1단계: 다다맘에서 결제하지 않는다. 상품을 보여주고 "구매하러 가기"는 브랜드 스토어로 보낸다.
+  // 브랜드·상품·배너는 관리자가 DB(mall_*)에 등록한다. 숨김 항목은 관리자에게만 보인다(RLS).
+  function won(n){ return n == null ? '' : Number(n).toLocaleString('ko-KR') + '원'; }
+  function brandLogoHtml(b){
+    var u = safeUrl(b && b.logo_url);
+    return '<span class="brand-logo" aria-hidden="true">' + (u ? '<img src="' + esc(u) + '" alt="" loading="lazy">' : esc((b && b.name || '?').replace(/^예시\s*/, '').charAt(0))) + '</span>';
+  }
+  function prodHtml(p, brand){
+    var img = safeUrl(p.image_url), buy = safeUrl(p.buy_url);
+    var sale = p.sale_price != null && p.price != null && p.sale_price < p.price;
+    var pct = sale ? Math.round((1 - p.sale_price / p.price) * 100) : 0;
+    var dealOn = p.is_deal && (!p.deal_until || p.deal_until >= todayISO());
+    return '<a class="prod" href="' + esc(buy || '#/brand') + '"' + (buy ? ' target="_blank" rel="noopener noreferrer sponsored"' : '') + '>' +
+      '<span class="ph">' + (img ? '<img src="' + esc(img) + '" alt="" loading="lazy">' : '<span class="product-placeholder"><svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M15 22h34l4 32H11l4-32Z" fill="rgba(255,255,255,.65)" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><path d="M23 24V17a9 9 0 0 1 18 0v7M25 38c4 4 10 4 14 0" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg><span>상품 사진 준비 중</span></span>') + '</span>' +
+      (dealOn ? '<span class="deal">특가' + (p.deal_until ? ' ~' + esc(p.deal_until.slice(5).replace('-', '/')) : '') + '</span>' : '') +
+      '<span class="bn">' + esc(brand ? brand.name : '') + (p.visible === false ? '<span class="hidden-tag">숨김</span>' : '') + '</span>' +
+      '<span class="nm">' + esc(p.name) + '</span>' +
+      '<span class="product-price">' + (sale ? '<span class="was">' + won(p.price) + '</span><span class="now"><span class="pct">' + pct + '%</span>' + won(p.sale_price) + '</span>'
+            : (p.price != null ? '<span class="now">' + won(p.price) + '</span>' : '')) + '</span>' +
+      '<span class="buy">구매하러 가기 ↗</span></a>';
+  }
+  var MALL_NOTE = '<p class="mall-note">구매·결제·배송은 각 브랜드 스토어에서 진행돼요. 다다맘은 상품을 소개하는 곳이라 판매 당사자가 아니에요.</p>';
+
+  var mallRequest = 0;
+  function mallProductGrid(list, byId){
+    return '<div class="prod-grid mall-products" data-count="' + list.length + '">' + list.map(function(p){ return prodHtml(p, byId[p.brand_id]); }).join('') + '</div>';
+  }
+  async function renderBrandMall(main, brandId, params){
+    var request = ++mallRequest;
+    main.innerHTML = '<section class="panel"><div class="panel-h"><h1 class="display">🛍️ 브랜드관</h1><span class="helper">엄마 아빠가 믿고 고르는 육아 브랜드</span></div><div class="mall-sec"><div class="helper">불러오는 중…</div></div></section>';
+    var res = await Promise.all([
+      sb.from('mall_brands').select('*').order('sort_order', { ascending:true }).order('created_at', { ascending:true }),
+      sb.from('mall_products').select('*').order('sort_order', { ascending:true }).order('created_at', { ascending:true }),
+      brandId ? Promise.resolve({ data:[] }) : sb.from('mall_banners').select('*').order('sort_order', { ascending:true })
+    ]);
+    if(request !== mallRequest || route().seg[0] !== 'brand') return;
+    var brands = res[0].data || [], prods = res[1].data || [], banners = res[2].data || [];
+    var byId = {}; brands.forEach(function(b){ byId[b.id] = b; });
+    prods = prods.filter(function(p){ return byId[p.brand_id]; });
+    var hiddenTag = function(x){ return x.visible === false ? '<span class="hidden-tag">숨김</span>' : ''; };
+
+    if(brandId){
+      var b = byId[brandId];
+      if(!b){ main.innerHTML = panelMsg('브랜드관', '🛍️', '찾는 브랜드가 없어요.', '<a class="btn" href="#/brand">브랜드관으로</a>'); return; }
+      var mine = prods.filter(function(p){ return p.brand_id === b.id; });
+      var store = safeUrl(b.store_url);
+      document.title = b.name + ' · 다다맘 브랜드관';
+      main.innerHTML = '<section class="brand-mall"><div class="mall-brand-detail"><div class="brand-head">' + brandLogoHtml(b) +
+          '<div style="flex:1; min-width:200px;"><h1 class="display" style="margin:0; font-size:22px;">' + esc(b.name) + hiddenTag(b) + '</h1>' +
+          (b.intro ? '<p class="helper" style="margin:6px 0 0; font-size:13.5px;">' + esc(b.intro) + '</p>' : '') + '</div>' +
+          (store ? '<a class="btn primary" href="' + esc(store) + '" target="_blank" rel="noopener noreferrer sponsored">브랜드 스토어 가기 ↗</a>' : '') + '</div>' +
+        '<div class="mall-sec"><h2>상품 ' + mine.length + '개</h2>' +
+          (mine.length ? mallProductGrid(mine, byId) : emptyHtml('🧺', '아직 등록된 상품이 없어요.')) +
+        '</div>' + MALL_NOTE + '<div style="padding:0 24px 24px;"><a class="btn" href="#/brand">← 브랜드관</a></div></div></section>';
+      return;
+    }
+
+    if(!brands.length){
+      main.innerHTML = panelMsg('브랜드관', '🛍️', '곧 엄마 아빠가 믿고 고를 수 있는 브랜드를 모아 열게요!', isAdmin ? '<a class="btn primary" href="#/mall-admin">⚙️ 브랜드 등록하기</a>' : '');
+      return;
+    }
+    var pick = byId[params.get('b')] || null;
+    var today = todayISO();
+    var dealOnly = params.get('tab') === 'deal';
+    var isDeal = function(p){ return p.is_deal && (!p.deal_until || p.deal_until >= today); };
+    var catalog = prods.filter(function(p){ return (!pick || p.brand_id === pick.id) && (!dealOnly || isDeal(p)); });
+    var filterHref = function(id, deal){ var q = new URLSearchParams(); if(id) q.set('b', id); if(deal) q.set('tab','deal'); return '#/brand' + (q.toString() ? '?' + q.toString() : '?tab=catalog'); };
+    var filter = function(label, href, on){ return '<a class="chip' + (on ? ' on' : '') + '" href="' + esc(href) + '"' + (on ? ' aria-current="true"' : '') + '>' + esc(label) + '</a>'; };
+    var bannerHtml = banners.length ? '<div class="mall-banners" aria-label="기획전">' + banners.map(function(n){
+        var img = safeUrl(n.image_url);
+        var link = n.link_url && /^#\//.test(n.link_url) ? n.link_url : safeUrl(n.link_url);
+        var style = img ? 'background-image:url(&quot;' + esc(img) + '&quot;)' : 'background:' + (/^#[0-9A-Fa-f]{6}$/.test(n.bg || '') ? n.bg : 'var(--coral-soft)');
+        var ext = link && !/^#/.test(link);
+        return '<a class="mall-banner' + (img ? ' img' : '') + '" style="' + style + '" href="' + esc(link || '#/brand') + '"' + (ext ? ' target="_blank" rel="noopener noreferrer"' : '') + '>' +
+          '<b class="display">' + esc(n.title) + hiddenTag(n) + '</b>' + (n.subtitle ? '<span>' + esc(n.subtitle) + '</span>' : '') + '</a>';
+      }).join('') + '</div>' : '';
+    main.innerHTML = '<section class="brand-mall" aria-label="다다맘 브랜드관">' +
+      '<header class="mall-hero"><div class="mall-hero-copy"><span class="mall-eyebrow">다다맘 브랜드관</span>' +
+        '<h1 class="display">우리 가족의<br><em>다정한 선택.</em></h1><p>아이와 나의 하루에 필요한 작은 발견.<br>육아 브랜드와 상품을 한곳에서 만나보세요.</p>' +
+        '<div class="mall-hero-actions"><a class="btn primary" href="#/brand?tab=catalog">상품 둘러보기 <span aria-hidden="true">↗</span></a>' +
+          (isAdmin ? '<a class="btn" href="#/mall-admin">브랜드관 관리</a>' : '') + '</div></div>' +
+        '<div class="mall-hero-art" aria-hidden="true"><div class="mall-hero-poster"><img src="./icons/icon-192.png" alt=""><b>소중한 하루를<br>함께 고르다</b><span>DADAMOM SELECT</span></div><span class="mall-hero-sticker">작은 선택, 큰 행복</span></div></header>' +
+      (bannerHtml ? '<section aria-label="브랜드관 소식">' + bannerHtml + '</section>' : '') +
+      '<section aria-labelledby="mall-brands-title"><div class="mall-section-head"><div><h2 id="mall-brands-title">함께하는 브랜드</h2><p>브랜드를 만나고, 우리 가족에게 맞는 상품을 찾아보세요.</p></div><span class="helper">' + brands.length + '개 브랜드</span></div>' +
+        '<div class="brand-directory-grid">' + brands.map(function(b){ return '<a class="brand-card" href="#/brand/' + esc(encodeURIComponent(b.id)) + '">' + brandLogoHtml(b) +
+          '<span class="brand-card-copy"><span class="brand-card-labels">' + (b.is_new ? '<span class="tag">NEW</span>' : '') + (b.is_featured ? '<span class="tag">추천</span>' : '') + '</span><b>' + esc(b.name) + hiddenTag(b) + '</b><span>' + esc(b.intro || '브랜드 상품 만나보기') + '</span></span><span class="brand-card-arrow" aria-hidden="true">↗</span></a>'; }).join('') + '</div></section>' +
+      '<section class="mall-catalog" id="mall-catalog" aria-labelledby="mall-products-title"><div class="mall-section-head"><div><h2 id="mall-products-title">우리 가족을 위한 발견</h2><p>상품을 살펴보고 구매는 각 브랜드 스토어에서 진행해요.</p></div></div>' +
+        '<nav class="mall-filter" aria-label="상품 필터">' + filter('전체 상품',filterHref('',false),!pick && !dealOnly) +
+          brands.map(function(b){return filter(b.name,filterHref(b.id,false),!!pick && b.id===pick.id && !dealOnly);}).join('') +
+          filter('특가 모아보기',filterHref('',true),dealOnly) + '</nav>' +
+        '<div class="mall-catalog-summary"><span>' + esc(dealOnly ? '진행 중인 특가' : pick ? pick.name : '전체 상품') + '</span><span>상품 <b>' + catalog.length + '</b>개</span></div>' +
+        (catalog.length ? mallProductGrid(catalog,byId) : emptyHtml('🧺','조건에 맞는 상품이 아직 없어요.')) + '</section>' + MALL_NOTE + '</section>';
+    if(params.get('tab') === 'deal' || params.get('tab') === 'catalog' || pick) $('mall-catalog').scrollIntoView({block:'start'});
+  }
+
+  // ---------- 브랜드관 관리 (관리자) ----------
+  // 화면은 관리자에게만 열리지만, 실제 쓰기는 DB 정책(mall_*_admin_write, storage 'mall')이 is_admin 으로 막는다.
+  var MALL_FORMS = {
+    brand: { table:'mall_brands', title:'브랜드', fields:[
+      ['name','이름 *','text',40], ['logo_url','로고 그림','image'], ['intro','소개 (300자)','textarea',300], ['store_url','브랜드 스토어 주소 (https://)','url'],
+      ['is_new','신규 브랜드로 표시','check'], ['is_featured','추천 브랜드로 표시','check'], ['visible','공개','check'], ['sort_order','순서 (작을수록 앞)','number'] ] },
+    product: { table:'mall_products', title:'상품', fields:[
+      ['brand_id','브랜드 *','brand'], ['name','상품 이름 *','text',80], ['image_url','상품 사진','image'], ['price','정가 (원)','number'], ['sale_price','할인가 (원, 없으면 비움)','number'],
+      ['buy_url','구매 링크 * (https://)','url'], ['is_deal','특가 코너에 표시','check'], ['deal_until','특가 마감일','date'], ['visible','공개','check'], ['sort_order','순서 (작을수록 앞)','number'] ] },
+    banner: { table:'mall_banners', title:'배너', fields:[
+      ['title','제목 * (40자)','text',40], ['subtitle','설명 (80자)','text',80], ['image_url','배너 그림 (가로로 긴 그림)','image'], ['link_url','누르면 갈 곳 (https:// 또는 #/brand/...)','text',300],
+      ['bg','배경색 (예: #FFE3D6, 그림이 없을 때)','text',7], ['starts_on','시작일','date'], ['ends_on','종료일','date'], ['visible','공개','check'], ['sort_order','순서 (작을수록 앞)','number'] ] }
+  };
+  var mallCache = { brand:[], product:[], banner:[] };
+
+  async function renderMallAdmin(main){
+    if(!isAdmin){ main.innerHTML = panelMsg('브랜드관 관리', '🔐', '관리자만 볼 수 있어요.'); return; }
+    main.innerHTML = '<section class="panel"><div class="panel-h line"><h1 class="display">⚙️ 브랜드관 관리</h1><a class="btn" href="#/brand">브랜드관 보기 ›</a></div><div class="mall-sec"><div class="helper">불러오는 중…</div></div></section>';
+    var res = await Promise.all([
+      sb.from('mall_brands').select('*').order('sort_order', { ascending:true }),
+      sb.from('mall_products').select('*').order('sort_order', { ascending:true }),
+      sb.from('mall_banners').select('*').order('sort_order', { ascending:true })
+    ]);
+    mallCache = { brand: res[0].data || [], product: res[1].data || [], banner: res[2].data || [] };
+    var bname = {}; mallCache.brand.forEach(function(b){ bname[b.id] = b.name; });
+    var row = function(kind, x, label){
+      return '<li><span class="t">' + label + (x.visible === false ? '<span class="hidden-tag">숨김</span>' : '') + '</span>' +
+        '<button class="btn" data-ma-edit="' + kind + ':' + x.id + '">수정</button><button class="btn" data-ma-del="' + kind + ':' + x.id + '">삭제</button></li>';
+    };
+    var sec = function(kind, em, list, label){
+      return '<div class="mall-sec"><h2>' + em + ' ' + MALL_FORMS[kind].title + ' ' + list.length + '개 <button class="btn primary" data-ma-new="' + kind + '" style="margin-left:auto;">+ ' + MALL_FORMS[kind].title + ' 추가</button></h2>' +
+        (list.length ? '<ul class="ma-list">' + list.map(function(x){ return row(kind, x, label(x)); }).join('') + '</ul>' : '<p class="helper">아직 없어요.</p>') + '</div>';
+    };
+    main.innerHTML = '<section class="panel"><div class="panel-h line"><h1 class="display">⚙️ 브랜드관 관리</h1><a class="btn" href="#/brand">브랜드관 보기 ›</a></div>' +
+      '<p class="mall-note" style="padding-top:14px;">상품을 올리기 전에 브랜드를 먼저 추가하세요. 숨김으로 저장하면 관리자에게만 보여요. 그림은 JPG·PNG·WEBP 5MB 까지.</p>' +
+      sec('banner', '🖼️', mallCache.banner, function(n){ return esc(n.title) + (n.ends_on ? ' <span class="helper">~' + esc(n.ends_on) + '</span>' : ''); }) +
+      sec('brand', '🏷️', mallCache.brand, function(b){ return esc(b.name) + (b.is_new ? ' 🆕' : '') + (b.is_featured ? ' ⭐' : ''); }) +
+      sec('product', '🧸', mallCache.product, function(p){ return '<span class="helper">' + esc(bname[p.brand_id] || '?') + '</span> ' + esc(p.name) + ' · ' + won(p.sale_price != null ? p.sale_price : p.price) + (p.is_deal ? ' 🔥' : ''); }) +
+      '</section>';
+  }
+
+  function openMallForm(kind, id){
+    var spec = MALL_FORMS[kind], x = id ? mallCache[kind].filter(function(r){ return r.id === id; })[0] : { visible:true, sort_order:0 };
+    if(!x) return;
+    if(kind === 'product' && !mallCache.brand.length){ alert('브랜드를 먼저 추가하세요.'); return; }
+    var v = function(k){ return x[k] == null ? '' : String(x[k]); };
+    var html = spec.fields.map(function(fd){
+      var k = fd[0], label = fd[1], type = fd[2], max = fd[3];
+      if(type === 'check') return '<label class="ck"><input type="checkbox" name="' + k + '"' + (x[k] ? ' checked' : '') + '> ' + esc(label) + '</label>';
+      if(type === 'textarea') return '<label>' + esc(label) + '<textarea name="' + k + '" maxlength="' + max + '" rows="3">' + esc(v(k)) + '</textarea></label>';
+      if(type === 'brand') return '<label>' + esc(label) + '<select name="' + k + '">' + mallCache.brand.map(function(b){ return '<option value="' + b.id + '"' + (b.id === x[k] ? ' selected' : '') + '>' + esc(b.name) + '</option>'; }).join('') + '</select></label>';
+      if(type === 'image') return '<label>' + esc(label) + '<input type="hidden" name="' + k + '" value="' + esc(v(k)) + '">' +
+        '<span class="ma-img" style="display:flex; gap:8px; align-items:center;">' + (v(k) ? '<img src="' + esc(v(k)) + '" alt="" style="width:56px; height:56px; object-fit:cover; border-radius:10px;">' : '') +
+        '<input type="file" accept="image/jpeg,image/png,image/webp" data-ma-file="' + k + '"></span></label>';
+      var t = type === 'number' ? 'number' : type === 'date' ? 'date' : type === 'url' ? 'url' : 'text';
+      return '<label>' + esc(label) + '<input type="' + t + '" name="' + k + '"' + (max ? ' maxlength="' + max + '"' : '') + (t === 'number' ? ' min="0" step="1"' : '') + ' value="' + esc(v(k)) + '"></label>';
+    }).join('');
+    openModal('<h3 class="display">' + esc(spec.title) + (id ? ' 수정' : ' 추가') + '</h3>' +
+      '<form id="ma-form" class="ma-form" data-kind="' + kind + '" data-id="' + (id || '') + '">' + html +
+      '<span class="helper" id="ma-hint" role="alert"></span>' +
+      '<div style="display:flex; gap:8px; justify-content:flex-end;"><button type="button" class="btn" data-close>취소</button><button class="btn primary" type="submit" id="ma-save">저장</button></div></form>');
+  }
+
+  async function uploadMallImage(input){
+    var file = input.files && input.files[0]; if(!file) return;
+    if(['image/jpeg','image/png','image/webp'].indexOf(file.type) < 0 || file.size > 5242880){ $('ma-hint').textContent = 'JPG·PNG·WEBP 5MB 까지만 올릴 수 있어요'; input.value = ''; return; }
+    $('ma-hint').textContent = '그림 올리는 중…';
+    var path = $('ma-form').getAttribute('data-kind') + '/' + (crypto.randomUUID ? crypto.randomUUID() : Date.now()) + '.' + (file.type.split('/')[1] === 'jpeg' ? 'jpg' : file.type.split('/')[1]);
+    var up = await sb.storage.from('mall').upload(path, file, { contentType: file.type, upsert:false });
+    if(up.error){ $('ma-hint').textContent = '그림을 올리지 못했어요: ' + up.error.message; return; }
+    var url = sb.storage.from('mall').getPublicUrl(path).data.publicUrl;
+    var k = input.getAttribute('data-ma-file');
+    $('ma-form').querySelector('input[name="' + k + '"]').value = url;
+    $('ma-hint').textContent = '그림을 올렸어요. 저장을 눌러야 반영돼요.';
+  }
+
+  async function saveMallForm(e){
+    e.preventDefault();
+    var form = $('ma-form'), kind = form.getAttribute('data-kind'), id = form.getAttribute('data-id'), spec = MALL_FORMS[kind], row = {};
+    spec.fields.forEach(function(fd){
+      var k = fd[0], type = fd[2], el = form.querySelector('[name="' + k + '"]'); if(!el) return;
+      if(type === 'check') row[k] = el.checked;
+      else if(type === 'number'){ var n = el.value.trim(); row[k] = n === '' ? (k === 'sort_order' ? 0 : null) : Math.max(0, parseInt(n, 10) || 0); }
+      else { var t = el.value.trim(); row[k] = t === '' ? null : t; }
+    });
+    var bad = spec.fields.filter(function(fd){ return /\*/.test(fd[1]) && !row[fd[0]]; })[0];
+    if(bad){ $('ma-hint').textContent = fd2label(bad) + ' 을(를) 입력해주세요'; return; }
+    var urlBad = ['store_url','buy_url'].filter(function(k){ return row[k] && !/^https:\/\//.test(row[k]); })[0] || (row.link_url && !/^(https:\/\/|#\/)/.test(row.link_url) ? 'link_url' : '') || (row.bg && !/^#[0-9A-Fa-f]{6}$/.test(row.bg) ? 'bg' : '');
+    if(urlBad){ $('ma-hint').textContent = urlBad === 'bg' ? '배경색은 #FFE3D6 처럼 적어주세요' : '주소는 https:// 로 시작해야 해요'; return; }
+    $('ma-save').disabled = true;
+    var q = id ? sb.from(spec.table).update(row).eq('id', id) : sb.from(spec.table).insert(row);
+    var r = await q.select('id');
+    $('ma-save').disabled = false;
+    // PostgREST 는 RLS 가 막아도 204 라서, 돌아온 행이 있는지로 확인한다
+    if(r.error || !r.data || !r.data.length){ $('ma-hint').textContent = '저장하지 못했어요' + (r.error ? ': ' + r.error.message : ''); return; }
+    closeModal(); renderMallAdmin($('main'));
+  }
+  function fd2label(fd){ return fd[1].replace(/\s*[*(].*$/, ''); }
+
+  async function deleteMall(kind, id){
+    var x = mallCache[kind].filter(function(r){ return r.id === id; })[0]; if(!x) return;
+    var extra = kind === 'brand' ? '\n이 브랜드의 상품도 모두 함께 지워져요.' : '';
+    if(!confirm('"' + (x.name || x.title) + '" 을(를) 지울까요?' + extra)) return;
+    var r = await sb.from(MALL_FORMS[kind].table).delete().eq('id', id).select('id');
+    if(r.error || !r.data || !r.data.length){ alert('지우지 못했어요'); return; }
+    renderMallAdmin($('main'));
   }
 
   // ---------- 마이페이지 ----------
@@ -1619,6 +2122,7 @@
     if(e.target.matches && e.target.matches('img[data-zoom]')){ zoomImage(e.target.src); return; }
     var t = e.target.closest('button, a');
     if(!t){ if(e.target === $('modal')) closeModal(); return; }
+    if(t.classList.contains('skip-link')){ e.preventDefault(); $('main').focus(); return; }
     if(t.hasAttribute('data-login')){ e.preventDefault(); openLogin(); }
     if(t.hasAttribute('data-social')){ socialLogin(t); return; }
     if(t.hasAttribute('data-popup-today')){ try{ localStorage.setItem(POPUP_KEY + t.getAttribute('data-popup-today'), todayISO()); }catch(e){} closeModal(); return; }
@@ -1627,6 +2131,9 @@
     else if(t.id === 'bell-btn'){ openNoti(); }
     else if(t.hasAttribute('data-edit-post')){ openEdit(); }
     else if(t.hasAttribute('data-admin-author')){ editAuthor(); }
+    else if(t.hasAttribute('data-ma-new')){ openMallForm(t.getAttribute('data-ma-new')); }
+    else if(t.hasAttribute('data-ma-edit')){ var me = t.getAttribute('data-ma-edit').split(':'); openMallForm(me[0], me[1]); }
+    else if(t.hasAttribute('data-ma-del')){ var md = t.getAttribute('data-ma-del').split(':'); deleteMall(md[0], md[1]); }
     else if(t.hasAttribute('data-clear-recent')){ try{ localStorage.removeItem(RECENT_KEY); }catch(err){} renderRecent(); }
     else if(t.hasAttribute('data-clear-draft')){ clearDraft(); $('w-title').value = ''; $('w-body').value = ''; $('draft-note').textContent = ''; }
     else if(t.hasAttribute('data-clear-photo')){ $('w-photo').value = ''; $('w-preview').innerHTML = ''; }
@@ -1660,9 +2167,11 @@
     else if(e.target.id === 'cmt-form') submitComment(e);
     else if(e.target.id === 'write-form') submitWrite(e);
     else if(e.target.id === 'login-form') submitLogin(e);
+    else if(e.target.id === 'ma-form') saveMallForm(e);
     else if(e.target.id === 'edit-form') submitEdit(e);
   });
   document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && !$('modal').hidden) closeModal(); });
+  document.addEventListener('change', function(e){ if(e.target.matches && e.target.matches('[data-ma-file]')) uploadMallImage(e.target); });
   // 머리말·사이드의 회원가입도 열어둔 글로 돌아오게 한다.
   document.addEventListener('click', function(e){
     var link = e.target.closest('a[href="./index.html#onboarding"], a[href="./index.html#my"]');
