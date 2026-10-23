@@ -5,7 +5,8 @@
       "namespace": "android_app",
       "package_name": "kr.dadaran.dadamom",
       "sha256_cert_fingerprints": [
-        "BB:F3:C0:45:26:A4:6C:E5:66:19:71:EF:E2:B5:98:39:29:AA:D0:4D:54:F9:0B:F2:DD:93:14:5B:51:2F:A0:4C"
+        "BB:F3:C0:45:26:A4:6C:E5:66:19:71:EF:E2:B5:98:39:29:AA:D0:4D:54:F9:0B:F2:DD:93:14:5B:51:2F:A0:4C",
+        "19:6C:F4:56:62:16:31:6B:7E:7F:74:2A:70:F4:1D:54:C4:75:E1:27:E7:A4:DC:57:C1:41:92:9F:CF:5E:EF:F1"
       ]
     }
   }
