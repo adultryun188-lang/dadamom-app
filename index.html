@@ -727,6 +727,15 @@
         <div class="my-stat"><span class="display" id="my-stat-post">0</span><span>내 게시물</span></div>
       </div>
 
+      <div class="card row" id="my-push-card" style="align-items:center; gap:13px; padding:14px 16px; border-radius:24px;">
+        <span class="my-ico" style="background:var(--w-sun);" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-bell"></use></svg></span>
+        <div class="col" style="flex:1; min-width:0; gap:2px;">
+          <span class="my-row-label">알림 받기</span>
+          <span class="helper" id="my-push-desc" style="margin:0;">내 글 댓글·응원 소식을 바로 알려 드려요</span>
+        </div>
+        <button type="button" data-push-toggle id="my-push-state" class="btn-primary" style="height:40px; min-height:40px; padding:0 16px; font-size:13px; flex:0 0 auto;">켜기</button>
+      </div>
+
       <div class="my-menu">
         <a href="#growth" class="my-row"><span class="my-ico" style="background:var(--w-leaf);" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-notebook-pen"></use></svg></span><span class="my-row-label">육아기록 · 성장</span><svg class="my-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></a>
         <a href="#prep" class="my-row"><span class="my-ico" style="background:var(--w-sun);" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-pen-line"></use></svg></span><span class="my-row-label">출산 준비물 · 선물 장부</span><svg class="my-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></a>
@@ -736,7 +745,6 @@
         <a href="#challenge" data-my-link="challenge" class="my-row"><span class="my-ico" style="background:var(--w-peach);" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-footprints"></use></svg></span><span class="my-row-label">참여이력</span><svg class="my-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></a>
         <a href="#benefit" data-my-link="benefit" class="my-row"><span class="my-ico" style="background:var(--w-sun);" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-gift"></use></svg></span><span class="my-row-label">혜택함</span><span id="my-benefit-badge" class="my-count">0</span></a>
         <button type="button" data-open-saved class="my-row"><span class="my-ico" style="background:var(--w-peach);" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-star"></use></svg></span><span class="my-row-label">스크랩한 글</span><svg class="my-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
-        <button type="button" data-push-toggle class="my-row"><span class="my-ico" style="background:var(--w-sun);" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-bell"></use></svg></span><span class="my-row-label">알림 받기</span><span id="my-push-state" class="helper">꺼짐</span></button>
         <button type="button" data-share-app class="my-row"><span class="my-ico" style="background:var(--w-leaf);" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-mail"></use></svg></span><span class="my-row-label">다다맘 앱 공유하기</span><svg class="my-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
       </div>
 
@@ -783,7 +791,7 @@
               <h1 class="display">육아<em>기록</em></h1>
               <div class="hh-art" aria-hidden="true"><span><svg class="ic" aria-hidden="true"><use href="#i-notebook-pen"></use></svg></span></div>
             </div>
-            <p class="page-hero-desc">돌봄기록·성장곡선·예방접종은 내 계정에 저장돼 휴대폰을 바꿔도 이어져요. 나만 볼 수 있어요.</p>
+            <p class="page-hero-desc">돌봄기록·성장곡선·예방접종은 내 계정에 저장돼 휴대폰을 바꿔도 이어져요. 나만 볼 수 있어요. 가족 공유를 켜면 가족과 함께 봐요.</p>
           </div>
         </header>
       </div>
@@ -939,7 +947,7 @@
     <div class="scroll pad">
       <button type="button" class="link-quiet" data-legal-back style="background:none; border:none; padding:2px 0; font-size:12.5px;">← 돌아가기</button>
       <h1 class="display" style="font-size:20px; margin:8px 0 4px;">개인정보처리방침</h1>
-      <span class="helper">시행일: 2026년 10월 23일</span>
+      <span class="helper">시행일: 2026년 11월 6일 (공지일: 2026년 10월 30일)</span>
       <div class="legal" style="margin-top:16px;" id="policy-body"></div>
       <div id="policy-footer"></div>
     </div>
@@ -1845,6 +1853,7 @@
         '<li>미션 인증 기록과 체험단 신청 내역</li>' +
         '<li>업로드한 사진·영상</li>' +
         '<li>돌봄기록·성장기록·예방접종, 준비물·선물 장부, 찜, 나만 보기 글</li>' +
+        '<li>가족 공유 참여 (마지막 구성원이면 가족 기록도 삭제)</li>' +
       '</ul>' +
       '<div class="field"><label for="delete-confirm-input">계속하려면 <strong>탈퇴</strong> 를 입력해주세요</label>' +
         '<input type="text" id="delete-confirm-input" autocomplete="off" placeholder="탈퇴"></div>' +
@@ -2643,7 +2652,8 @@
       gifts:[],
       growthMetric:'weight',
       vaccines:{},
-      familyCode:'',
+      family:null,          // {id, cursor} — 가족 공유 중일 때만
+      familyOutbox:[],      // 아직 서버에 못 보낸 가족 기록 행
       entries:[],
       posts:[]
     };
@@ -5341,111 +5351,314 @@
     });
   }
 
-  // ---------- 가족과 함께 기록하기 ----------
-  function renderFamily(){
-    var el = document.getElementById('family-body');
-    if(!el) return;
-    if(state.familyCode){
-      el.innerHTML = '<p class="helper">이 코드를 아는 사람은 같은 육아 기록을 볼 수 있어요.</p>' +
-        '<div class="row" style="align-items:center; gap:10px;">' +
-        '<span class="display" style="font-size:22px; letter-spacing:2px; flex:1;">' + escapeHtml(state.familyCode) + '</span>' +
-        '<button type="button" data-family-copy class="btn-ghost" style="height:40px; padding:0 14px; font-size:12.5px;">코드 복사</button></div>' +
-        '<div class="row" style="gap:8px;">' +
-        '<button type="button" data-family-sync class="btn-ghost" style="flex:1; height:40px; font-size:12.5px;">지금 동기화</button>' +
-        '<button type="button" data-family-leave class="btn-ghost" style="flex:1; height:40px; font-size:12.5px; color:var(--accent2);">연결 해제</button></div>';
-    } else {
-      el.innerHTML = '<p class="helper">배우자나 가족과 코드 하나로 수유·수면 기록, 성장기록을 함께 볼 수 있어요.</p>' +
-        '<button type="button" data-family-create class="btn-primary" style="height:44px; font-size:14px;">가족 코드 만들기</button>' +
-        '<div class="row" style="gap:8px; align-items:center;">' +
-        '<input type="text" id="family-join-input" placeholder="받은 코드 입력" maxlength="8" style="flex:1; border:1px solid var(--border); border-radius:14px; padding:12px 14px; background:var(--surface); color:var(--text); text-transform:uppercase;">' +
-        '<button type="button" data-family-join class="btn-ghost" style="height:44px; padding:0 16px; font-size:13px;">연결</button></div>';
-    }
+  // ---------- 가족 공유 (0016 · docs/가족공유_재설계/지시서.md 2절) ----------
+  // 서버: my_family/create_family/join_family/new_family_invite/leave_family/remove_family_member RPC 와
+  //       family_records 표 (구성원만 읽고 씀, 시각·작성자는 서버가 찍음, 삭제는 deleted:true).
+  // 기기: state.family = {id, cursor} (가족 id 와 마지막으로 받은 updated_at),
+  //       state.familyOutbox = [보낼 행] — 먼저 넣고 보낸 뒤 빼서, 실패해도 다음 동기화 때 다시 보낸다.
+  var famInfo = null;          // my_family() 결과 (화면용)
+  var famPulling = null, famPullOwner = null, famLastPull = 0;
+  var famFlushing = null, famFlushOwner = null, famFlushFamily = null;
+  var famRevision = 0, famEdits = Object.create(null);
+  var famLeaving = false, famEpoch = 0, famPullEpoch = 0;
+
+  var FAM_ERRORS = {
+    invalid_code: '코드가 맞지 않거나 만료됐어요. 새 코드를 받아주세요',
+    family_full: '이 가족은 이미 4명이에요',
+    already_in_family: '이미 가족 공유 중이에요. 다른 가족에 참여하려면 먼저 나가주세요',
+    consent_required: '가족 공유 동의가 필요해요',
+    not_owner: '가족을 만든 사람만 구성원을 뺄 수 있어요',
+    not_in_family: '가족 공유 중이 아니에요'
+  };
+  function famErrText(err){
+    var m = (err && err.message) || '';
+    for(var k in FAM_ERRORS){ if(m.indexOf(k) > -1) return FAM_ERRORS[k]; }
+    return '잠시 후 다시 시도해주세요';
   }
 
-  function randomFamilyCode(){
-    var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    var out = '';
-    for(var i=0;i<6;i++) out += chars[Math.floor(Math.random()*chars.length)];
-    return out;
+  function famCode(c){ c = String(c || ''); return c.length === 10 ? c.slice(0,5) + '-' + c.slice(5) : c; }
+  function famWhen(iso){
+    var d = new Date(iso);
+    return (d.getMonth()+1) + '/' + d.getDate() + ' ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
   }
 
-  function familySnapshot(){
-    return {
-      nickname: state.nickname, kidType: state.kidType, dueDate: state.dueDate,
-      birthMonth: state.birthMonth, region: state.region,
-      careLog: state.careLog, growthRecords: state.growthRecords, vaccines: state.vaccines
-    };
+  // 앱 상태 ↔ family_records 행 (지시서 2-3)
+  function famCareRow(c, del){ return { kind:'care', rid:c.id, body:{ type:c.type, ts:c.ts }, deleted:!!del }; }
+  function famGrowthRow(g){ return { kind:'growth', rid:g.id, body:{ ts:g.ts, height:g.height, weight:g.weight }, deleted:false }; }
+  function famVaxRow(vid){ return { kind:'vaccine', rid:vid, body:!!state.vaccines[vid], deleted:false }; }
+  function famAllRows(){
+    return state.careLog.filter(function(c){ return c && c.id; }).map(function(c){ return famCareRow(c); })
+      .concat(state.growthRecords.filter(function(g){ return g && g.id; }).map(famGrowthRow))
+      .concat(Object.keys(state.vaccines || {}).map(famVaxRow));
   }
 
-  function applyFamilySnapshot(data){
-    if(!data) return;
-    ['nickname','kidType','dueDate','birthMonth','region'].forEach(function(k){
-      if(data[k] != null && data[k] !== '') state[k] = data[k];
+  // 기록을 남기거나 지울 때마다 부른다. 가족 공유 중이 아니면 아무것도 안 한다.
+  function famQueue(rows){
+    if(!state.family || !rows || !rows.length) return;
+    rows.forEach(function(r){ famEdits[r.kind + ':' + r.rid] = ++famRevision; });
+    var box = (state.familyOutbox || []).filter(function(o){
+      return !rows.some(function(r){ return r.kind === o.kind && r.rid === o.rid; });
     });
-    if(Array.isArray(data.careLog)) state.careLog = data.careLog;
-    if(Array.isArray(data.growthRecords)) state.growthRecords = data.growthRecords;
-    if(data.vaccines) state.vaccines = data.vaccines;
+    state.familyOutbox = box.concat(rows);
+    save();
+    famFlush();
   }
 
-  function pushFamilySnapshot(){
-    if(!sb || !state.familyCode) return;
-    try{
-      sb.from('families').update({ data: familySnapshot(), updated_at: new Date().toISOString() }).eq('code', state.familyCode).then(function(){});
-    }catch(e){}
-  }
-
-  async function handleFamilyCreate(){
-    var code = randomFamilyCode();
-    if(sb){
-      var res = { error: { message: '가족공유는 재설계 중이라 잠시 중단됐어요' } }; // families 백엔드 차단 상태
-      if(res.error){
-        showToast('가족 코드 생성 실패: ' + (res.error.message || '다시 시도해주세요'));
-        return;
+  function famFlush(){
+    if(famLeaving) return Promise.resolve(false);
+    if(!sb || !authUser || !state.family) return Promise.resolve(true);
+    if(famFlushing && famFlushOwner === state && famFlushFamily === state.family.id) return famFlushing;
+    var owner = state, uid = authUser.id, fid = state.family.id;
+    function current(){ return authUser && authUser.id === uid && state === owner && state.family && state.family.id === fid; }
+    // 같은 기기에서 빠르게 바꿔도 서버 도착 순서가 뒤집히지 않도록 한 번에 하나만 보낸다.
+    var job = Promise.resolve().then(async function(){
+      try{
+        while(current() && !famLeaving && (state.familyOutbox || []).length){
+          var sending = state.familyOutbox.slice(0, 200);
+          var res = await sb.from('family_records').upsert(sending.map(function(r){
+            return { family_id:fid, kind:r.kind, rid:r.rid, body:r.body, deleted:r.deleted };
+          }), { onConflict:'family_id,kind,rid' });
+          if(!current()) return false;
+          if(res && res.error) throw res.error;
+          // 보내는 동안 같은 키가 다시 수정됐다면 새 항목은 보관하고 다음 차례에 보낸다.
+          state.familyOutbox = (state.familyOutbox || []).filter(function(o){ return sending.indexOf(o) === -1; });
+          save();
+        }
+        return true;
+      }catch(e){
+        if(current()){
+          console.warn('[다다맘] 가족 기록 보내기 실패', e);
+          showToast('가족 기록을 보내지 못했어요. 연결되면 다시 보낼게요');
+        }
+        return false;
+      }finally{
+        if(famFlushing === job){ famFlushing = null; famFlushOwner = null; famFlushFamily = null; }
       }
-    }
-    state.familyCode = code;
-    save(); renderFamily();
-    showToast('가족 코드가 만들어졌어요');
+    });
+    famFlushOwner = owner;
+    famFlushFamily = fid;
+    famFlushing = job;
+    return job;
   }
 
-  async function handleFamilyJoin(){
-    var input = document.getElementById('family-join-input');
-    var code = (input.value || '').trim().toUpperCase();
-    if(!code) return;
-    if(!sb){
-      showToast('온라인 상태에서만 연결할 수 있어요');
-      return;
+  function famApply(rows, revision){
+    rows.forEach(function(r){
+      // 실패해서 아직 못 보낸 로컬 수정은 예전 서버 값보다 우선한다.
+      if((state.familyOutbox || []).some(function(o){ return o.kind === r.kind && o.rid === r.rid; })) return;
+      if((famEdits[r.kind + ':' + r.rid] || 0) > revision) return;
+      if(r.kind === 'care'){
+        state.careLog = state.careLog.filter(function(c){ return c.id !== r.rid; });
+        if(!r.deleted && r.body) state.careLog.push({ id:r.rid, type:r.body.type, ts:r.body.ts });
+      } else if(r.kind === 'growth'){
+        state.growthRecords = state.growthRecords.filter(function(g){ return g.id !== r.rid; });
+        if(!r.deleted && r.body) state.growthRecords.push({ id:r.rid, ts:r.body.ts, height:r.body.height, weight:r.body.weight });
+      } else if(r.kind === 'vaccine'){
+        state.vaccines[r.rid] = !r.deleted && r.body === true;
+      }
+    });
+  }
+
+  function famRerender(){
+    renderCareLog(); renderGrowth(); renderVax(); renderTimeline(); renderFamily(); renderHome();
+  }
+
+  // 앱 열 때·로그인 직후·성장 화면 열 때 (지시서 2-4 ②). force 가 아니면 30초에 한 번만.
+  function famPull(force){
+    if(!sb || !authUser || famLeaving) return Promise.resolve();
+    if(famPulling && famPullOwner === state && famPullEpoch === famEpoch) return famPulling;
+    if(!force && Date.now() - famLastPull < 30000) return Promise.resolve();
+    var owner = state, uid = authUser.id, epoch = famEpoch;
+    function current(){ return authUser && authUser.id === uid && state === owner && famEpoch === epoch && !famLeaving; }
+    var job = Promise.resolve().then(async function(){
+      try{
+        var mf = await sb.rpc('my_family');
+        if(!current()) return;
+        if(mf.error){ console.warn('[다다맘] 가족 정보 실패', mf.error); if(state.family) showToast('가족 기록을 불러오지 못했어요. 잠시 후 다시 시도해주세요'); return; }
+        var info = mf.data && typeof mf.data === 'object' ? mf.data : null;
+        if(!info || !info.family_id){
+          famInfo = null;
+          if(state.family){
+            state.family = null; state.familyOutbox = []; save();
+            showToast('가족 공유에서 빠졌어요. 지금까지의 기록은 이 기기에 남아요');
+          }
+          renderFamily();
+          return;
+        }
+        famInfo = info;
+        if(!state.family || state.family.id !== info.family_id){ state.family = { id: info.family_id, cursor: null }; state.familyOutbox = []; save(); }
+        await famFlush();
+        if(!current() || !state.family || state.family.id !== info.family_id) return;
+        // 커서 2분 전부터 다시 받는다 — 같은 시각에 커밋된 행을 놓치지 않게. upsert 라 중복 적용해도 같다.
+        var since = state.family.cursor ? new Date(new Date(state.family.cursor).getTime() - 120000).toISOString() : null;
+        var revision = famRevision, rows = [], last = null;
+        // 시간·종류·id의 고유한 순서로 이어 받는다. 1000행 제한이나 같은 시각의 행에 갇히지 않는다.
+        do{
+          var q = sb.from('family_records').select('kind,rid,body,deleted,updated_at').eq('family_id', info.family_id);
+          if(since) q = q.gte('updated_at', since);
+          if(last){
+            var rid = '"' + last.rid.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
+            q = q.or('updated_at.gt.' + last.updated_at +
+              ',and(updated_at.eq.' + last.updated_at + ',kind.gt.' + last.kind + ')' +
+              ',and(updated_at.eq.' + last.updated_at + ',kind.eq.' + last.kind + ',rid.gt.' + rid + ')');
+          }
+          var rr = await q.order('updated_at', { ascending:true }).order('kind', { ascending:true }).order('rid', { ascending:true }).limit(500);
+          if(!current() || !state.family || state.family.id !== info.family_id) return;
+          if(rr.error){ console.warn('[다다맘] 가족 기록 받기 실패', rr.error); showToast('가족 기록을 불러오지 못했어요. 잠시 후 다시 시도해주세요'); return; }
+          var page = rr.data || [];
+          rows = rows.concat(page);
+          last = page[page.length - 1];
+        }while(page.length === 500);
+        if(rows.length){
+          famApply(rows, revision);
+          state.family.cursor = rows[rows.length - 1].updated_at;
+          save();
+        }
+        famLastPull = Date.now();
+        famRerender();
+      }catch(e){ console.warn('[다다맘] 가족 동기화 실패', e); }
+      finally{ if(famPulling === job){ famPulling = null; famPullOwner = null; } }
+    });
+    famPullOwner = owner;
+    famPullEpoch = epoch;
+    famPulling = job;
+    return job;
+  }
+
+  // 가족 공유는 개인정보처리방침 변경 공지 7일 뒤(2026-11-06)부터 열린다. 테스트 환경은 ENV.FAMILY_OPEN_AT 으로 앞당김.
+  var FAMILY_OPEN = Date.now() >= Date.parse(ENV.FAMILY_OPEN_AT || '2026-11-06T00:00:00+09:00');
+  function renderFamily(){
+    var card = document.getElementById('family-card');
+    var el = document.getElementById('family-body');
+    if(!card || !el) return;
+    // 계정으로 확인하는 기능이라 로그인했을 때만 보인다
+    card.hidden = !(sb && authUser && FAMILY_OPEN);
+    if(card.hidden) return;
+    var btnS = 'height:40px; padding:0 14px; font-size:12.5px;';
+    if(state.family && famInfo){
+      var members = famInfo.members || [];
+      var valid = famInfo.invite_code && famInfo.invite_expires_at && new Date(famInfo.invite_expires_at) > new Date();
+      el.innerHTML = '<p class="helper">가족 ' + members.length + '명이 함께 기록하고 있어요.</p>' +
+        '<div class="col" style="gap:6px;">' + members.map(function(m){
+          return '<div class="row" style="align-items:center; gap:8px; font-size:13.5px;">' +
+            '<span style="flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + escapeHtml(m.nickname || '가족') +
+              (m.is_owner ? ' <span class="badge-match">만든 사람</span>' : '') + (m.is_me ? ' <span class="badge-match">나</span>' : '') + '</span>' +
+            (famInfo.is_owner && !m.is_me ? '<button type="button" class="link-quiet" data-family-remove="' + escapeHtml(m.user_id) + '" data-family-name="' + escapeHtml(m.nickname || '가족') + '" style="background:none; border:none; padding:6px; min-height:36px;">빼기</button>' : '') +
+          '</div>';
+        }).join('') + '</div>' +
+        (valid
+          ? '<div class="col" style="gap:4px;"><span class="helper">초대 코드</span>' +
+              '<div class="row" style="align-items:center; gap:8px; flex-wrap:wrap;"><span class="display" style="font-size:20px; letter-spacing:1px; flex:1;">' + escapeHtml(famCode(famInfo.invite_code)) + '</span>' +
+              '<button type="button" data-family-copy class="btn-ghost" style="' + btnS + '">코드 복사</button></div>' +
+              '<span class="helper">' + famWhen(famInfo.invite_expires_at) + '까지 사용할 수 있어요</span></div>' +
+            '<button type="button" data-family-newcode class="btn-ghost" style="' + btnS + '">새 코드 만들기</button>'
+          : '<div class="row" style="align-items:center; gap:8px;"><span class="helper" style="flex:1;">초대 코드가 만료됐어요.</span>' +
+            '<button type="button" data-family-newcode class="btn-ghost" style="' + btnS + '">새 코드 만들기</button></div>') +
+        '<button type="button" data-family-leave class="link-quiet" style="background:none; border:none; padding:6px 0; color:var(--accent2); text-align:left;">가족 공유 나가기</button>';
+    } else if(state.family){
+      el.innerHTML = '<p class="helper">가족 공유 정보를 불러오는 중이에요…</p>';
+    } else {
+      el.innerHTML = '<p class="helper">배우자나 가족과 수유·수면 기록, 키·몸무게, 예방접종을 함께 기록해요. 최대 4명까지 함께할 수 있어요.</p>' +
+        '<button type="button" data-family-create class="btn-primary" style="height:44px; font-size:14px;">가족 공유 시작하기</button>' +
+        '<div class="row" style="gap:8px; align-items:center;">' +
+        '<input type="text" id="family-join-input" placeholder="받은 초대 코드" maxlength="11" autocomplete="off" style="flex:1; min-width:0; border:1px solid var(--border); border-radius:14px; padding:12px 14px; background:var(--surface); color:var(--text); text-transform:uppercase;">' +
+        '<button type="button" data-family-join class="btn-ghost" style="height:44px; padding:0 16px; font-size:13px;">참여하기</button></div>';
     }
-    var res = await sb.from('families').select('*').eq('code', code).single();
-    if(res.error || !res.data){
-      showToast('코드를 찾을 수 없어요. 다시 확인해주세요');
-      return;
-    }
-    applyFamilySnapshot(res.data.data);
-    state.familyCode = code;
+  }
+
+  // 동의 화면 (지시서 1-3). mode: 'create' | 'join'
+  var famPending = null;
+  function famConsentHtml(){
+    return '<div class="modal-head"><h3 class="display">가족 공유 동의</h3><button class="modal-close" data-close-modal aria-label="닫기">✕</button></div>' +
+      '<ul style="margin:0; padding-left:18px; font-size:13px; line-height:1.7; color:var(--text);">' +
+        '<li><b>공유하는 기록</b>: 수유·수면 기록, 키·몸무게 기록, 예방접종 체크. 성장 앨범 사진은 공유하지 않아요.</li>' +
+        '<li><b>이 기기에 있던 기록</b>도 가족 기록으로 함께 올라가요.</li>' +
+        '<li><b>저장 위치</b>: 다다맘 서버에 저장되고, 같은 가족 구성원(최대 4명)만 볼 수 있어요. 운영자 화면에는 가족 기록을 보는 기능이 없어요.</li>' +
+        '<li><b>보관 기간</b>: 가족 공유를 나가거나 탈퇴할 때까지예요. 내가 남긴 기록은 작성자 표시 없이 가족에게 남고, 마지막 사람이 나가면 가족 기록은 모두 삭제돼요.</li>' +
+        '<li>동의하지 않아도 기록 기능은 이 기기에서 그대로 쓸 수 있어요.</li>' +
+      '</ul>' +
+      '<label class="check-row"><input type="checkbox" id="family-consent-check"><span><b>[필수]</b> 위 내용을 확인했고, 가족 공유를 위해 육아 기록을 서버에 저장하는 데 동의합니다.</span></label>' +
+      '<button type="button" class="btn-primary" id="family-consent-ok" disabled style="width:100%;">동의하고 시작하기</button>' +
+      '<button type="button" class="btn-ghost" data-close-modal style="width:100%;">그만두기</button>';
+  }
+
+  function famStart(mode, code){
+    if(!sb || !authUser){ showToast('로그인하면 가족 공유를 쓸 수 있어요'); return; }
+    if(mode === 'join' && !code){ showToast('받은 초대 코드를 입력해주세요'); return; }
+    famPending = { mode: mode, code: code };
+    openModal(famConsentHtml());
+  }
+
+  async function famConsentOk(btn){
+    if(!famPending) return;
+    btn.disabled = true; btn.textContent = '연결 중…';
+    var p = famPending;
+    // 서버가 가장 최근 동의를 확인한다 — 반드시 만들기·참여 전에 남긴다
+    var cr = await sb.from('consent_records').insert({ kind:'family_share', granted:true, doc_version:'v1' });
+    if(cr.error){ console.warn('[다다맘] 가족 공유 동의 기록 실패', cr.error); showToast('동의를 저장하지 못했어요. 잠시 후 다시 시도해주세요'); btn.disabled = false; btn.textContent = '동의하고 시작하기'; return; }
+    var res = p.mode === 'create' ? await sb.rpc('create_family') : await sb.rpc('join_family', { p_code: p.code });
+    if(res.error){ showToast(famErrText(res.error)); btn.disabled = false; btn.textContent = '동의하고 시작하기'; return; }
+    famPending = null;
+    closeModal();
+    famEpoch++;
+    state.family = { id: res.data.family_id, cursor: null };
+    state.familyOutbox = [];
     save();
-    renderAll((location.hash || '').replace('#',''));
-    showToast('가족 기록에 연결됐어요');
+    // 시작·참여 직후: 이 기기의 기록 전부를 올리고(합집합) 전체를 받는다 (지시서 2-4 ①)
+    famQueue(famAllRows());
+    await famPull(true);
+    showToast(p.mode === 'create' ? '가족 공유를 시작했어요. 초대 코드를 가족에게 보내주세요' : '가족 기록에 연결됐어요');
   }
 
-  async function handleFamilySync(){
-    if(!sb || !state.familyCode) return;
-    var res = await sb.from('families').select('*').eq('code', state.familyCode).single();
-    if(res.error || !res.data){
-      showToast('동기화 실패');
-      return;
+  async function famLeave(){
+    if(famLeaving || !sb || !authUser || !state.family) return;
+    var last = famInfo && (famInfo.members || []).length <= 1;
+    var msg = last
+      ? '가족 공유에서 나갈까요? 마지막 구성원이라 가족 기록이 서버에서 모두 삭제돼요. 이 기기의 기록은 남아요.'
+      : '가족 공유에서 나갈까요? 지금까지의 기록은 이 기기에 남아요. 내가 남긴 기록은 다른 가족에게도 남아요.';
+    if(!window.confirm(msg)) return;
+    var owner = state, uid = authUser.id;
+    function current(){ return authUser && authUser.id === uid && state === owner; }
+    var operation = {};
+    famLeaving = operation; famEpoch++;
+    var btn = document.querySelector('[data-family-leave]');
+    if(btn) btn.disabled = true;
+    try{
+      // 0017 미적용 환경에서 기존의 비원자적 종료를 실행하지 않는다.
+      var version = await sb.rpc('family_privacy_version');
+      if(!current()) return;
+      if(version.error || typeof version.data !== 'number' || version.data < 17) throw new Error('family_privacy_not_ready');
+      // 종료 의사 뒤에는 새 기록을 업로드하지 않는다. 이미 시작한 전송만 마무리한다.
+      if(famFlushing && famFlushOwner === owner) await famFlushing;
+      if(!current()) return;
+      var res = await sb.rpc('leave_family');
+      if(!current()) return;
+      if(res.error || !res.data || !res.data.ok || res.data.consent_revoked !== true) throw (res.error || new Error('family_leave_unconfirmed'));
+      state.family = null; state.familyOutbox = []; famInfo = null; save();
+      showToast('가족 공유에서 나왔어요. 지금까지의 기록은 이 기기에 남아요');
+    }catch(e){
+      if(current()){
+        console.warn('[다다맘] 가족 공유 종료 확인 실패', e);
+        showToast('가족 공유 종료를 확인하지 못했어요. 연결을 확인하고 다시 시도해주세요');
+      }
+    }finally{
+      if(famLeaving === operation) famLeaving = false;
+      if(current()) renderFamily();
     }
-    applyFamilySnapshot(res.data.data);
-    save();
-    pushFamilySnapshot();
-    renderAll((location.hash || '').replace('#',''));
-    showToast('동기화됐어요');
   }
 
-  function handleFamilyLeave(){
-    state.familyCode = '';
-    save(); renderFamily();
-    showToast('가족 연결을 해제했어요');
+  async function famRemove(uid, name){
+    if(!window.confirm(name + '님을 가족에서 뺄까요? 지금 초대 코드는 더 쓸 수 없게 돼요.')) return;
+    var res = await sb.rpc('remove_family_member', { p_user: uid });
+    if(res.error){ showToast(famErrText(res.error)); return; }
+    showToast(name + '님을 가족에서 뺐어요');
+    famPull(true);
+  }
+
+  async function famNewCode(){
+    var res = await sb.rpc('new_family_invite');
+    if(res.error){ showToast(famErrText(res.error)); return; }
+    showToast('새 초대 코드를 만들었어요');
+    famPull(true);
   }
 
   function renderAll(active){
@@ -5508,9 +5721,11 @@
     '<tr><td>체험단 신청</td><td>받는 분 이름, 연락처, 배송지 주소</td><td>체험단을 신청할 때</td></tr>' +
     '<tr><td>챌린지 경품 당첨</td><td>받는 분 이름, 연락처, 배송지 주소</td><td>당첨 안내 메일에 회신할 때</td></tr>' +
     '<tr><td>내 기록</td><td>수유·수면 등 돌봄기록, 키·몸무게, 예방접종 체크, 출산 준비물 체크, 선물 장부(보낸 분·선물·금액), 찜한 상품, 나만 보기 글</td><td>로그인한 상태에서 직접 기록할 때</td></tr>' +
+    '<tr><td>가족 공유 (선택)</td><td>수유·수면 기록과 시각, 키·몸무게와 시각, 예방접종 체크, 가족 그룹·구성원 정보(닉네임·참여 시각), 기록을 마지막으로 고친 계정</td><td>별도 동의 후 가족 공유를 시작하거나 참여할 때, 공유 중 기록할 때</td></tr>' +
     '<tr><td>콘텐츠 등록</td><td>게시글·댓글 내용, 첨부한 사진 및 영상</td><td>커뮤니티 글 또는 챌린지 참가작을 올릴 때</td></tr>' +
     '<tr><td>자동 수집</td><td>서비스 이용 기록, 접속 로그</td><td>서비스 이용 과정에서 자동 생성</td></tr></table>' +
     '<div class="note"><strong>내 기록</strong>(수유·수면 등 돌봄기록, 키·몸무게, 예방접종 체크, 출산 준비물 체크, 선물 장부의 보낸 분·선물·금액, 찜한 상품, \'나만 보기\' 글)은 기기를 바꿔도 이어지도록 <strong>이용자 계정에 연결해 서버에 보관</strong>됩니다. <strong>본인 계정으로만 읽고 쓸 수 있도록 접근이 제한</strong>되며, 다른 이용자와 운영자 화면에는 표시되지 않습니다. 회원 탈퇴 시 함께 삭제됩니다.</div>' +
+    '<div class="note"><strong>가족 공유</strong>는 켜는 사람만 쓰는 선택 기능입니다. 별도로 동의하고 가족 공유를 시작하거나 참여하면 수유·수면·키·몸무게·예방접종 기록이 같은 가족 그룹(최대 4명)에 공유되어 <strong>구성원이 함께 보고 기록</strong>할 수 있습니다. 초대 코드는 24시간 동안만 쓸 수 있으며, 서비스가 실제 가족관계를 확인하지는 않으므로 믿을 수 있는 사람에게만 알려 주세요. 성장 앨범 사진은 공유되지 않습니다. 운영자 화면에는 가족 기록을 보는 기능이 없습니다.</div>' +
     '<div class="note"><strong>체험단 배송 정보</strong>(받는 분 이름·연락처·배송지)는 다른 신청 정보와 <strong>분리된 저장소</strong>에 보관되며, 운영자 화면에서도 기본적으로 가려져 표시됩니다. 배송 등 실제 처리가 필요할 때만 사유를 남기고 열람하며, <strong>열람 기록이 서버에 남습니다.</strong> 신청일로부터 <strong>90일이 지나면 배송 정보는 파기</strong>되고, 신청 이력(닉네임·지역)만 남습니다.</div>' +
     '<div class="note"><strong>동의 이력</strong>(언제 어떤 항목에 동의·철회했는지)은 별도의 기록으로 서버에 보관됩니다. 이 기록은 추가만 가능하며 사후에 수정·삭제되지 않습니다. 회원 탈퇴 시에는 함께 삭제됩니다.</div>' +
     '<div class="note"><strong>성장 앨범</strong>에 올린 사진은 예외적으로 서버(비공개 저장소)에 보관됩니다. 기기를 바꿔도 사진이 유지되도록 하기 위한 것이며, <strong>본인 계정으로만 열람할 수 있도록 접근이 제한</strong>됩니다. 공개 링크가 생성되지 않고, 다른 이용자는 물론 검색엔진에도 노출되지 않습니다. 회원 탈퇴 시 사진도 함께 삭제됩니다.</div>' +
@@ -5521,6 +5736,7 @@
     '<li>아이의 개월 수·임신 주수에 맞춘 정보 제공 등 맞춤형 서비스 제공</li>' +
     '<li>커뮤니티·챌린지 등 이용자 참여형 서비스 운영 및 콘텐츠 검수</li>' +
     '<li>체험단 선정 결과 안내 및 제품 배송, 챌린지 경품 당첨 안내 및 배송</li>' +
+    '<li>이용자가 선택한 가족 구성원과 육아 기록을 함께 기록·동기화 (가족 공유), 가족 공유 동의·종료 이력 관리</li>' +
     '<li>문의 응대 및 공지사항 전달</li>' +
     '</ul>' +
 
@@ -5529,6 +5745,9 @@
     '<table><tr><th>구분</th><th>보유 기간</th><th>근거</th></tr>' +
     '<tr><td>회원 정보</td><td>회원 탈퇴 시까지</td><td>서비스 제공</td></tr>' +
     '<tr><td>내 기록<br>(돌봄·성장·준비물·선물 장부·찜)</td><td>회원 탈퇴 시까지</td><td>기기 변경 시 기록 유지</td></tr>' +
+    '<tr><td>가족 공유 참여 정보</td><td>가족 공유에서 나가거나 빠지거나 회원 탈퇴할 때까지</td><td>가족 공유 제공</td></tr>' +
+    '<tr><td>가족 공유 기록</td><td>다른 구성원이 남아 있으면 가족의 공동 기록으로 남고(나간 사람의 \'마지막으로 고친 계정\' 표시는 지움), 마지막 구성원이 나가면 삭제</td><td>가족 공유 제공</td></tr>' +
+    '<tr><td>가족 공유 동의·종료 이력</td><td>회원 탈퇴 시까지</td><td>동의·철회 처리 확인</td></tr>' +
     '<tr><td>체험단 배송 정보<br>(이름·연락처·주소)</td><td>신청일로부터 90일 (매일 자동 파기)</td><td>체험단 선정·배송</td></tr>' +
     '<tr><td>챌린지 경품 배송 정보<br>(이름·연락처·주소)</td><td>배송 완료 후 30일</td><td>배송 확인·분실 대응</td></tr>' +
     '<tr><td>계약 또는 청약철회 기록</td><td>5년</td><td>전자상거래법</td></tr>' +
@@ -5541,6 +5760,7 @@
     '<li>이용자가 사전에 동의한 경우 (예: 체험단 참여 시 배송을 위해 해당 브랜드에 배송 정보를 전달하는 경우 — 이 경우 신청 단계에서 제공받는 자와 항목을 별도로 안내하고 동의를 받습니다)</li>' +
     '<li>법령에 근거하거나 수사기관이 적법한 절차에 따라 요청한 경우</li>' +
     '</ul>' +
+    '<p>가족 공유를 켠 경우, 해당 기록은 이용자가 초대 코드를 알려 주어 참여한 같은 가족 그룹의 구성원에게 보입니다. 가족 공유에서 나가거나 빠진 계정은 이후 그 가족의 기록을 볼 수 없습니다. 이미 각 기기에 내려받은 기록은 그 기기에 남습니다.</p>' +
 
     '<h2>5. 개인정보 처리의 위탁</h2>' +
     '<p>회사는 서비스 운영을 위해 아래와 같이 개인정보 처리 업무를 위탁하고 있습니다.</p>' +
@@ -5559,7 +5779,10 @@
     '<li>작성한 커뮤니티 글과 댓글</li>' +
     '<li>미션 인증 기록 및 체험단 신청 내역</li>' +
     '<li>업로드한 사진·영상</li>' +
+    '<li>가족 공유 참여 정보와 동의 이력 (마지막 구성원이면 가족 기록도 삭제)</li>' +
     '</ul>' +
+    '<h3>가족 공유 나가기·기록 삭제 요청</h3>' +
+    '<p>MY 화면의 가족 공유에서 언제든 나갈 수 있으며, 다시 참여하려면 새로 동의해야 합니다. 가족 공유 기록 중 내가 남긴 기록의 삭제를 원하시면 <strong>가족 공유에서 나가기 전에</strong> 아래 연락처로 요청해 주세요. 본인 확인 후 지체 없이 처리하고 결과를 알려 드립니다.</p>' +
     '<p>삭제된 정보는 복구할 수 없습니다. 다만 위 3항의 표에 적힌 법령상 보존 의무가 있는 기록(전자상거래법에 따른 계약·청약철회 기록 등)은 해당 기간 동안 분리 보관한 뒤 파기합니다.</p>' +
 
     '<h2>7. 개인정보의 파기</h2>' +
@@ -5688,6 +5911,8 @@
     renderTimeline();
     renderMonthlyAlbum();
     renderAlbum();
+    renderFamily();
+    famPull();
   }
 
   // ---------- ROUTING ----------
@@ -6038,6 +6263,11 @@
     blockedIds = [];
     if(authUser){ fetchBlocks().then(function(){ renderBlockList(); }); touchLastSeen(); }
     state = loadState();
+    famLeaving = false; famEpoch++;
+    famInfo = null;
+    famLastPull = 0;
+    famRevision = 0; famEdits = Object.create(null);
+    if(authUser) setTimeout(function(){ famPull(true); }, 0);
     if(authUser) setTimeout(function(){ appDataPull(); }, 0);
     // 방금 로그인한 사람이 온보딩 화면에 서 있으면 홈으로 보낸다
     // (MY에서 프로필을 고치러 들어온 경우는 로그인 상태가 바뀌지 않으므로 해당 없음)
@@ -6173,7 +6403,7 @@
   }
   // 백그라운드에 며칠 떠 있던 앱(설치형)으로 돌아와도 '앱을 연 것'으로 친다
   document.addEventListener('visibilitychange', function(){
-    if(!document.hidden){ touchLastSeen(); refreshVisibleFeed(); }
+    if(!document.hidden){ touchLastSeen(); famPull(); refreshVisibleFeed(); }
   });
   window.addEventListener('focus', refreshVisibleFeed);
   var lastFeedRefresh = 0;
@@ -6955,7 +7185,7 @@
         state.careLog.push({ id:'c' + Date.now(), type: isSleeping() ? 'sleep_end' : 'sleep_start', ts:Date.now() });
       }
       save(); renderCareLog();
-      if(state.familyCode) pushFamilySnapshot();
+      famQueue([famCareRow(state.careLog[state.careLog.length - 1])]);
       return;
     }
     var growthDel = e.target.closest('[data-growth-del]');
@@ -6974,7 +7204,7 @@
     var careUndo = e.target.closest('[data-care-undo]');
     if(careUndo){
       var lastToday = todayCareLog().slice(-1)[0];
-      if(lastToday){ state.careLog = state.careLog.filter(function(x){ return x !== lastToday; }); save(); renderCareLog(); if(state.familyCode) pushFamilySnapshot(); }
+      if(lastToday){ state.careLog = state.careLog.filter(function(x){ return x !== lastToday; }); save(); renderCareLog(); if(lastToday.id) famQueue([famCareRow(lastToday, true)]); }
       return;
     }
     var peerToggle = e.target.closest('[data-peer-toggle]');
@@ -7031,7 +7261,8 @@
     }
 
     if(e.target.closest('[data-push-toggle]')){
-      if(!pushSupported()){ showToast('이 기기·브라우저는 알림을 지원하지 않아요'); return; }
+      if(pushNeedsAppUpdate()){ showToast('플레이스토어에서 다다맘을 업데이트해 주세요'); window.open('https://play.google.com/store/apps/details?id=kr.dadaran.dadamom', '_blank'); return; }
+      if(!pushSupported()){ showToast('이 브라우저는 알림을 지원하지 않아요. 휴대폰 크롬이나 다다맘 앱에서 켜 주세요'); return; }
       if(!requireLogin('알림 받기')) return;
       if(pushPref('pushToken')) disablePush(); else enablePush(false);
       return;
@@ -7073,7 +7304,7 @@
     if(vaxDone){
       state.vaccines[vaxDone.getAttribute('data-vax-done')] = true;
       save(); renderVax();
-      if(state.familyCode) pushFamilySnapshot();
+      famQueue([famVaxRow(vaxDone.getAttribute('data-vax-done'))]);
       return;
     }
     if(e.target.closest('[data-open-vax-modal]')){
@@ -7087,27 +7318,20 @@
       return;
     }
 
-    if(e.target.closest('[data-family-create]')){
-      handleFamilyCreate();
-      return;
-    }
+    if(e.target.closest('[data-family-create]')){ famStart('create'); return; }
     if(e.target.closest('[data-family-join]')){
-      handleFamilyJoin();
+      var fji = document.getElementById('family-join-input');
+      famStart('join', (fji && fji.value || '').trim());
       return;
     }
-    if(e.target.closest('[data-family-sync]')){
-      handleFamilySync();
-      return;
-    }
-    if(e.target.closest('[data-family-leave]')){
-      handleFamilyLeave();
-      return;
-    }
+    if(e.target.id === 'family-consent-ok'){ famConsentOk(e.target); return; }
+    if(e.target.closest('[data-family-leave]')){ famLeave(); return; }
+    if(e.target.closest('[data-family-newcode]')){ famNewCode(); return; }
+    var famRm = e.target.closest('[data-family-remove]');
+    if(famRm){ famRemove(famRm.getAttribute('data-family-remove'), famRm.getAttribute('data-family-name')); return; }
     if(e.target.closest('[data-family-copy]')){
-      try{
-        navigator.clipboard.writeText(state.familyCode || '');
-        showToast('코드를 복사했어요');
-      }catch(e){}
+      var fc = famInfo ? famCode(famInfo.invite_code) : '';
+      if(navigator.clipboard && fc){ navigator.clipboard.writeText(fc).then(function(){ showToast('코드를 복사했어요'); }, function(){ showToast(fc); }); }
       return;
     }
 
@@ -7672,7 +7896,7 @@
     });
     save();
     closeModal(); renderGrowth();
-    if(state.familyCode) pushFamilySnapshot();
+    famQueue([famGrowthRow(state.growthRecords[state.growthRecords.length - 1])]);
     showToast('성장 기록이 저장됐어요');
   }
 
@@ -7945,6 +8169,7 @@
     }
   });
   document.addEventListener('change', function(e){
+    if(e.target.id === 'family-consent-check'){ var fok = document.getElementById('family-consent-ok'); if(fok) fok.disabled = !e.target.checked; return; }
     if(e.target.id === 'album-file'){
       handleAlbumFiles(e.target.files);
       e.target.value = '';
@@ -7957,7 +8182,7 @@
       save(); renderVax();
       var modalCardEl = document.getElementById('modal-card');
       if(modalCardEl && modalCardEl.contains(vaxCheck)){ modalCardEl.innerHTML = vaxModalHtml(); }
-      if(state.familyCode) pushFamilySnapshot();
+      famQueue([famVaxRow(vid)]);
       return;
     }
     if(e.target.id === 'due-date'){ state.dueDate = e.target.value; save(); renderOnboarding(); }
@@ -7982,9 +8207,23 @@
   function nativePush(){ var C = window.Capacitor; return C && C.isNativePlatform && C.isNativePlatform() && C.Plugins && C.Plugins.PushNotifications; }
   function pushSupported(){ return !!nativePush() || ('serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window && location.protocol === 'https:'); }
   function pushPref(k, v){ try{ if(v === undefined) return localStorage.getItem('dadamom.' + k); if(v === null) localStorage.removeItem('dadamom.' + k); else localStorage.setItem('dadamom.' + k, v); }catch(e){ return null; } }
+  // 알림 기능이 없는 옛 앱(1.1.1 이하). 앱 껍데기(UA)인데 푸시 플러그인이 없다.
+  function pushNeedsAppUpdate(){ return /DadamomAndroid/.test(navigator.userAgent) && !nativePush(); }
   function renderPushState(){
-    var el = document.getElementById('my-push-state');
-    if(el) el.textContent = !pushSupported() ? '이 기기는 지원 안 함' : pushPref('pushToken') ? '켜짐' : '꺼짐';
+    var btn = document.getElementById('my-push-state'), desc = document.getElementById('my-push-desc');
+    if(!btn || !desc) return;
+    var on = !!pushPref('pushToken');
+    if(pushNeedsAppUpdate()){
+      btn.textContent = '앱 업데이트'; btn.className = 'btn-primary';
+      desc.textContent = '앱을 최신 버전으로 업데이트하면 알림을 받을 수 있어요';
+    } else if(!pushSupported()){
+      btn.textContent = '안내'; btn.className = 'btn-ghost';
+      desc.textContent = '이 브라우저에서는 알림을 받을 수 없어요';
+    } else {
+      btn.textContent = on ? '끄기' : '켜기'; btn.className = on ? 'btn-ghost' : 'btn-primary';
+      desc.textContent = on ? '알림이 켜져 있어요 · 댓글·응원 소식을 알려 드려요' : '내 글 댓글·응원 소식을 바로 알려 드려요';
+    }
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
   }
   async function getPushToken(){
     var P = nativePush();
