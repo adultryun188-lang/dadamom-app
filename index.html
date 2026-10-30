@@ -736,6 +736,7 @@
         <a href="#challenge" data-my-link="challenge" class="my-row"><span class="my-ico" style="background:var(--w-peach);" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-footprints"></use></svg></span><span class="my-row-label">참여이력</span><svg class="my-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></a>
         <a href="#benefit" data-my-link="benefit" class="my-row"><span class="my-ico" style="background:var(--w-sun);" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-gift"></use></svg></span><span class="my-row-label">혜택함</span><span id="my-benefit-badge" class="my-count">0</span></a>
         <button type="button" data-open-saved class="my-row"><span class="my-ico" style="background:var(--w-peach);" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-star"></use></svg></span><span class="my-row-label">스크랩한 글</span><svg class="my-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+        <button type="button" data-push-toggle class="my-row"><span class="my-ico" style="background:var(--w-sun);" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-bell"></use></svg></span><span class="my-row-label">알림 받기</span><span id="my-push-state" class="helper">꺼짐</span></button>
         <button type="button" data-share-app class="my-row"><span class="my-ico" style="background:var(--w-leaf);" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-mail"></use></svg></span><span class="my-row-label">다다맘 앱 공유하기</span><svg class="my-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
       </div>
 
@@ -1064,12 +1065,14 @@
           refreshAdminStatus();
           if(prevId !== nextId){ switchStateForAccount(); }
           if(event === 'SIGNED_IN'){ clearAuthDraft(); flushPendingConsents(); showToast('로그인됐어요'); }
+          // 알림을 켜 둔 기기는 로그인한 계정으로 다시 묶는다 (다른 계정이면 그쪽으로 넘어감)
+          if(prevId !== nextId && nextId && pushPref('pushToken')){ setTimeout(function(){ enablePush(true); }, 0); }
         });
       }
     }catch(e){ /* 인증을 지원하지 않는 클라이언트에서도 앱 초기화는 계속 진행 */ }
   }
 
-  var authView = 'code';   // 'code' 이메일 인증번호 · 'password' 비밀번호 로그인
+  var authView = 'password';   // 'password' 비밀번호 로그인(첫 화면) · 'signup' 회원가입 · 'code' 이메일 인증번호
   var authMode = 'login';
 
   function naverButtonLabelHtml(){
@@ -1096,7 +1099,7 @@
           '<span style="font-size:12.5px; font-weight:700;">이 환경에서는 이메일 로그인만 됩니다</span>' +
           '<span class="helper">카카오·구글 로그인은 이 환경에서 꺼져 있어요.</span>' +
         '</div>';
-      return head + socialOff + (authView === 'password' ? authPasswordFormHtml() : authCodeHtml());
+      return head + socialOff + authViewHtml();
     }
 
     var social = ENV.SOCIAL_LOGIN === false ? '' : ''+
@@ -1128,7 +1131,7 @@
     }
     social += '<div class="auth-divider">또는 이메일로</div>';
 
-    return head + social + (authView === 'password' ? authPasswordFormHtml() : authCodeHtml());
+    return head + social + authViewHtml();
   }
 
   // ---------- 이메일 인증번호로 시작하기 (2026-10-28) ----------
@@ -1143,7 +1146,7 @@
           '<span>[필수] <a href="#terms" class="link-quiet">약관</a>·<a href="#policy" class="link-quiet">개인정보 수집</a> 동의 · 만 14세 이상</span></label>' +
         '<button class="btn-primary" id="otp-send" style="width:100%; margin-top:8px;" disabled>인증번호 받기</button>' +
         '<span class="helper" style="text-align:center;">처음이면 바로 가입되고, 가입했던 이메일이면 로그인돼요</span>' +
-        linkBtn('password', '비밀번호로 로그인') +
+        '<div class="row" style="justify-content:center; gap:18px;">' + linkBtn('password', '비밀번호로 로그인') + linkBtn('signup', '회원가입') + '</div>' +
         '<span class="helper" id="auth-hint" role="alert"></span>';
     }
     return '<div class="card col" style="gap:4px; padding:12px 14px; margin-bottom:12px;">' +
@@ -1180,7 +1183,10 @@
     var btn = document.getElementById(resend ? 'otp-resend' : 'otp-send');
     if(btn){ btn.disabled = true; if(!resend) btn.textContent = '보내는 중...'; }
     try{
-      var res = await sb.auth.signInWithOtp({ email: email, options: { shouldCreateUser: true, emailRedirectTo: authCallbackUrl() } });
+      var joining = !!(resend && otpSent && otpSent.type === 'signup');
+      var res = joining
+        ? await sb.auth.resend({ type: 'signup', email: email, options: { emailRedirectTo: authCallbackUrl() } })
+        : await sb.auth.signInWithOtp({ email: email, options: { shouldCreateUser: true, emailRedirectTo: authCallbackUrl() } });
       if(res.error){
         if(hint) hint.textContent = otpErrText(res.error);
         if(btn){ btn.disabled = false; if(!resend) btn.textContent = '인증번호 받기'; }
@@ -1191,7 +1197,7 @@
         try{ localStorage.setItem(PENDING_CONSENT_KEY, JSON.stringify([
           { kind:'signup_terms', granted:true }, { kind:'signup_privacy', granted:true }, { kind:'signup_age14', granted:true }])); }catch(e){}
       }
-      otpSent = { email: email, at: Date.now() };
+      otpSent = { email: email, at: Date.now(), type: joining ? 'signup' : 'email' };
       refreshAuthForms();
       var h2 = document.getElementById('auth-hint');
       if(h2 && resend) h2.textContent = '인증번호를 다시 보냈어요.';
@@ -1213,7 +1219,7 @@
     otpVerifying = true;
     if(btn){ btn.disabled = true; btn.textContent = '확인하는 중...'; }
     try{
-      var res = await sb.auth.verifyOtp({ email: otpSent.email, token: token, type: 'email' });
+      var res = await sb.auth.verifyOtp({ email: otpSent.email, token: token, type: otpSent.type || 'email' });
       if(res.error || !(res.data && res.data.session)){
         if(hint) hint.textContent = otpErrText(res.error || { message: 'invalid' });
         if(btn){ btn.disabled = false; btn.textContent = '확인'; }
@@ -1278,6 +1284,8 @@
     if(link) link.disabled = !EMAIL_RE.test((authDraft.email||'').trim());
     var send = g('otp-send');
     if(send) send.disabled = !(EMAIL_RE.test((authDraft.email||'').trim()) && authDraft.quick);
+    var join = g('join-send');
+    if(join) join.disabled = !(signupStep1Ok() && authDraft.quick);
     var code = g('auth-code'), verify = g('otp-verify');
     if(verify) verify.disabled = !(code && code.value.replace(/\D/g, '').length >= 6);
   }
@@ -1296,13 +1304,60 @@
   // 이메일·비밀번호 폼. 소셜 로그인이 있든 없든 같은 폼을 쓴다.
   // 비밀번호로 가입했던 회원(관리자 등)만 쓰는 로그인. 새 가입은 인증번호(authCodeHtml)로만 받는다.
   // shortcut: 예전 비밀번호 가입 단계(signupHtml 등)는 화면에서 뺐지만 코드는 남겨 둠 — 인증번호 가입이 자리 잡으면 지운다.
+  function authViewHtml(){
+    if(otpSent) return authCodeHtml();   // 번호 입력 화면은 가입·인증번호 로그인이 같이 쓴다
+    if(authView === 'signup') return authJoinHtml();
+    if(authView === 'code') return authCodeHtml();
+    return authPasswordFormHtml();
+  }
+  function authLinkRow(){
+    var b = function(view, text){ return '<button type="button" data-auth-view="' + view + '" class="link-quiet" style="background:none; border:none; padding:2px 0;">' + text + '</button>'; };
+    return '<div class="row" style="justify-content:center; gap:18px; margin-top:12px;">' + b('signup', '회원가입') + b('code', '이메일 인증번호로 로그인') + '</div>';
+  }
   function authPasswordFormHtml(){
     authMode = 'login';
     return '<div class="field"><label for="auth-email">이메일</label><input type="email" id="auth-email" placeholder="you@example.com" autocomplete="email" value="' + escapeHtml(authDraft.email) + '"></div>' +
       '<div class="field"><label for="auth-password">비밀번호</label><input type="password" id="auth-password" autocomplete="current-password" value="' + escapeHtml(authDraft.password) + '"></div>' +
       '<button class="btn-primary" id="auth-password-submit" style="width:100%;" disabled>로그인하기</button>' +
-      '<button type="button" data-auth-view="code" class="link-quiet" style="background:none; border:none; margin-top:10px; padding:2px 0;">이메일 인증번호로 시작하기</button>' +
+      authLinkRow() +
+      '<span class="helper" style="text-align:center;">비밀번호를 잊었다면 이메일 인증번호로 로그인하세요</span>' +
       '<span class="helper" id="auth-hint" role="alert"></span>';
+  }
+  // 회원가입: 이메일·비밀번호 정하기 → 메일로 온 6자리 번호 확인 → 끝 (2026-10-30)
+  function authJoinHtml(){
+    return '<div class="field"><label for="auth-email">이메일</label><input type="email" id="auth-email" placeholder="you@example.com" autocomplete="email" inputmode="email" value="' + escapeHtml(authDraft.email) + '"></div>' +
+      '<div class="field"><label for="auth-password">비밀번호</label><input type="password" id="auth-password" autocomplete="new-password" placeholder="영문·숫자 섞어 8자 이상" value="' + escapeHtml(authDraft.password) + '"></div>' +
+      '<div class="field"><label for="auth-password2">비밀번호 확인</label><input type="password" id="auth-password2" autocomplete="new-password" value="' + escapeHtml(authDraft.password2) + '"></div>' +
+      '<label class="check-row" style="font-size:12.5px; align-items:flex-start;"><input type="checkbox" id="consent-quick"' + (authDraft.quick ? ' checked' : '') + '> ' +
+        '<span>[필수] <a href="#terms" class="link-quiet">약관</a>·<a href="#policy" class="link-quiet">개인정보 수집</a> 동의 · 만 14세 이상</span></label>' +
+      '<button class="btn-primary" id="join-send" style="width:100%; margin-top:8px;" disabled>가입하기</button>' +
+      '<span class="helper" style="text-align:center;">가입하기를 누르면 이메일로 6자리 인증번호가 가요</span>' +
+      '<button type="button" data-auth-view="password" class="link-quiet" style="background:none; border:none; margin-top:10px; padding:2px 0;">이미 가입했어요 · 로그인</button>' +
+      '<span class="helper" id="auth-hint" role="alert"></span>';
+  }
+  async function handleJoin(){
+    captureAuthDraft();
+    var hint = document.getElementById('auth-hint'), btn = document.getElementById('join-send');
+    var email = (authDraft.email || '').trim();
+    if(!signupStep1Ok() || !authDraft.quick || !sb) return;
+    if(btn){ btn.disabled = true; btn.textContent = '가입하는 중...'; }
+    try{
+      var res = await sb.auth.signUp({ email: email, password: authDraft.password, options: { emailRedirectTo: authCallbackUrl() } });
+      if(isRepeatedSignup(res) || res.error){
+        if(hint) hint.textContent = isRepeatedSignup(res) ? '이미 가입된 이메일이에요. 로그인하거나 인증번호로 들어와 주세요.' : otpErrText(res.error);
+        if(btn){ btn.disabled = false; btn.textContent = '가입하기'; }
+        return;
+      }
+      try{ localStorage.setItem(PENDING_CONSENT_KEY, JSON.stringify([
+        { kind:'signup_terms', granted:true }, { kind:'signup_privacy', granted:true }, { kind:'signup_age14', granted:true }])); }catch(e){}
+      if(res.data && res.data.session){ closeModal(); return; }   // 메일 확인을 끈 환경
+      otpSent = { email: email, at: Date.now(), type: 'signup' };
+      refreshAuthForms();
+      var code = document.getElementById('auth-code'); if(code) code.focus();
+    }catch(e){
+      if(hint) hint.textContent = otpErrText(e);
+      if(btn){ btn.disabled = false; btn.textContent = '가입하기'; }
+    }
   }
 
   // ---------- 회원가입 (2단계) ----------
@@ -6975,6 +7030,13 @@
       return;
     }
 
+    if(e.target.closest('[data-push-toggle]')){
+      if(!pushSupported()){ showToast('이 기기·브라우저는 알림을 지원하지 않아요'); return; }
+      if(!requireLogin('알림 받기')) return;
+      if(pushPref('pushToken')) disablePush(); else enablePush(false);
+      return;
+    }
+
     var shareAppBtn = e.target.closest('[data-share-app]');
     if(shareAppBtn){
       openShareModal({ title:'다다맘', text:'다다맘 · 임신·육아 기록과 부모 커뮤니티', url: shareUrlFor() });
@@ -7222,6 +7284,7 @@
     if(e.target.closest('#apple-signin-btn')){ handleAppleSignIn(); return; }
     if(e.target.closest('#auth-submit')){ handleAuthSubmit(); return; }
     if(e.target.closest('#otp-send')){ handleOtpSend(false); return; }
+    if(e.target.closest('#join-send')){ handleJoin(); return; }
     if(e.target.closest('#otp-resend')){ handleOtpSend(true); return; }
     if(e.target.closest('#otp-verify')){ handleOtpVerify(); return; }
     if(e.target.closest('#otp-change')){ otpSent = null; refreshAuthForms(); return; }
@@ -7909,6 +7972,69 @@
     if(e.target.id === 'post-consent'){ updatePostSubmit(); }
     if(e.target.id === 'apply-consent'){ updateApplySubmit(); }
   });
+
+  // ---------- 푸시 알림 (0046 push_tokens · 0047 send-push) ----------
+  // Firebase 웹 설정·VAPID 는 공개값이다 (비밀 키는 Supabase Edge Function 비밀값에만 있다).
+  var FIREBASE_WEB = { apiKey:'AIzaSyBG4Ogep4OvVNx-IaWMPLXH7ZVuxS4WuQI', authDomain:'dadamom-1f97b.firebaseapp.com', projectId:'dadamom-1f97b',
+    storageBucket:'dadamom-1f97b.firebasestorage.app', messagingSenderId:'669030606180', appId:'1:669030606180:web:ee45393e545204d12bc671' };
+  var FCM_VAPID = 'BHN1dv7Djm_hDzBEWLPWzeAL2kr_h8CpXDrm0VnMXd4Oe6hrd-f6aVw5j4rPOHNdP08mUP7wk7cMCx4AnBiUvq8';
+  var FB_SDK = 'https://www.gstatic.com/firebasejs/10.12.2/';
+  function nativePush(){ var C = window.Capacitor; return C && C.isNativePlatform && C.isNativePlatform() && C.Plugins && C.Plugins.PushNotifications; }
+  function pushSupported(){ return !!nativePush() || ('serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window && location.protocol === 'https:'); }
+  function pushPref(k, v){ try{ if(v === undefined) return localStorage.getItem('dadamom.' + k); if(v === null) localStorage.removeItem('dadamom.' + k); else localStorage.setItem('dadamom.' + k, v); }catch(e){ return null; } }
+  function renderPushState(){
+    var el = document.getElementById('my-push-state');
+    if(el) el.textContent = !pushSupported() ? '이 기기는 지원 안 함' : pushPref('pushToken') ? '켜짐' : '꺼짐';
+  }
+  async function getPushToken(){
+    var P = nativePush();
+    if(P){
+      var perm = await P.requestPermissions();
+      if(perm.receive !== 'granted') throw new Error('DENIED');
+      return new Promise(function(resolve, reject){
+        P.addListener('registration', function(t){ resolve(t.value); });
+        P.addListener('registrationError', function(err){ reject(err); });
+        P.register();
+      });
+    }
+    if(await Notification.requestPermission() !== 'granted') throw new Error('DENIED');
+    var reg = await navigator.serviceWorker.ready;
+    var fa = await import(FB_SDK + 'firebase-app.js'), fm = await import(FB_SDK + 'firebase-messaging.js');
+    var app = fa.getApps().length ? fa.getApp() : fa.initializeApp(FIREBASE_WEB);
+    return fm.getToken(fm.getMessaging(app), { vapidKey: FCM_VAPID, serviceWorkerRegistration: reg });
+  }
+  async function enablePush(silent){
+    if(!pushSupported() || !sb || !authUser) return;
+    try{
+      var token = await getPushToken();
+      var r = await sb.rpc('register_push_token', { p_token: token, p_platform: nativePush() ? 'android' : 'web' });
+      if(r.error) throw r.error;
+      pushPref('pushToken', token);
+      if(!silent) showToast('알림을 켰어요. 댓글·응원 소식을 알려 드릴게요');
+    }catch(err){
+      console.warn('[다다맘] 알림 켜기 실패', err);
+      if(!silent) showToast(err && err.message === 'DENIED' ? '휴대폰 설정에서 다다맘 알림을 허용해 주세요' : '알림을 켜지 못했어요. 잠시 후 다시 시도해 주세요');
+    }
+    renderPushState();
+  }
+  async function disablePush(){
+    var token = pushPref('pushToken');
+    if(token && sb){
+      var r = await sb.from('push_tokens').delete().eq('token', token);
+      if(r.error){ showToast('알림을 끄지 못했어요. 잠시 후 다시 시도해 주세요'); return; }
+    }
+    pushPref('pushToken', null);
+    renderPushState();
+    showToast('알림을 껐어요');
+  }
+  // 앱: 알림을 누르면 그 화면으로
+  if(nativePush()){
+    nativePush().addListener('pushNotificationActionPerformed', function(a){
+      var link = a && a.notification && a.notification.data && a.notification.data.link;
+      if(link && link.charAt(0) === '#') location.hash = link;
+    });
+  }
+  renderPushState();
 
   // ---------- 서비스워커 (홈 화면 설치용) ----------
   // index.html 은 network-first 로 받아오므로 배포한 변경이 바로 반영된다.
